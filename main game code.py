@@ -1,5 +1,6 @@
 import pygame
 import sys 
+import datetime # to get user device time
 
 pygame.init() # to start the system: sound,graphics etc of pygame module
 #screen here is like a canvas to store the window and u can draw/ add other images
@@ -8,13 +9,20 @@ screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
 Time = pygame.time.Clock()
 #set game speed
 
+current_hour = datetime.datetime.now().hour
+
+#night time image
+night_background = pygame.image.load("Moodify/graphics/night.png").convert()
+
+# day time image
+sunny_background = pygame.image.load("Moodify/graphics/sunny day background.png").convert()
 #background image
-background_surface =pygame.image.load("Moodify/graphics/Game main page.png").convert()
+background_surface =pygame.image.load("Moodify/graphics/main game page no window.png").convert_alpha()
 # to scale background image to match full screen of user
 screen_width,screen_height = screen.get_size()
 background_surface = pygame.transform.scale(background_surface,(screen_width,screen_height))
 
-#TV image 
+
 
 
 
@@ -25,6 +33,12 @@ while True:
             if event.key == pygame.K_ESCAPE: #if its the ESC key
                 pygame.quit() # shut down eveythig u open/ initialized (includes the program that is running in the background)
                 sys.exit() 
+
+    current_hour = datetime.datetime.now().hour
+    if 7 <= current_hour < 18: #set time between  7 to 6pm
+        screen.blit(sunny_background, (570,50))
+    else:
+        screen.blit(night_background, (600,50))
     
     screen.blit(background_surface,(0,0))
 
