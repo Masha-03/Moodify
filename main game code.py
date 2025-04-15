@@ -1,5 +1,5 @@
 import pygame
-from sys import exit
+import sys 
 
 pygame.init() # to start the system: sound,graphics etc of pygame module
 #screen here is like a canvas to store the window and u can draw/ add other images
@@ -9,10 +9,14 @@ Time = pygame.time.Clock()
 #set game speed
 
 #background image
-background_surface =pygame.image.load("Moodify/graphics/Game main page.png")
+background_surface =pygame.image.load("Moodify/graphics/Game main page.png").convert()
 # to scale background image to match full screen of user
 screen_width,screen_height = screen.get_size()
 background_surface = pygame.transform.scale(background_surface,(screen_width,screen_height))
+
+#TV image 
+
+
 
 #game main loop
 while True:
@@ -20,7 +24,7 @@ while True:
         if event.type == pygame.KEYDOWN:#check if any key is press 
             if event.key == pygame.K_ESCAPE: #if its the ESC key
                 pygame.quit() # shut down eveythig u open/ initialized (includes the program that is running in the background)
-                exit() 
+                sys.exit() 
     
     screen.blit(background_surface,(0,0))
 
