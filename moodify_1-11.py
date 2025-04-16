@@ -5,34 +5,46 @@ import sqlite3
 # Create the Tkinter root window
 root = tk.Tk()
 root.title("database")
-#----------------------------------------------------------------------UI-----------------------------------------------------------------------------------
+
 #Window fullscreen
 root.state('zoomed')
 
-#Background colour of whole window
-root.configure(bg="#e6e0d8")
+#Styling
+main_font = ("Segoe UI", 14)
+label_font = ("Segoe UI", 18, "bold")
+bg_color = "#e6e0d8"
+frame_bg = "#ffffff"
+button_color = "#d9cfc1"
 
-#Create center frame inside window
-center_frame = tk.Frame(root, bg="#e6e0d8")
-center_frame.place(relx=0.5, rely=0.5, anchor='center')
+#Main frame
+main_frame = tk.Frame(root, bg=frame_bg, bd=2, relief="groove")
+main_frame.place(relx=0.5, rely=0.5, anchor="center", width=550, height=500)
 
-#Frames for UI
-moodify_frame = tk.LabelFrame(center_frame, text="Moodify", font=("Helvetica", 18, "bold"),bg="#fdf6f0") #fg=foreground/text color
-moodify_frame.grid(row=0, column=0, padx=50, pady=50)
-profile_label = tk.Label(moodify_frame, text="Profile:", bg="#e6e0d8")
-profile_label.grid(row=0, column=0)
-gender_label = tk.Label(moodify_frame, text="Gender:", bg="#e6e0d8")
-gender_combobox = ttk.Combobox(moodify_frame, values=["Male", "Female"])
-gender_label.grid(row=3, column=0)
-                               
- #User entry box
-profile_entry = tk.Entry(moodify_frame)     
-profile_entry.grid(row=2, column=0)     
-gender_combobox.grid(row=4, column=0)     
+#Title
+title_label = tk.Label(main_frame, text="🌿 Moodify", font=("Segoe UI", 24, "bold"), bg=frame_bg)
+title_label.pack(pady=(20, 0))
 
-#Padding for both elements  
-for widget in moodify_frame.winfo_children():
-        widget.grid_configure(padx=30, pady=30)
+#Top spacer to push down content
+tk.Label(main_frame, bg=frame_bg).pack(expand=True)
+
+#Form frame
+form_frame = tk.Frame(main_frame, bg=frame_bg)
+form_frame.pack()
+
+#Profile UI and input
+profile_label = tk.Label(main_frame, text="Profile Name", font=label_font, bg=frame_bg)
+profile_label.pack(pady=(0, 5))
+profile_entry = tk.Entry(main_frame, font=main_font, width=30)     
+profile_entry.pack(pady=(0, 20)) 
+
+#Gender UI and input
+gender_label = tk.Label(main_frame, text="Gender", font=label_font, bg=frame_bg)
+gender_label.pack(pady=(0, 5))
+gender_combobox = ttk.Combobox(main_frame, values=["Male", "Female"], font=main_font, width=28)
+gender_combobox.pack()     
+
+#Bottom spacer to push content up
+tk.Label(main_frame, bg=frame_bg).pack(expand=True)
 
 #Save data when button is clicked
 def enter_data(): 
@@ -64,7 +76,7 @@ def enter_data():
         connect.close()
     
 #Submit button   
-button = tk.Button(moodify_frame, text="SUBMIT", command= enter_data)  
-button.grid(row=7, column=0, sticky="news", padx=30, pady=30)                          
+button = tk.Button(main_frame, text="SUBMIT",font=label_font, bg=button_color, width=20, command= enter_data)  
+button.pack(pady=(10, 30))                          
 
 root.mainloop()
