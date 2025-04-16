@@ -15,23 +15,26 @@ root.title("database")
 #Window fullscreen
 root.state('zoomed')
 
-#Create frame inside window
-frame = tk.Frame(root)
-frame.pack()
+#Background colour of whole window
+root.configure(bg="#e6e0d8")
+
+#Create center frame inside window
+center_frame = tk.Frame(root, bg="#e6e0d8")
+center_frame.place(relx=0.5, rely=0.5, anchor='center')
 
 #Frames for UI
-moodify_frame = tk.LabelFrame(frame, text="Moodify")
-moodify_frame.grid(row=3, column=0, padx=50, pady=50)
-username_label = tk.Label(moodify_frame, text="Username:")
-username_label.grid(row=3, column=0)
-gender_label = tk.Label(moodify_frame, text="Gender:")
+moodify_frame = tk.LabelFrame(center_frame, text="Moodify", font=("Helvetica", 18, "bold"),bg="#fdf6f0") #fg=foreground/text color
+moodify_frame.grid(row=0, column=0, padx=50, pady=50)
+username_label = tk.Label(moodify_frame, text="Username:", bg="#e6e0d8")
+username_label.grid(row=0, column=0)
+gender_label = tk.Label(moodify_frame, text="Gender:", bg="#e6e0d8")
 gender_combobox = ttk.Combobox(moodify_frame, values=["Male", "Female"])
-gender_label.grid(row=5, column=0)
+gender_label.grid(row=3, column=0)
                                
  #User entry box
 username_entry = tk.Entry(moodify_frame)     
-username_entry.grid(row=4, column=0)     
-gender_combobox.grid(row=6, column=0)     
+username_entry.grid(row=2, column=0)     
+gender_combobox.grid(row=4, column=0)     
 
 #Padding for both elements  
 for widget in moodify_frame.winfo_children():
@@ -62,6 +65,5 @@ connect.commit()
 
 #Close connection
 connect.close()
-
 
 root.mainloop()
