@@ -22,15 +22,15 @@ POP_COLOR = (200, 200, 255)
 # Bubble settings
 BUBBLE_RADIUS = 30
 BUBBLE_SPEED = 1
-BUBBLE_INTERVAL = 60  # frames between spawns
+BUBBLE_INTERVAL = 60  # frames between the spawns
 
-# Sound (optional: replace 'pop.wav' with your own)
+# Sound (optional: replace 'popsound.wav' with poppping sound file)
 try:
-    pop_sound = pygame.mixer.Sound("pop.wav")
+    pop_sound = pygame.mixer.Sound("popsound.wav")
 except:
     pop_sound = None
 
-# Background music (optional)
+# Background music (optional) for now
 try:
     pygame.mixer.music.load("lofi.mp3")
     pygame.mixer.music.play(-1)
