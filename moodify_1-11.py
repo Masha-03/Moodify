@@ -1,20 +1,35 @@
 import tkinter as tk
 from tkinter import ttk
 import sqlite3
+from tkinter import messagebox
+from PIL import Image, ImageTk
 
-# Create the Tkinter root window
+#Create tkinter root window
 root = tk.Tk()
-root.title("database")
+root.title("Moodify")
 
 #Window fullscreen
 root.state('zoomed')
+
+# Get screen width and height
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+
+# Load and resize image
+bg_image = Image.open("intro_bg.png")
+bg_image = bg_image.resize((screen_width, screen_height))
+bg_photo = ImageTk.PhotoImage(bg_image)
+
+bg_label = tk.Label(root, image=bg_photo)
+bg_label.image = bg_photo  # keep a reference
+bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
 #Styling
 root.configure(bg="#e6e0d8")
 main_font = ("Segoe UI", 14)
 label_font = ("Segoe UI", 18, "bold")
 frame_bg = "#ffffff"
-button_color = "#d9cfc1"
+button_color = "#ECDFC8"
 
 #Main frame
 main_frame = tk.Frame(root, bg=frame_bg, bd=2, relief="groove")
@@ -53,7 +68,7 @@ def enter_data():
         gender = gender_combobox.get()
         
         if not profile or not gender:
-                print("⚠️ Profile or Gender is empty!")
+                messagebox.showwarning("Incomplete Information", "Please fill in both Profile Name and Gender")
                 return
         
         #Display received data
