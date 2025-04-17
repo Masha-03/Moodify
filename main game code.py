@@ -1,7 +1,8 @@
 import pygame
 import sys 
 import datetime # to get user device time
-
+    
+    
 pygame.init() # to start the system: sound,graphics etc of pygame module
 #screen here is like a canvas to store the window and u can draw/ add other images
 screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
@@ -11,11 +12,17 @@ Time = pygame.time.Clock()
 
 current_hour = datetime.datetime.now().hour
 
+#images
+
+#raining image
+raindrops= pygame.image.load("Moodify/graphics/raindrops.png")
+
 #night time image
 night_background = pygame.image.load("Moodify/graphics/night.png").convert()
 
 # day time image
 sunny_background = pygame.image.load("Moodify/graphics/sunny day background.png").convert()
+
 #background image
 background_surface =pygame.image.load("Moodify/graphics/main game page no window.png").convert_alpha()
 # to scale background image to match full screen of user
