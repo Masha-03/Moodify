@@ -10,9 +10,9 @@ root.title("database")
 root.state('zoomed')
 
 #Styling
+root.configure(bg="#e6e0d8")
 main_font = ("Segoe UI", 14)
 label_font = ("Segoe UI", 18, "bold")
-bg_color = "#e6e0d8"
 frame_bg = "#ffffff"
 button_color = "#d9cfc1"
 
@@ -51,10 +51,15 @@ def enter_data():
         #Get user info
         profile = profile_entry.get()
         gender = gender_combobox.get()
+        
+        if not profile or not gender:
+                print("⚠️ Profile or Gender is empty!")
+                return
+        
         #Display received data
         print(f": {profile}, Gender: {gender}") 
         #Connect to database
-        connect = sqlite3.connect('user_info.db')
+        connect = sqlite3.connect('C:/Users/Madhushaa/Projects/Moodify/user_info.db')
         #Create cursor
         cursor = connect.cursor()
         
