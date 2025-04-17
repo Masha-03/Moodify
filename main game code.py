@@ -1,8 +1,53 @@
 import pygame
 import sys 
+import random
 import datetime # to get user device time
-    
-    
+
+#create the rain sprite and set up its speed and postion
+class Rain(pygame.sprite.Sprite): 
+    def __init__(rain): #set up the sprite image for image manipulation (runs automatically)
+        pygame.sprite.Sprite.__init__(rain) #calling the sprite(rain variable) and set up the properties
+        rain.image=raindrops #set the image
+        rain.rect= rain.image.get_rect() # create a rectangle, get_rect from image automatically assign the value
+        #set the speed for in x and y for raindrops
+        rain.speedx=2
+        rain.speedy= random.randint(10,20)
+        #tells where the raindrops should spawn
+        rain.rect.x=random.randint(0,window_width)
+        rain.rect.y=random.randint(-window_height,-5)
+
+    def update(rain):
+            #when the sprite touches the the end of the screen, reuse the sprite to spawn it again
+        if rain.rect.bottom >window_height:
+            rain.speedx=2
+            rain.speedy= random.randint(10,20)
+            rain.rect.x=random.randint(0,window_width)
+            rain.rect.y=random.randint(-window_height,-5)
+
+        #add value keep on update the rain
+        rain.rect.x=rain.rect.x + rain.speedx 
+        rain.rect.y=rain.rect.y+rain.speedy
+
+#random to rain or not
+def rain_or_not():
+    num_rain = random.randint(1,3)
+    rain_group = pygame.sprite.Group()
+
+    if num_rain == 1 or num_rain == 3:
+        for i in range (100): #run the group sprite one by one 100 times
+            rain = Rain() #runs the set up to spawn the rain, position and speed and add it to the group
+            rain_group.add(rain) 
+        return rain_group
+    else:
+        return None
+
+#make it as a function to call it in the main loop
+def display_rain(rain_group):
+    if rain_group :
+        rain_group.update() #moves all the raindrops
+        rain_group.draw(screen) #a screen blit for the rain group loops it one by one
+
+#setting up pygame
 pygame.init() # to start the system: sound,graphics etc of pygame module
 #screen here is like a canvas to store the window and u can draw/ add other images
 screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
@@ -10,12 +55,19 @@ screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
 Time = pygame.time.Clock()
 #set game speed
 
-current_hour = datetime.datetime.now().hour
+
+
+#to get the height and width of screen
+window_width,window_height = screen.get_size()
+
+#to get the users device time
+current_hour = datetime.datetime.now().hour 
+
+
 
 #images
-
 #raining image
-raindrops= pygame.image.load("Moodify/graphics/raindrops.png")
+raindrops= pygame.image.load("Moodify/graphics/raindrops.png").convert_alpha()
 
 #night time image
 night_background = pygame.image.load("Moodify/graphics/night.png").convert()
@@ -29,9 +81,8 @@ background_surface =pygame.image.load("Moodify/graphics/main game page no window
 screen_width,screen_height = screen.get_size()
 background_surface = pygame.transform.scale(background_surface,(screen_width,screen_height))
 
-
-
-
+#determine will rain or not
+rain_group = rain_or_not()
 
 #game main loop
 while True:
@@ -46,7 +97,11 @@ while True:
         screen.blit(sunny_background, (570,50))
     else:
         screen.blit(night_background, (600,50))
+
     
+    #if it rain the display if not None
+    display_rain(rain_group)
+
     screen.blit(background_surface,(0,0))
 
     pygame.display.update() #update the display of the screen 
