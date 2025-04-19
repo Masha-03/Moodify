@@ -81,6 +81,8 @@ background_surface =pygame.image.load("Moodify/graphics/main game page no window
 screen_width,screen_height = screen.get_size()
 background_surface = pygame.transform.scale(background_surface,(screen_width,screen_height))
 
+character_image =pygame.image.load("Moodify/character stand still to right/pixil-frame-0")
+
 #determine will rain or not
 rain_group = rain_or_not()
 
