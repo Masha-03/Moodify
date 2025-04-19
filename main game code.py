@@ -30,8 +30,8 @@ class Rain(pygame.sprite.Sprite):
 
 #random to rain or not
 def rain_or_not():
-    num_rain = random.randint(1,3)
-    rain_group = pygame.sprite.Group()
+    num_rain = random.randint(1,3) #random the num
+    rain_group = pygame.sprite.Group() #make it as a group of sprite
 
     if num_rain == 1 or num_rain == 3:
         for i in range (100): #run the group sprite one by one 100 times
@@ -43,9 +43,40 @@ def rain_or_not():
 
 #make it as a function to call it in the main loop
 def display_rain(rain_group):
-    if rain_group :
+    if rain_group : #if there is a sprite
         rain_group.update() #moves all the raindrops
         rain_group.draw(screen) #a screen blit for the rain group loops it one by one
+
+
+class FemaleCharacter(pygame.sprite.Sprite):
+    def __init__(Female):
+        pygame.sprite.Sprite.__init__(Female)
+        Female.character =character_image
+        Female.current_image = 0 #showing index 0 img
+        Female.image = Female.character[Female.current_image] #link the sprite to the list
+        Female.rect=Female.image.get_rect()
+        Female.speedx =5
+        Female.rect.x=-1
+        Female.rect.y=window_height -Female.rect.height #place the character bottom of the user screen
+
+    def update_character(Female):
+        keys = pygame.key.get_pressed() #user press key
+        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+            Female.rect.x=Female.rect.x-Female.speedx
+                    
+        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+            Female.rect.x = Female.rect.x + Female.speedx
+                    
+        #spawn right side of the screen if cross the left side
+        if Female.rect.right < 0:
+            Female.rect.x = window_width
+        #spawn at left side if cross the right
+        if Female.rect.left > window_width:
+            Female.rect.right= 0 
+            #fixed the jumping issue here before: rect.x=0
+
+
+
 
 #setting up pygame
 pygame.init() # to start the system: sound,graphics etc of pygame module
@@ -81,10 +112,18 @@ background_surface =pygame.image.load("Moodify/graphics/main game page no window
 screen_width,screen_height = screen.get_size()
 background_surface = pygame.transform.scale(background_surface,(screen_width,screen_height))
 
-character_image =pygame.image.load("Moodify/character stand still to right/pixil-frame-0")
-
+#character image (female)
+character_image = [
+    pygame.image.load("Moodify/F-right/pixil-frame-0.png"),
+    pygame.image.load("Moodify/F-right/pixil-frame-1.png"),
+    pygame.image.load("Moodify/F-right/pixil-frame-2.png"),
+    pygame.image.load("Moodify/F-right/pixil-frame-3.png"),
+]
+#(Spawn only once) 
 #determine will rain or not
 rain_group = rain_or_not()
+#the female character 
+Female_character=FemaleCharacter()
 
 #game main loop
 while True:
@@ -94,17 +133,22 @@ while True:
                 pygame.quit() # shut down eveythig u open/ initialized (includes the program that is running in the background)
                 sys.exit() 
 
+    #the night and day background
     current_hour = datetime.datetime.now().hour
     if 7 <= current_hour < 18: #set time between  7 to 6pm
         screen.blit(sunny_background, (570,50))
     else:
         screen.blit(night_background, (600,50))
 
-    
     #if it rain the display if not None
     display_rain(rain_group)
 
+    #background
     screen.blit(background_surface,(0,0))
+
+    Female_character.update_character()
+    screen.blit(Female_character.image,Female_character.rect)
+    
 
     pygame.display.update() #update the display of the screen 
     Time.tick(60)# tells loop dont just faster then 60 fps
