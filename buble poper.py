@@ -6,7 +6,7 @@ import sys
 pygame.init()
 
 # Screen settings
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 1920, 1020
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Bubble Popper")
 
@@ -20,32 +20,31 @@ BUBBLE_COLOR = (255, 255, 255)
 POP_COLOR = (200, 200, 255)
 
 # Bubble settings
-BUBBLE_RADIUS = 30
-BUBBLE_SPEED = 1
-BUBBLE_INTERVAL = 60  # frames between the spawns
+BUBBLE_MIN_RADIUS = 20
+BUBBLE_MAX_RADIUS = 70
+BUBBLE_SPEED = 2
+BUBBLE_INTERVAL = 60  # frames between spawns
 
-# Sound (optional: replace 'popsound.wav' with poppping sound file)
-try:
-    pop_sound = pygame.mixer.Sound("popsound.wav")
-except:
-    pop_sound = None
-
-# Background music (optional) for now
-try:
-    pygame.mixer.music.load("lofi.mp3")
-    pygame.mixer.music.play(-1)
-except:
-    pass
+#sound list
+pop_sounds = []
+for i in range (1,4):
+    try:
+        sound = pygame.mixer.Sound(f"pop{i}.wav")
+        sound.set_volume(1.0)
+        pop_sounds.append(sound)    
+    except:
+        print(f"not playing pop{i}.wav")
 
 # Bubble class
 class Bubble:
     def __init__(self):
-        self.x = random.randint(BUBBLE_RADIUS, WIDTH - BUBBLE_RADIUS)
-        self.y = HEIGHT + BUBBLE_RADIUS
-        self.radius = BUBBLE_RADIUS
+        self.radius = random.randint(BUBBLE_MIN_RADIUS, BUBBLE_MAX_RADIUS)
+        self.x = random.randint(self.radius, WIDTH - self.radius)
+        self.y = HEIGHT + self.radius
         self.color = BUBBLE_COLOR
         self.popped = False
         self.alpha = 255  # fade out on pop
+        self.pop_sound = random.choice(pop_sounds) if pop_sounds else None
 
     def update(self):
         if not self.popped:
@@ -72,8 +71,8 @@ class Bubble:
 # Main loop
 bubbles = []
 frame_count = 0
-
 running = True
+
 while running:
     screen.fill(BG_COLOR)
     frame_count += 1
@@ -86,8 +85,9 @@ while running:
                 if bubble.check_click(event.pos):
                     bubble.popped = True
                     bubble.color = POP_COLOR
-                    if pop_sound:
-                        pop_sound.play()
+                    if bubble.pop_sound:
+                        bubble.pop_sound.play()
+                
 
     # Add bubbles
     if frame_count % BUBBLE_INTERVAL == 0:
