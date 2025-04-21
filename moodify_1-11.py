@@ -64,8 +64,13 @@ tk.Label(main_frame, bg=frame_bg).pack(expand=True)
 #Save data when button is clicked
 def enter_data(): 
         #Get user info
-        profile = profile_entry.get()
+        profile = profile_entry.get().strip()
         gender = gender_combobox.get()
+        
+        #Connect to database
+        connect = sqlite3.connect('C:/Users/Madhushaa/Projects/Moodify/user_info.db')
+        #Create cursor
+        cursor = connect.cursor()
         
         if not profile or not gender:
                 messagebox.showwarning("Incomplete Information", "Please fill in both Profile Name and Gender")
@@ -73,22 +78,34 @@ def enter_data():
         
         #Display received data
         print(f": {profile}, Gender: {gender}") 
-        #Connect to database
-        connect = sqlite3.connect('C:/Users/Madhushaa/Projects/Moodify/user_info.db')
-        #Create cursor
-        cursor = connect.cursor()
         
         #Create table
         table_create_query = """ CREATE TABLE IF NOT EXISTS user_info
-                (profile TEXT, gender TEXT) """
+                (profile TEXT UNIQUE, gender TEXT) """
         cursor.execute(table_create_query)
+        # Check for duplicate profile name
+        cursor.execute("SELECT profile FROM user_info WHERE profile = ?", (profile,))
+        result = cursor.fetchone()
 
+        if result:
+                tk.messagebox.showwarning("Duplicate Entry", "This profile name already exists!")
+        else:
+                # Insert only if no duplicate
+                cursor.execute("INSERT INTO user_info (profile, gender) VALUES (?, ?)", (profile, gender))
+                connect.commit()
+                tk.messagebox.showinfo("Success", "Profile saved successfully!")
+        
         #Insert Data
         data_insert_query = """ INSERT INTO user_info
         (profile, gender) VALUES
         (?, ?)"""
         data_insert_tuple = (profile, gender)
         connect.execute(data_insert_query, data_insert_tuple)
+        
+        # Clear fields after success
+        profile_entry.delete(0, tk.END)
+        profile_entry.focus_set()  #Puts the cursor back in the profile box
+        gender_combobox.set("")
 
         #Save data, update
         connect.commit()
