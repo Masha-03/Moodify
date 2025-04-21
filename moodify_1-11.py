@@ -58,7 +58,7 @@ gender_label.pack(pady=(0, 5))
 gender_combobox = ttk.Combobox(main_frame, values=["Male", "Female"], font=main_font, width=28)
 gender_combobox.pack()     
 
-#Bottom spacer to push content up
+#Bottom spacer to push content
 tk.Label(main_frame, bg=frame_bg).pack(expand=True)
 
 #Save data when button is clicked
@@ -83,26 +83,25 @@ def enter_data():
         table_create_query = """ CREATE TABLE IF NOT EXISTS user_info
                 (profile TEXT UNIQUE, gender TEXT) """
         cursor.execute(table_create_query)
+        
         # Check for duplicate profile name
         cursor.execute("SELECT profile FROM user_info WHERE profile = ?", (profile,))
         result = cursor.fetchone()
 
         if result:
-                tk.messagebox.showwarning("Duplicate Entry", "This profile name already exists!")
+                tk.messagebox.showwarning("Duplicate Entry", "This profile name already exists. Choose a new one XD")
         else:
-                # Insert only if no duplicate
-                cursor.execute("INSERT INTO user_info (profile, gender) VALUES (?, ?)", (profile, gender))
-                connect.commit()
+                #Insert only if no duplicate
+                data_insert_query = """ INSERT INTO user_info
+                (profile, gender) VALUES
+                (?, ?)"""
+                data_insert_tuple = (profile, gender)
+                connect.execute(data_insert_query, data_insert_tuple)
                 tk.messagebox.showinfo("Success", "Profile saved successfully!")
         
-        #Insert Data
-        data_insert_query = """ INSERT INTO user_info
-        (profile, gender) VALUES
-        (?, ?)"""
-        data_insert_tuple = (profile, gender)
-        connect.execute(data_insert_query, data_insert_tuple)
         
-        # Clear fields after success
+        
+        #Clear fields after a input
         profile_entry.delete(0, tk.END)
         profile_entry.focus_set()  #Puts the cursor back in the profile box
         gender_combobox.set("")
