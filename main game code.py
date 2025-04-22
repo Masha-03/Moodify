@@ -15,6 +15,7 @@ class Rain(pygame.sprite.Sprite):
         #tells where the raindrops should spawn
         rain.rect.x=random.randint(0,window_width)
         rain.rect.y=random.randint(-window_height,-5)
+        
 
     def update(rain):
             #when the sprite touches the the end of the screen, reuse the sprite to spawn it again
@@ -58,14 +59,22 @@ class FemaleCharacter(pygame.sprite.Sprite):
         Female.speedx =5
         Female.rect.x=-1
         Female.rect.y=window_height -Female.rect.height #place the character bottom of the user screen
+        
+        #where the character facing
+        Female.facing_left = pygame.transform.flip(Female.image,True,False)
+        Female.facing_right = True
 
     def update_character(Female):
         keys = pygame.key.get_pressed() #user press key
+            
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             Female.rect.x=Female.rect.x-Female.speedx
+            Female.facing_right = False
+            
                     
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             Female.rect.x = Female.rect.x + Female.speedx
+            Female.facing_right = True
                     
         #spawn right side of the screen if cross the left side
         if Female.rect.right < 0:
@@ -75,6 +84,10 @@ class FemaleCharacter(pygame.sprite.Sprite):
             Female.rect.right= 0 
             #fixed the jumping issue here before: rect.x=0
 
+        if Female.facing_right:
+            Female.image = Female.character[Female.current_image]
+        else:
+            Female.image =Female.facing_left
 
 
 
