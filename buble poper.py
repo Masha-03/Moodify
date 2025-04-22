@@ -45,6 +45,10 @@ class Bubble:
         self.popped = False
         self.alpha = 255  # fade out on pop
         self.pop_sound = random.choice(pop_sounds) if pop_sounds else None
+
+        # Blast effect
+        self.blast_radius = self.radius
+        self.blast_alpha = 255
        
 
     def update(self):
@@ -66,7 +70,7 @@ class Bubble:
             pygame.draw.circle(bubble_surface, draw_color, (self.radius, self.radius), self.radius)
             surface.blit(bubble_surface, (self.x - self.radius, self.y - self.radius))
 
-        # blast effect
+        # blast effect ring coming out of the buble
         if self.popped and self.blast_alpha > 0:
             ring_surface = pygame.Surface((self.blast_radius*2, self.blast_radius*2), pygame.SRCALPHA)
             ring_color = (255, 255, 255, self.blast_alpha)
