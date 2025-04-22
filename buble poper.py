@@ -27,7 +27,7 @@ BUBBLE_INTERVAL = 60  # frames between spawns
 
 #sound list
 pop_sounds = []
-for i in range (1,4):
+for i in range (1,5):
     try:
         sound = pygame.mixer.Sound(f"pop{i}.wav")
         sound.set_volume(1.0)
