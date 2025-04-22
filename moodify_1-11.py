@@ -3,7 +3,7 @@ from tkinter import ttk #Styled widgets
 import sqlite3
 from tkinter import messagebox #To show popup boxes
 from PIL import Image, ImageTk #Handle and display images
-import subprocess
+import subprocess #Allows to run another file from python
 
 #Create main window
 root = tk.Tk()
@@ -120,10 +120,10 @@ def enter_data():
         #Close connection
         connect.close()
         
-        # Launch the Pygame homepage 
-        subprocess.Popen(["python", "calendar_.py", profile])      
+        #Launch homepage with profile
+        subprocess.Popen(["python", "#", profile])      
 
-        # Close the current Tkinter window
+        #Close the current Tkinter window
         root.destroy()  
     
 #Submit button   
