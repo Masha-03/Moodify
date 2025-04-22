@@ -20,9 +20,9 @@ BUBBLE_COLOR = (255, 255, 255)
 POP_COLOR = (200, 200, 255)
 
 # Bubble settings
-BUBBLE_MIN_RADIUS = 20
-BUBBLE_MAX_RADIUS = 70
-BUBBLE_SPEED = 2
+BUBBLE_MIN_RADIUS = 50
+BUBBLE_MAX_RADIUS = 90
+BUBBLE_SPEED = 2 
 BUBBLE_INTERVAL = 60  # frames between spawns
 
 #sound list
@@ -45,21 +45,33 @@ class Bubble:
         self.popped = False
         self.alpha = 255  # fade out on pop
         self.pop_sound = random.choice(pop_sounds) if pop_sounds else None
+       
 
     def update(self):
         if not self.popped:
             self.y -= BUBBLE_SPEED
         else:
             self.alpha -= 10
-            if self.alpha <= 0:
+            self.blast_radius += 3
+            self.blast_alpha -= 15
+            if self.alpha <= 0 and self.blast_alpha <= 0:
                 return False
         return True
 
     def draw(self, surface):
-        bubble_surface = pygame.Surface((self.radius*2, self.radius*2), pygame.SRCALPHA)
-        draw_color = (*self.color, self.alpha)
-        pygame.draw.circle(bubble_surface, draw_color, (self.radius, self.radius), self.radius)
-        surface.blit(bubble_surface, (self.x - self.radius, self.y - self.radius))
+        # bubble
+        if self.alpha > 0: 
+            bubble_surface = pygame.Surface((self.radius*2, self.radius*2), pygame.SRCALPHA)
+            draw_color = (*self.color, self.alpha)
+            pygame.draw.circle(bubble_surface, draw_color, (self.radius, self.radius), self.radius)
+            surface.blit(bubble_surface, (self.x - self.radius, self.y - self.radius))
+
+        # blast effect
+        if self.popped and self.blast_alpha > 0:
+            ring_surface = pygame.Surface((self.blast_radius*2, self.blast_radius*2), pygame.SRCALPHA)
+            ring_color = (255, 255, 255, self.blast_alpha)
+            pygame.draw.circle(ring_surface, ring_color, (self.blast_radius, self.blast_radius), self.blast_radius, width=4)
+            surface.blit(ring_surface, (self.x - self.blast_radius, self.y - self.blast_radius))
 
     def check_click(self, pos):
         if not self.popped:
