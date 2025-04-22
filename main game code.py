@@ -59,22 +59,32 @@ class FemaleCharacter(pygame.sprite.Sprite):
         Female.speedx =5
         Female.rect.x=-1
         Female.rect.y=window_height -Female.rect.height #place the character bottom of the user screen
-        
+
         #where the character facing
-        Female.facing_left = pygame.transform.flip(Female.image,True,False)
         Female.facing_right = True
+        Female.facing_left = []
+        for i in Female.character:
+            flipped_img = pygame.transform.flip(i,True,False)
+            Female.facing_left.append(flipped_img)
+
+        Female.animation_timer =0
+        Female.animation_delay =150 
 
     def update_character(Female):
         keys = pygame.key.get_pressed() #user press key
+
+        moving = False
             
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             Female.rect.x=Female.rect.x-Female.speedx
             Female.facing_right = False
+            moving = True
             
                     
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             Female.rect.x = Female.rect.x + Female.speedx
             Female.facing_right = True
+            moving =True
                     
         #spawn right side of the screen if cross the left side
         if Female.rect.right < 0:
@@ -84,10 +94,22 @@ class FemaleCharacter(pygame.sprite.Sprite):
             Female.rect.right= 0 
             #fixed the jumping issue here before: rect.x=0
 
+        #facing left right
         if Female.facing_right:
             Female.image = Female.character[Female.current_image]
         else:
-            Female.image =Female.facing_left
+            Female.image =Female.facing_left[Female.current_image]
+
+        #check if its moving or idle
+        if moving== False:
+            current_time = pygame.time.get_ticks()
+            if current_time - Female.animation_timer > Female.animation_delay: #check if it alr 150ms
+                Female.animation_timer =current_time 
+                Female.current_image += 1 
+                if Female.current_image >=len(Female.character):
+                    Female.current_image =0
+
+            
 
 
 
@@ -132,6 +154,9 @@ character_image = [
     pygame.image.load("Moodify/F-right/pixil-frame-2.png"),
     pygame.image.load("Moodify/F-right/pixil-frame-3.png"),
 ]
+
+
+
 #(Spawn only once) 
 #determine will rain or not
 rain_group = rain_or_not()
