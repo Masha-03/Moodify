@@ -112,7 +112,7 @@ def enter_data():
         connect.close()
         
         # Launch the Pygame homepage 
-        subprocess.Popen(["python", "calendar_.py"])      
+        subprocess.Popen(["python", "calendar_.py", profile])      
 
         # Close the current Tkinter window
         root.destroy()  
