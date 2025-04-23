@@ -44,7 +44,7 @@ reflection_prompts=["What emotion have you felt the most today? Why?",
                     "How are you feeling right now on a scale of 1 to 10?",
                     "Did you experience any negative thoughts today, and how did you challenge them?",
                     "Did anything interesting happen today?",
-                    "What do you remember about my dreams last night?",
+                    "What do you remember about your dreams last night?",
                     "What image or color comes to mind when you think of peace?"]
 random_refle_prom=random.choice(reflection_prompts) #computer will random choose one prompts and display
 print(random_refle_prom)
@@ -70,7 +70,7 @@ save_button=tk.Button(root,text="Save Entry", command=save_entry, font=("Times N
 save_button.pack(pady=10)
 
 #connect the text box to word counter
-text_entry.bind("<KeyRelease>", word_count) #everytime type/delete something,it triggers word_count 
+text_entry.bind("<KeyRelease>", word_count) #everytime type/delete something,it triggers word_count #<KeyRelease>=when a key is pressed(event binding system from tkinter library)
 
 #run the whole program
 root.mainloop()
