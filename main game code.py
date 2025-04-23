@@ -58,7 +58,7 @@ class FemaleCharacter(pygame.sprite.Sprite):
         Female.rect=Female.image.get_rect()
         Female.speedx =5
         Female.rect.x=-1
-        Female.rect.y=window_height -Female.rect.height #place the character bottom of the user screen
+        Female.rect.y=window_height -Female.rect.height +25 #place the character bottom of the user screen
 
         #where the character facing
         Female.facing_right = True
