@@ -22,7 +22,7 @@ POP_COLOR = (200, 200, 255)
 # Bubble settings
 BUBBLE_MIN_RADIUS = 50
 BUBBLE_MAX_RADIUS = 90
-BUBBLE_SPEED = 2 
+BUBBLE_SPEED = 3
 BUBBLE_INTERVAL = 60  # frames between spawns
 
 #sound list
@@ -116,6 +116,23 @@ while running:
 
     pygame.display.flip()
     clock.tick(FPS)
+
+    
+def play_background_music():
+    pygame.mixer.init()
+    pygame.mixer.music.load("lofi_music.wav") 
+    pygame.mixer.music.set_volume(0.5)      
+    pygame.mixer.music.play(-1)                # -1 means loop indefinitely
+
+play_background_music()
+
+# Main loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
 
 pygame.quit()
 sys.exit()
