@@ -201,6 +201,7 @@ rain_group = rain_or_not()
 Female_character=FemaleCharacter()
 
 radio_entry = pygame.Rect(1000, 595, 160, 110) 
+TV_entry = pygame.Rect(310, 325, 295, 195) 
 
 #bg music
 play_background_music()
@@ -217,7 +218,9 @@ while True:
                 pygame.quit() # shut down eveythig u open/ initialized (includes the program that is running in the background)
                 sys.exit() 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if radio_entry.collidepoint(event.pos):
+            if radio_entry.collidepoint(event.pos): #where it click on and check if its inside the box
+                print("Radio clicked")
+            if TV_entry.collidepoint(event.pos):
                 print("Radio clicked")
 
     #the night and day background
@@ -235,6 +238,7 @@ while True:
 
     Female_character.update_character()
     screen.blit(Female_character.image,Female_character.rect)
+    
     
 
     pygame.display.update() #update the display of the screen 
