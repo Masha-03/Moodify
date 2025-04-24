@@ -52,20 +52,28 @@ def display_rain(rain_group):
 class FemaleCharacter(pygame.sprite.Sprite):
     def __init__(Female):
         pygame.sprite.Sprite.__init__(Female)
-        Female.character =character_image
+        Female.idle = Fcharacter_image_idle
+        Female.walking = Fcharacter_walking_img
         Female.current_image = 0 #showing index 0 img
-        Female.image = Female.character[Female.current_image] #link the sprite to the list
+        Female.image = Female.idle[Female.current_image] #link the idle sprite to the list
         Female.rect=Female.image.get_rect()
         Female.speedx =5
         Female.rect.x=-1
         Female.rect.y=window_height -Female.rect.height +25 #place the character bottom of the user screen
 
-        #where the character facing
+        #where the character facing for idle
         Female.facing_right = True
         Female.facing_left = []
-        for i in Female.character:
+        for i in Female.idle:
             flipped_img = pygame.transform.flip(i,True,False)
             Female.facing_left.append(flipped_img)
+
+        #facing walking image 
+        Female.walkingfacing_right = True
+        Female.walkingfacing_left = []
+        for i in Female.walking:
+            flipped_img = pygame.transform.flip(i,True,False)
+            Female.walkingfacing_left.append(flipped_img)
 
         Female.animation_timer =0
         Female.animation_delay =150 
@@ -78,12 +86,14 @@ class FemaleCharacter(pygame.sprite.Sprite):
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             Female.rect.x=Female.rect.x-Female.speedx
             Female.facing_right = False
+            Female.walkingfacing_right = False
             moving = True
             
                     
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             Female.rect.x = Female.rect.x + Female.speedx
             Female.facing_right = True
+            Female.walkingfacing_right = True
             moving =True
                     
         #spawn right side of the screen if cross the left side
@@ -94,21 +104,29 @@ class FemaleCharacter(pygame.sprite.Sprite):
             Female.rect.right= 0 
             #fixed the jumping issue here before: rect.x=0
 
-        #facing left right
-        if Female.facing_right:
-            Female.image = Female.character[Female.current_image]
-        else:
-            Female.image =Female.facing_left[Female.current_image]
-
         #check if its moving or idle
-        if moving== False:
-            current_time = pygame.time.get_ticks()
+        current_time = pygame.time.get_ticks()
+        if moving: #animation timing
+            if current_time - Female.animation_timer > Female.animation_delay +50:
+                Female.animation_timer = current_time
+                Female.current_image += 1
+                if Female.current_image >= len(Female.walking):
+                    Female.current_image = 0
+            if Female.walkingfacing_right : #decides which one to show left or right
+                Female.image = Female.walking[Female.current_image]
+            else:
+                Female.image = Female.walkingfacing_left[Female.current_image]
+        #idle
+        else:
             if current_time - Female.animation_timer > Female.animation_delay: #check if it alr 150ms
                 Female.animation_timer =current_time 
                 Female.current_image += 1 
-                if Female.current_image >=len(Female.character):
+                if Female.current_image >=len(Female.idle):
                     Female.current_image =0
-
+            if Female.facing_right:
+                Female.image = Female.idle[Female.current_image]
+            else:
+                Female.image =Female.facing_left[Female.current_image]
             
 
 
@@ -148,14 +166,19 @@ screen_width,screen_height = screen.get_size()
 background_surface = pygame.transform.scale(background_surface,(screen_width,screen_height))
 
 #character image (female)
-character_image = [
+Fcharacter_image_idle = [
     pygame.image.load("Moodify/F-right/pixil-frame-0.png"),
     pygame.image.load("Moodify/F-right/pixil-frame-1.png"),
     pygame.image.load("Moodify/F-right/pixil-frame-2.png"),
     pygame.image.load("Moodify/F-right/pixil-frame-3.png"),
 ]
 
-
+Fcharacter_walking_img =[
+    pygame.image.load("Moodify/F-walking/pixil-frame-0.png"),
+    pygame.image.load("Moodify/F-walking/pixil-frame-1.png"),
+    pygame.image.load("Moodify/F-walking/pixil-frame-2.png"),
+    pygame.image.load("Moodify/F-walking/pixil-frame-3.png"),
+]
 
 #(Spawn only once) 
 #determine will rain or not
