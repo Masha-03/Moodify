@@ -29,6 +29,7 @@ class Rain(pygame.sprite.Sprite):
         rain.rect.x=rain.rect.x + rain.speedx 
         rain.rect.y=rain.rect.y+rain.speedy
 
+
 #random to rain or not
 def rain_or_not():
     num_rain = random.randint(1,3) #random the num
@@ -38,6 +39,7 @@ def rain_or_not():
         for i in range (100): #run the group sprite one by one 100 times
             rain = Rain() #runs the set up to spawn the rain, position and speed and add it to the group
             rain_group.add(rain) 
+        play_rain_sound()
         return rain_group
     else:
         return None
@@ -128,8 +130,18 @@ class FemaleCharacter(pygame.sprite.Sprite):
             else:
                 Female.image =Female.facing_left[Female.current_image]
             
+# Load and play background music
+def play_background_music():
+    pygame.mixer.init()
+    pygame.mixer.music.load("Moodify/sound effect/lofi_music.wav") 
+    pygame.mixer.music.set_volume(0.5)      
+    pygame.mixer.music.play(-1)  # -1 means loop indefinitely
 
-
+def play_rain_sound():
+    raining_sound = pygame.mixer.Sound("Moodify/sound effect/raining sound.mp3") 
+    raining_sound.set_volume(0.4)
+    raining_sound.play(-1)
+    
 
 #setting up pygame
 pygame.init() # to start the system: sound,graphics etc of pygame module
@@ -180,11 +192,22 @@ Fcharacter_walking_img =[
     pygame.image.load("Moodify/F-walking/pixil-frame-3.png"),
 ]
 
+
+
 #(Spawn only once) 
 #determine will rain or not
 rain_group = rain_or_not()
 #the female character 
 Female_character=FemaleCharacter()
+
+radio_entry = pygame.Rect(1000, 595, 160, 110) 
+
+#bg music
+play_background_music()
+
+
+
+
 
 #game main loop
 while True:
@@ -193,6 +216,9 @@ while True:
             if event.key == pygame.K_ESCAPE: #if its the ESC key
                 pygame.quit() # shut down eveythig u open/ initialized (includes the program that is running in the background)
                 sys.exit() 
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if radio_entry.collidepoint(event.pos):
+                print("Radio clicked")
 
     #the night and day background
     current_hour = datetime.datetime.now().hour
