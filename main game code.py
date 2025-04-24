@@ -143,6 +143,9 @@ def play_rain_sound():
     raining_sound.play(-1)
     
 
+        
+        
+
 #setting up pygame
 pygame.init() # to start the system: sound,graphics etc of pygame module
 #screen here is like a canvas to store the window and u can draw/ add other images
@@ -191,8 +194,10 @@ Fcharacter_walking_img =[
     pygame.image.load("Moodify/F-walking/pixil-frame-2.png"),
     pygame.image.load("Moodify/F-walking/pixil-frame-3.png"),
 ]
-
-
+#TV and radio img
+TV_mini_games_img =pygame.image.load("Moodify/graphics/mini games interface.png")
+quit_button_img = pygame.image.load("Moodify/graphics/cancel button.png")
+radio_img = pygame.image.load("Moodify/graphics/radio interface.png")
 
 #(Spawn only once) 
 #determine will rain or not
@@ -200,8 +205,11 @@ rain_group = rain_or_not()
 #the female character 
 Female_character=FemaleCharacter()
 
+#Tv and radio entry
 radio_entry = pygame.Rect(1000, 595, 160, 110) 
 TV_entry = pygame.Rect(310, 325, 295, 195) 
+show_tv_screen = False
+show_radio =False
 
 #bg music
 play_background_music()
@@ -218,10 +226,17 @@ while True:
                 pygame.quit() # shut down eveythig u open/ initialized (includes the program that is running in the background)
                 sys.exit() 
         if event.type == pygame.MOUSEBUTTONDOWN:
+            if show_tv_screen:
+                if TV_quit_button_rect.collidepoint(event.pos):
+                    show_tv_screen = False
+            if show_radio:
+                if Radio_quit_button_rect.collidepoint(event.pos):
+                    show_radio =False
             if radio_entry.collidepoint(event.pos): #where it click on and check if its inside the box
-                print("Radio clicked")
+                show_radio =True
             if TV_entry.collidepoint(event.pos):
-                print("Radio clicked")
+                show_tv_screen = True
+                
 
     #the night and day background
     current_hour = datetime.datetime.now().hour
@@ -238,6 +253,21 @@ while True:
 
     Female_character.update_character()
     screen.blit(Female_character.image,Female_character.rect)
+                #   image                    position
+    #for the Tv mini game interface
+    if show_tv_screen:
+        scaled_tv_image = pygame.transform.scale(TV_mini_games_img,(screen_width,screen_height))
+        screen.blit(scaled_tv_image,(0,0))
+        TV_quit_button_rect = quit_button_img.get_rect()
+        TV_quit_button_rect.topright =(1440,80) #assign correct position
+        screen.blit(quit_button_img,TV_quit_button_rect)
+
+    if show_radio:
+        scaled_radio_img = pygame.transform.scale(radio_img,(screen_width,screen_height))
+        screen.blit(scaled_radio_img,(0,0))
+        Radio_quit_button_rect = quit_button_img.get_rect()
+        Radio_quit_button_rect.topright =(1400,160) #assign correct position
+        screen.blit(quit_button_img,Radio_quit_button_rect)
     
     
 
