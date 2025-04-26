@@ -36,7 +36,7 @@ def refresh_prompts():
     new_prompt=random.choice(writing_prompts)
     promts_label.config(text=new_prompt)
 
-#function for 
+#function for update the font
 def update_font():
     chosen_font = selected_font.get()
     text_entry.configure(font=(chosen_font, 12))
@@ -47,7 +47,7 @@ def save_entry():
     current_date = datetime.now().strftime("%Y-%m-%d") #get current date
     file_name=f"diary_{current_date}.txt" #create a filename with the date
     with open(file_name, "w", encoding="utf-8") as file: #"w"=write mode #encoding="utf-8" is to ensures it can handle characters like emojis, symbols, and other non-English text correctly
-        title_text = title_entry.get().strip()
+        title_text = smalltitle_entry.get().strip()
         file.write(f"Date: {current_date}\n\n") #\n\n=add two line breaks to separate the date from the diary content
         file.write(f"Title: {title_text if title_text else 'Untitled'}\n\n")
         file.write(diary_text)
