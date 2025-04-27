@@ -2,7 +2,8 @@ import tkinter as tk
 import random
 from datetime import datetime #to get current date and time
 from tkinter import messagebox #for show pop-up message
-import sqlite3
+import requests #getting data from API
+import tkinter.font as tkfont #use to import font module from tkinter library
 
 #counts how many words are in the diary
 def word_count(event=None): #event=None:means it can be called with/without event
@@ -11,15 +12,56 @@ def word_count(event=None): #event=None:means it can be called with/without even
     word_count = len(words) #len(words)=count how many words in the list #len=return the length of something
     word_count_label.config(text=f"{word_count} words") #update the label
 
+#function for the weather
+def get_weather():
+    api_key= "84fef18519a48ec1188bd03abd5494e5" #the api key from OpenWeatherApp
+    city= "Kuala Lumpur"
+    url= f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+
+    try:
+        response = requests.get(url) #format used to send a get request to the specific URL
+        data = response.json()
+
+        if data["cod"] == 200: #"cod"=code #200=success
+            temp = data["main"]["temp"] #"main"=a dictionary that contain temperature and other weather details #"temp"=give the current temperature
+            weather = data["weather"][0]["description"].capitalize() #weather=give a list of weather condition #0=get the first item in the list #description=is like:"rain","clear sky"
+            return f"{weather}, {temp}°C" #returns a formatted string combining both values 
+        else:
+            return "Failed to load weather"
+    except:
+        return "Error fetching weather" #catches any unexpected error
+
+#function to refresh the prompts
+def refresh_prompts():
+    new_prompt=random.choice(writing_prompts)
+    promts_label.config(text=new_prompt)
+
+#function for update the font
+def update_font():
+    chosen_font = selected_font.get()
+    text_entry.configure(font=(chosen_font, 12))
+  
 #save users entry #save as txt file(temporary) after that will change to json
-#def save_entry():
-    #diary_text=text_entry.get("1.0","end-1c")  #get the dairy text
-    #current_date = datetime.now().strftime("%Y-%m-%d") #get current date
-    #file_name=f"diary_{current_date}.txt" #create a filename with the date
-    #with open(file_name, "w", encoding="utf-8") as file: #"w"=write mode #encoding="utf-8" is to ensures it can handle characters like emojis, symbols, and other non-English text correctly
-        #file.write(f"Date: {current_date}\n\n") #\n\n=add two line breaks to separate the date from the diary content
-        #file.write(diary_text)
-    #messagebox.showinfo("Saved!", f"Your diary entry has been saved as:\n{file_name}") #print a message to show a popup
+def save_entry():
+    diary_text=text_entry.get("1.0","end-1c")  #get the dairy text
+    current_date = datetime.now().strftime("%Y-%m-%d") #get current date
+    file_name=f"diary_{current_date}.txt" #create a filename with the date
+    with open(file_name, "w", encoding="utf-8") as file: #"w"=write mode #encoding="utf-8" is to ensures it can handle characters like emojis, symbols, and other non-English text correctly
+        title_text = smalltitle_entry.get().strip()
+        file.write(f"Date: {current_date}\n\n") #\n\n=add two line breaks to separate the date from the diary content
+        file.write(f"Title: {title_text if title_text else 'Untitled'}\n\n")
+        file.write(diary_text)
+    messagebox.showinfo("Saved!", f"Your diary entry has been saved as:\n{file_name}") #print a message to show a popup
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
+
+#clear the text box after saving
+    text_entry.delete("1.0", "end")
+
+#reset the word count to 0 word
+    word_count_label.config(text="0 words")
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
 
 #main window
 root=tk.Tk()
@@ -27,95 +69,133 @@ root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}") #Full-s
 root.title("Diary📖")
 root.configure(bg="#fdf6f0")
 
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
+
 #title label
 title=tk.Label(root, text="My Diary😸", font=("Helvetica", 20, "bold"),bg="#fdf6f0",fg="#333")
-title.pack(pady=10)
+title.pack(pady=(10,5))
 
-#get current date 
-current_date = datetime.now().strftime("%B %d, %Y")  #strftime=string format time #Format:%B=Month, %d=Day, %Y=Year
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
+#About random prompts
 
-#label to display the current date
-cur_date_label=tk.Label(root, text=current_date, font=("Times New Roman",15),bg="#fdf6f0", fg="#333")
-cur_date_label.pack(pady=5)
-
-#print random reflection prompts
-reflection_prompts=["What emotion have you felt the most today? Why?",
+#print random writing prompts
+writing_prompts=["What emotion have you felt the most today? Why?",
                     "How have you been treating yourself lately? Kindly or harshly?",
                     "What are the things that have brought you the most peace or joy today?",
                     "How are you feeling right now on a scale of 1 to 10?",
                     "Did you experience any negative thoughts today, and how did you challenge them?",
                     "Did anything interesting happen today?",
-                    "What do you remember about my dreams last night?",
+                    "What do you remember about your dreams last night?",
                     "What image or color comes to mind when you think of peace?"]
-random_refle_prom=random.choice(reflection_prompts) #computer will random choose one prompts and display
-print(random_refle_prom)
+random_writ_prom=random.choice(writing_prompts) #computer will random choose one prompts and display
+print(random_writ_prom)
+
+#frame to hold prompts and button side by side
+prompts_frame=tk.Frame(root, bg="#fdf6f0")
+prompts_frame.pack(pady=(0,10))
 
 #label to display the reflection prompts
-promts_label=tk.Label(root, text=random_refle_prom, font=("Calibri",12),bg="#fdf6f0", fg="#333", wraplength=600)
-promts_label.pack(pady=10)
+promts_label=tk.Label(prompts_frame, text=random_writ_prom, font=("Calibri",13),bg="#fdf6f0", fg="#333", wraplength=600)
+promts_label.pack(side="left",pady=(10,10))
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
+
+#while button clicked the prompts will refresh
+refresh_button=tk.Button(prompts_frame, text="New Prompt", command=refresh_prompts, font=("Times New Roman",10), bg="#d0e1ff", fg="black",relief="groove")
+refresh_button.pack(side="left")
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
+#About adjust the position of current date and weather
+
+#frame to hold the current date and weather
+info_frame=tk.Frame(root, bg="#fdf6f0")
+info_frame.pack(fill="x", padx=300, pady=(0,5))
+
+#get current date 
+current_date = datetime.now().strftime("%B %d, %Y")  #strftime=string format time #Format:%B=Month, %d=Day, %Y=Year
+
+#label to display the current date
+cur_date_label=tk.Label(info_frame, text=f"Date: {current_date}", font=("Times New Roman",14),bg="#fdf6f0", fg="#333")
+cur_date_label.pack(side="left")
+
+weather_info = get_weather()
+weather_label = tk.Label(info_frame, text=f"Weather: {weather_info}", font=("Times New Roman", 13), bg="#fdf6f0", fg="#333")
+weather_label.pack(side="right")
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
+#About a text entry for users to input their diary's title
+
+#frame for small title
+smalltitle_frame = tk.Frame(root, bg="#fdf6f0")
+smalltitle_frame.pack(pady=(5, 13))
+
+#label for small title
+smalltitle_label = tk.Label(smalltitle_frame, text="Title:", font=("Calibri", 13), bg="#fdf6f0", fg="#333")
+smalltitle_label.pack(side="left")
+
+#blank text area for small title
+smalltitle_entry = tk.Entry(smalltitle_frame, width=60, font=("Times New Roman", 12))
+smalltitle_entry.pack(side="left", padx=10)
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
+#About Font selection(OptionMenu)
+
+#list of font options to let users choose
+available_fonts = ["Times New Roman", "Helvetica", "Calibri", "Arial", "Courier", "Comic Sans MS"]
+
+#frame to hold the font selection
+font_frame = tk.Frame(root, bg="#fdf6f0")
+font_frame.pack(pady=(5, 0))
+
+#create label for font selection
+font_label = tk.Label(font_frame, text="Choose Font:", font=("Times New Roman", 12), bg="#fdf6f0", fg="#333")
+font_label.pack(side="left")
+
+#for storing selected font
+selected_font = tk.StringVar() #Stringvar()=to store the font that selected by user from the optionmenu
+selected_font.set(available_fonts[0])  #sets the default value of the OptionMenu to the first item in the list
+
+#create the optionmenu thing
+font_selection = tk.OptionMenu(font_frame, selected_font, *available_fonts, command=lambda _: update_font()) #*=used to unpack a list
+font_selection.config(font=("Times New Roman", 10)) #set the font of the optionmenu itself
+font_selection.pack(side="left", pady=(0,10))
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
+#About main text entry
+
+#create a fixed-size frame
+text_frame = tk.Frame(root, width=800, height=330)
+text_frame.pack()
+text_frame.pack_propagate(False)  #prevent the frame from resizing based on content
+
+#place the text widget inside the fixed-size frame
+text_entry = tk.Text(text_frame, wrap="word", bd="2", relief="groove")
+text_entry.pack(expand=True, fill="both")
+
+#------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #frame to hold the diary area for styling
 diary_frame=tk.Frame(root, bg="#fdf6f0", bd=5, relief="ridge", padx=20, pady=20)
 diary_frame.pack()
 
-#blank text area
-text_entry=tk.Text(root,height=20,width=80)
-text_entry.pack()
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
 
 #word count
 word_count_label = tk.Label(root, text="0 words", font=("Times New Roman", 12), bg="#fdf6f0", fg="#666")
-word_count_label.pack(pady=(5, 10))
+word_count_label.pack(pady=(5, 5))
 
-def save_diary():
-    #Fetch all text (character 0 till end)
-    entry_text = text_entry.get("1.0", tk.END).strip()
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
 
-    #Check for empty entry
-    if not entry_text:
-        #Display warning box
-        tk.messagebox.showwarning("Empty Entry", "Please write something before saving.")
-        return
-
-    #Connect to database
-    connect = sqlite3.connect("C:/Users/Madhushaa/Projects/Moodify/user_info.db")
-    #Create cursor
-    cursor = connect.cursor()
-
-    #Create new table in the same database file
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS diary_entries (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            profile TEXT,
-            date TEXT,
-            entry TEXT,
-            FOREIGN KEY (profile) REFERENCES user_info(profile)
-        )
-    """) #Foreign key is to link 2 tables together
-
-    #Check if entry already exists for the profile and exact date
-    cursor.execute("SELECT * FROM diary_entries WHERE profile=? AND date=?", (profile, date))
-    result = cursor.fetchone()
-
-    if result:
-        #Update entry that already exist
-        cursor.execute("UPDATE diary_entries SET entry=? WHERE profile=? AND date=?", (entry_text, profile, date))
-    else:
-        #Insert new record into table
-        cursor.execute("INSERT INTO diary_entries (profile, date, entry) VALUES (?, ?, ?)", (profile, date, entry_text))
-
-    #Save data, update
-    connect.commit()
-    #Close connection
-    connect.close()
-    #Conformation message
-    tk.messagebox.showinfo("Saved", "Diary entry saved!")
-    
 #create a save button
-save_button=tk.Button(root,text="Save Entry", command=save_diary, font=("Times New Roman", 12), bg="#f8c9c9", fg="black") #command=save_entry is to call save_entry function to  save diary
-save_button.pack(pady=10)
+save_button=tk.Button(root,text="Save Entry", command=save_entry, font=("Times New Roman", 12), bg="#f8c9c9", fg="black") #command=save_entry is to call save_entry function to  save diary
+save_button.pack(pady=1)
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
 
 #connect the text box to word counter
-text_entry.bind("<KeyRelease>", word_count) #everytime type/delete something,it triggers word_count 
+text_entry.bind("<KeyRelease>", word_count) #everytime type/delete something,it triggers word_count #<KeyRelease>=when a key is pressed(event binding system from tkinter library)
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
 
 #run the whole program
 root.mainloop()
