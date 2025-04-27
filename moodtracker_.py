@@ -1,6 +1,7 @@
 import tkinter as tk
 import random #for ask_user
 from tkinter import messagebox #for show pop-up message
+from PIL import Image,ImageTk #import pillow for image resizing
 
 mood_quotes = {
     "Happy": "Keep shining, the world needs your light!",
@@ -10,6 +11,15 @@ mood_quotes = {
     "Sleepy": "Rest well — even dreams need time to grow.",
     "Relaxed": "Peace of mind is the best kind of success."
 }
+
+#function to save mood
+def save_mood():
+    if selected_mood:
+        quote = mood_quotes.get(selected_mood, "No quote available.")
+        messagebox.showinfo("Mood Saved!", f"Mood: {selected_mood}\n{quote}")
+        text_entry.delete(1.0, tk.END)  # clear the text box after saving
+    else:
+        messagebox.showwarning("No Mood Selected", "Please select a mood before saving.")
 
 #function to handle the button click
 def set_mood(mood):
@@ -47,11 +57,6 @@ def set_mood(mood):
     for button in emoji_buttons:
         button.configure(bg=btn_colour)
 
-    #get the matching quote
-    quote=mood_quotes.get(mood,"")
-
-    messagebox.showinfo("Mood Selected!", f"Mood Saved! {quote}") #display a messagebox to let users know their mood has been selected
-
 #main window
 root=tk.Tk()
 root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}") #full-screen size
@@ -77,15 +82,31 @@ ask_user_label.pack(pady=(10,10))
 frame_button=tk.Frame(root,bg="#FCF8E8")
 frame_button.pack(pady=20)
 
+#list of emoji buttons
 emoji_buttons=[]
 
+#load and resize the image using PIL 
+def resize_image(image_path, size=(100,50)):
+    img=Image.open(image_path)
+    img=img.resize(size, Image.Resampling.LANCZOS) #Resampling=process of changing size of an image #LANCZOS=high quality resizing
+    return ImageTk.PhotoImage(img)
+
+#image for button
+happy_image=resize_image("C:/Users/qinen/project/moodify/happy.png")
+sad_image=resize_image("C:/Users/qinen/project/moodify/sad.png")
+angry_image=resize_image("C:/Users/qinen/project/moodify/angry.png")
+excited_image=resize_image("C:/Users/qinen/project/moodify/excited.png")
+sleepy_image=resize_image("C:/Users/qinen/project/moodify/sleepy.png")
+relaxed_image=resize_image("C:/Users/qinen/project/moodify/relaxed.png")
+
+
 #button to choose the mood
-button_happy=tk.Button(frame_button,text="Happy😊", font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Happy")) #command=lambda is to bind a function to button/expression 
-button_sad=tk.Button(frame_button,text="Sad😢", font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Sad"))       #when button clicked lambda calls set_mood("") function
-button_angry=tk.Button(frame_button,text="Angry😠", font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Angry"))
-button_excited=tk.Button(frame_button,text="Excited😆", font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Excited"))
-button_sleepy=tk.Button(frame_button,text="Sleepy😴", font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Sleepy"))
-button_relaxed=tk.Button(frame_button,text="Relaxed😌", font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Relaxed"))
+button_happy=tk.Button(frame_button,text="Happy😊", image=happy_image, font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Happy")) #command=lambda is to bind a function to button/expression 
+button_sad=tk.Button(frame_button,text="Sad😢", image=sad_image, font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Sad"))       #when button clicked lambda calls set_mood("") function
+button_angry=tk.Button(frame_button,text="Angry😠", image=angry_image, font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Angry"))
+button_excited=tk.Button(frame_button,text="Excited😆", image=excited_image, font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Excited"))
+button_sleepy=tk.Button(frame_button,text="Sleepy😴", image=sleepy_image, font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Sleepy"))
+button_relaxed=tk.Button(frame_button,text="Relaxed😌", image=relaxed_image, font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Relaxed"))
 
 #add all buttons to the list
 emoji_buttons.extend([
@@ -108,6 +129,13 @@ text_entry.pack()
 #Add a instruction label for users
 label=tk.Label(root,text="Choose a button or describe your mood inside the blank box.",font=("Helvetica",11),bg="#fdf6f0",fg="#777")
 label.pack(pady=(7,5))    
+
+#save Button to save the mood
+save_button = tk.Button(root, text="Save Mood", font=("Arial", 12), bg="white", relief="groove", command=save_mood)
+save_button.pack(pady=10)
+
+#global variable to store selected mood
+selected_mood = ""
 
 #run the whole program
 root.mainloop()
