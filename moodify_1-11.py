@@ -121,10 +121,10 @@ def enter_data():
         connect.close()
         
         #Launch homepage with profile
-        subprocess.Popen(["python", "#", profile])      
+        #subprocess.Popen(["python", "#", profile])      
 
         #Close the current Tkinter window
-        root.destroy()  
+        #root.destroy()  
     
 #Submit button   
 button = tk.Button(main_frame, text="SUBMIT",font=label_font, bg=button_color, width=20, command= enter_data)  
