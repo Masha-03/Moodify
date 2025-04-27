@@ -4,6 +4,32 @@ import sqlite3
 from tkinter import messagebox #To show popup boxes
 from PIL import Image, ImageTk #Handle and display images
 import subprocess #Allows to run another file from python
+import os
+
+# Find the folder where the current Python file is
+base_dir = os.path.dirname(os.path.abspath(__file__))
+# Always save database in same folder
+db_path = os.path.join(base_dir, 'moodify_database.db')
+connect = sqlite3.connect(db_path)
+
+#Initialise shared database
+def initialise_db(): 
+        #Connect to database
+        connect = sqlite3.connect('moodify_database.db')
+        #Create cursor
+        cursor = connect.cursor()
+        
+        #Create table
+        table_create_query = """ CREATE TABLE IF NOT EXISTS user_info
+                (profile TEXT UNIQUE, gender TEXT) """
+        cursor.execute(table_create_query)
+        
+        #Save data, update
+        connect.commit()
+        #Close connection
+        connect.close()
+#Initialise database before GUI starts        
+initialise_db()  
 
 #Create main window
 root = tk.Tk()
@@ -73,7 +99,7 @@ def enter_data():
         gender = gender_combobox.get()
         
         #Connect to database
-        connect = sqlite3.connect('C:/Users/Madhushaa/Projects/Moodify/user_info.db')
+        connect = sqlite3.connect('moodify_database.db')
         #Create cursor
         cursor = connect.cursor()
         
@@ -85,11 +111,6 @@ def enter_data():
         
         #Display received data
         print(f": {profile}, Gender: {gender}") 
-        
-        #Create table
-        table_create_query = """ CREATE TABLE IF NOT EXISTS user_info
-                (profile TEXT UNIQUE, gender TEXT) """
-        cursor.execute(table_create_query)
         
         # Check for duplicate profile name
         cursor.execute("SELECT profile FROM user_info WHERE profile = ?", (profile,))
@@ -121,7 +142,7 @@ def enter_data():
         connect.close()
         
         #Launch homepage with profile
-        #subprocess.Popen(["python", "#", profile])      
+        subprocess.Popen(["python", "diary_.py", profile]) #Pass profile
 
         #Close the current Tkinter window
         #root.destroy()  
