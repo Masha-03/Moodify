@@ -9,6 +9,7 @@ import sqlite3
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
 #Get profile from the database
 def get_profile():
+    global profile
     connect = sqlite3.connect('moodify_database.db')
     cursor = connect.cursor()
     
@@ -17,9 +18,12 @@ def get_profile():
     result = cursor.fetchone()
     
     connect.close() #Close connection
-    return result[0] if result else None  # Return None if no profile exists
+    if result:
+        profile = result[0]  # Store the profile in the global variable
+    else:
+        profile = None  # Set profile to None if no profile found
 
-#-----------------------------------------------------------------------------------------------------------------------------------------------#
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #counts how many words are in the diary
 def word_count(event=None): #event=None:means it can be called with/without event
@@ -61,7 +65,7 @@ def update_font():
 
 #Function to save diary entry with profile
 def save_entry():
-    profile = get_profile() #Retrieve profile
+    get_profile() #Retrieve profile
     #If no profile found
     if not profile:
         messagebox.showwarning("No Profile", "No active profile found. Please set up a profile.")
@@ -82,7 +86,7 @@ def save_entry():
         CREATE TABLE IF NOT EXISTS diary_entries (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             profile TEXT,
-            date TEXT,
+            date DATE,
             time TEXT,
             title TEXT,
             content TEXT
@@ -108,7 +112,7 @@ def save_entry():
     #Close connection
     connect.close()
 
-#-----------------------------------------------------------------------------------------------------------------------------------------------#
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #main window
 root=tk.Tk()

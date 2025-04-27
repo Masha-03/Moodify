@@ -21,7 +21,8 @@ def initialise_db():
         
         #Create table
         table_create_query = """ CREATE TABLE IF NOT EXISTS user_info
-                (profile TEXT UNIQUE, gender TEXT) """
+                (profile TEXT UNIQUE NOT NULL, 
+                gender TEXT NOT NULL) """
         cursor.execute(table_create_query)
         
         #Save data, update
