@@ -16,7 +16,7 @@ def get_profile():
     cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
     result = cursor.fetchone()
     
-    connect.close()
+    connect.close() #Close connection
     return result[0] if result else None  # Return None if no profile exists
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
@@ -80,7 +80,8 @@ def save_entry():
     # Create the diary_entries table if not exists
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS diary_entries (
-            profile TEXT UNIQUE,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            profile TEXT,
             date TEXT,
             time TEXT,
             title TEXT,
@@ -94,15 +95,17 @@ def save_entry():
         VALUES (?, ?, ?, ?, ?)
     """, (profile, current_date, current_time, title_text, diary_text))
     
+    #Save data, update
     connect.commit()
     messagebox.showinfo("Saved!", "Your diary entry has been saved.")
 
     #Clear text entry after saving
     text_entry.delete("1.0", "end")
+    smalltitle_entry.delete("1.0", "end")
     #reset the word count to 0 word
     word_count_label.config(text="0 words")
 
-    # Close database connection
+    #Close connection
     connect.close()
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
