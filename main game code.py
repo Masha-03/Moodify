@@ -143,8 +143,62 @@ def play_rain_sound():
     raining_sound.play(-1)
     
 
-        
-        
+def picture_speech():
+    speech_forpicture =["Arrr matey! Ready for an adventure?",
+                        "Who dares disturb the captain's nap?",
+                        "Legends say this painting hides a secret...",
+                        "Shiver me timbers! Someone touched me painting!",
+                        "Yo-ho-ho! Find the treasure if ye dare!"]
+    speech = random.choice(speech_forpicture)
+    return speech
+
+def teddy_speech():
+    speech_forteddy =["Shh... Teddy is sleeping",
+                        "Teddy wants a cup of tea!",
+                        "Mr. Bean will be back soon!",
+                        "Teddy feels cozy here"]
+    speech = random.choice(speech_forteddy)
+    return speech 
+
+def cockroach_speech():
+    speech_forteddy =["You can't catch me!",
+                        "Home sweet... kitchen!",
+                        "I'm faster than you think!",
+                        "Oops! You saw me!",
+                        "Just passing through!",
+                        "I'm tiny but mighty!"]
+    speech = random.choice(speech_forteddy)
+    return speech 
+
+def cockroach_speech():
+    speech_forck =["You can't catch me!",
+                        "Home sweet... kitchen!",
+                        "I'm faster than you think!",
+                        "Oops! You saw me!",
+                        "Just passing through!",
+                        "I'm tiny but mighty!"]
+    speech = random.choice(speech_forck)
+    return speech 
+
+def plant_speech():
+    speech_forplant =["Don't forget to water this one!",
+                        "Ah, a little greenery to brighten the room!",
+                        "A plant that never complains...",
+                        "This plant's looking a bit thirsty...",
+                        "If only it could talk, what would it say?",
+                        "Hmm, should I name it? Maybe 'Leafy'?"]
+    speech = random.choice(speech_forplant)
+    return speech 
+
+def sofa_speech():
+    speech_forsofa =["Ah, a perfect spot to relax!",
+                        "This looks like the comfiest seat in the house!",
+                        "Is this where the magic of napping happens?",
+                        "I could definitely spend a whole day on this.",
+                        "This is where all the best TV shows are watched.",
+                        "This sofa has ‘comfort’ written all over it!"]
+    speech = random.choice(speech_forsofa)
+    return speech 
 
 #setting up pygame
 pygame.init() # to start the system: sound,graphics etc of pygame module
@@ -199,6 +253,13 @@ TV_mini_games_img =pygame.image.load("Moodify/graphics/mini games interface.png"
 quit_button_img = pygame.image.load("Moodify/graphics/cancel button.png")
 radio_img = pygame.image.load("Moodify/graphics/radio interface.png")
 
+# speech bar position and img
+Speech_bar =pygame.image.load("Moodify/graphics/speech bar.png")
+speechbar_rect =Speech_bar.get_rect()
+speechbar_rect.x = 330
+speechbar_rect.y =595
+show_text =False
+
 #(Spawn only once) 
 #determine will rain or not
 rain_group = rain_or_not()
@@ -211,10 +272,19 @@ TV_entry = pygame.Rect(310, 325, 295, 195)
 show_tv_screen = False
 show_radio =False
 
+#interaction points
+picture = pygame.Rect(110,68,300,230)
+teddy = pygame.Rect(1460,535,90,120)
+plant = pygame.Rect(650,380,90,155)
+cockroach = pygame.Rect(65,690,50,65)
+sofa = pygame.Rect(300,600,600,200)
+
+
 #bg music
 play_background_music()
 
-
+#text font size 
+font =pygame.font.Font(None,40)
 
 
 
@@ -236,6 +306,31 @@ while True:
                 show_radio =True
             if TV_entry.collidepoint(event.pos):
                 show_tv_screen = True
+            if teddy.collidepoint(event.pos):
+                show_text =True
+                text_surface = font.render(teddy_speech(),True,(0,0,0))
+                text_rect =text_surface.get_rect(center =speechbar_rect.center)
+            if cockroach.collidepoint(event.pos):
+                show_text =True
+                text_surface = font.render(cockroach_speech(),True,(0,0,0))
+                text_rect =text_surface.get_rect(center =speechbar_rect.center)
+            if sofa.collidepoint(event.pos):
+                show_text =True
+                text_surface = font.render(sofa_speech(),True,(0,0,0))
+                text_rect =text_surface.get_rect(center =speechbar_rect.center)
+            if picture.collidepoint(event.pos):
+                show_text =True
+                text_surface = font.render(picture_speech(),True,(0,0,0))
+                text_rect =text_surface.get_rect(center =speechbar_rect.center)
+            if plant.collidepoint(event.pos):
+                show_text =True
+                text_surface = font.render(plant_speech(),True,(0,0,0))
+                text_rect =text_surface.get_rect(center =speechbar_rect.center)
+            # Only close the speech bar if not clicking on any important object
+            if not (teddy.collidepoint(event.pos) or cockroach.collidepoint(event.pos) or sofa.collidepoint(event.pos) or picture.collidepoint(event.pos) or plant.collidepoint(event.pos)):
+                show_text = False
+
+
                 
 
     #the night and day background
@@ -269,7 +364,9 @@ while True:
         Radio_quit_button_rect.topright =(1400,160) #assign correct position
         screen.blit(quit_button_img,Radio_quit_button_rect)
     
-    
+    if show_text:
+        screen.blit(Speech_bar,speechbar_rect)
+        screen.blit(text_surface,text_rect)
 
     pygame.display.update() #update the display of the screen 
     Time.tick(60)# tells loop dont just faster then 60 fps
