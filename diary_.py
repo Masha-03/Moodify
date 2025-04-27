@@ -4,6 +4,7 @@ from datetime import datetime #to get current date and time
 from tkinter import messagebox #for show pop-up message
 import requests #getting data from API
 import tkinter.font as tkfont #use to import font module from tkinter library
+import sqlite3
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
 #Get profile from the database
@@ -12,16 +13,13 @@ def get_profile():
     cursor = connect.cursor()
     
     #Fetch the profile
-    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1")
+    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
     result = cursor.fetchone()
     
     connect.close()
     return result[0] if result else None  # Return None if no profile exists
 
-
-
-
-
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
 
 #counts how many words are in the diary
 def word_count(event=None): #event=None:means it can be called with/without event
@@ -60,12 +58,18 @@ def update_font():
     text_entry.configure(font=(chosen_font, 12))
     
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
-# Get profile passed from first page
-profile = sys.argv[1]  # Profile is passed as command line argument
 
 #Function to save diary entry with profile
-def save_entry(profile):
+def save_entry():
+    profile = get_profile() #Retrieve profile
+    #If no profile found
+    if not profile:
+        messagebox.showwarning("No Profile", "No active profile found. Please set up a profile.")
+        return
+    
+    #Get user input
     diary_text = text_entry.get("1.0", "end-1c")
+    title_text = smalltitle_entry.get().strip()
     current_date = datetime.now().strftime("%Y-%m-%d")
     current_time = datetime.now().strftime("%H:%M:%S")  # Get current time
 
@@ -76,7 +80,7 @@ def save_entry(profile):
     # Create the diary_entries table if not exists
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS diary_entries (
-            profile TEXT,
+            profile TEXT UNIQUE,
             date TEXT,
             time TEXT,
             title TEXT,
@@ -85,7 +89,6 @@ def save_entry(profile):
     """)
 
     # Save the diary entry
-    title_text = smalltitle_entry.get().strip()
     cursor.execute("""
         INSERT INTO diary_entries (profile, date, time, title, content)
         VALUES (?, ?, ?, ?, ?)
@@ -94,31 +97,13 @@ def save_entry(profile):
     connect.commit()
     messagebox.showinfo("Saved!", "Your diary entry has been saved.")
 
-    # Clear the text entry and reset word count
+    #Clear text entry after saving
     text_entry.delete("1.0", "end")
+    #reset the word count to 0 word
     word_count_label.config(text="0 words")
 
     # Close database connection
     connect.close()
-
-def save_entry():
-    diary_text=text_entry.get("1.0","end-1c")  #get the dairy text
-    current_date = datetime.now().strftime("%Y-%m-%d") #get current date
-    file_name=f"diary_{current_date}.txt" #create a filename with the date
-    with open(file_name, "w", encoding="utf-8") as file: #"w"=write mode #encoding="utf-8" is to ensures it can handle characters like emojis, symbols, and other non-English text correctly
-        title_text = smalltitle_entry.get().strip()
-        file.write(f"Date: {current_date}\n\n") #\n\n=add two line breaks to separate the date from the diary content
-        file.write(f"Title: {title_text if title_text else 'Untitled'}\n\n")
-        file.write(diary_text)
-    messagebox.showinfo("Saved!", f"Your diary entry has been saved as:\n{file_name}") #print a message to show a popup
-
-#-----------------------------------------------------------------------------------------------------------------------------------------------#
-
-#clear the text box after saving
-    text_entry.delete("1.0", "end")
-
-#reset the word count to 0 word
-    word_count_label.config(text="0 words")
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
 
