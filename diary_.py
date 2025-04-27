@@ -5,6 +5,24 @@ from tkinter import messagebox #for show pop-up message
 import requests #getting data from API
 import tkinter.font as tkfont #use to import font module from tkinter library
 
+#--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
+#Get profile from the database
+def get_profile():
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+    
+    #Fetch the profile
+    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1")
+    result = cursor.fetchone()
+    
+    connect.close()
+    return result[0] if result else None  # Return None if no profile exists
+
+
+
+
+
+
 #counts how many words are in the diary
 def word_count(event=None): #event=None:means it can be called with/without event
     content = text_entry.get("1.0", "end-1c")  #get full text from text widget #1.0=start from line 1,character 0(very beginning) #end-1c=means up to one character before the end 
@@ -40,8 +58,49 @@ def refresh_prompts():
 def update_font():
     chosen_font = selected_font.get()
     text_entry.configure(font=(chosen_font, 12))
-  
-#save users entry #save as txt file(temporary) after that will change to json
+    
+#--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
+# Get profile passed from first page
+profile = sys.argv[1]  # Profile is passed as command line argument
+
+#Function to save diary entry with profile
+def save_entry(profile):
+    diary_text = text_entry.get("1.0", "end-1c")
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    current_time = datetime.now().strftime("%H:%M:%S")  # Get current time
+
+    # Database connection
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+
+    # Create the diary_entries table if not exists
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS diary_entries (
+            profile TEXT,
+            date TEXT,
+            time TEXT,
+            title TEXT,
+            content TEXT
+        )
+    """)
+
+    # Save the diary entry
+    title_text = smalltitle_entry.get().strip()
+    cursor.execute("""
+        INSERT INTO diary_entries (profile, date, time, title, content)
+        VALUES (?, ?, ?, ?, ?)
+    """, (profile, current_date, current_time, title_text, diary_text))
+    
+    connect.commit()
+    messagebox.showinfo("Saved!", "Your diary entry has been saved.")
+
+    # Clear the text entry and reset word count
+    text_entry.delete("1.0", "end")
+    word_count_label.config(text="0 words")
+
+    # Close database connection
+    connect.close()
+
 def save_entry():
     diary_text=text_entry.get("1.0","end-1c")  #get the dairy text
     current_date = datetime.now().strftime("%Y-%m-%d") #get current date
