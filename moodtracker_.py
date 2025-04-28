@@ -2,6 +2,8 @@ import tkinter as tk
 import random #for ask_user
 from tkinter import messagebox #for show pop-up message
 from PIL import Image,ImageTk #import pillow for image resizing
+import datetime
+import sqlite3
 
 mood_quotes = {
     "Happy": "Keep shining, the world needs your light!",
@@ -12,17 +14,92 @@ mood_quotes = {
     "Relaxed": "Peace of mind is the best kind of success."
 }
 
+#--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
+#Get profile from the database
+def get_profile():
+    global profile
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+    
+    #Fetch the profile
+    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
+    result = cursor.fetchone()
+    
+    connect.close() #Close connection
+    if result:
+        profile = result[0]  # Store the profile 
+    else:
+        profile = None  # Set profile to None if no profile found
+
+#Initialise table
+def initialise_table(): 
+        #Connect to database
+        connect = sqlite3.connect('moodify_database.db')
+        #Create cursor
+        cursor = connect.cursor()
+        
+        #Create the diary_entries table
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS mood_entries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            profile_name TEXT,
+            date DATE,
+            time TEXT,
+            mood TEXT,
+            mood_description TEXT
+        )
+        ''')
+        
+        #Save data, update
+        connect.commit()
+        #Close connection
+        connect.close()
+        
+#Initialise table before GUI starts        
+initialise_table()  
+
 #function to save mood
 def save_mood():
+    global selected_mood
+    get_profile()
     if selected_mood:
+        mood_desc = text_entry.get("1.0", tk.END).strip()
+        if not mood_desc:
+            mood_desc = "No description."
+
+        now = datetime.datetime.now()
+        current_date = now.strftime("%Y-%m-%d") #Get date
+        current_time = now.strftime("%H:%M:%S") #Get time
+
+        # Insert into database
+        conn = sqlite3.connect('moodify_database.db')
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            INSERT INTO mood_entries (profile_name, date, time, mood, mood_description)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (profile, current_date, current_time, selected_mood, mood_desc))
+
+        conn.commit()
+        conn.close()
+
+        #Show popup after submit
         quote = mood_quotes.get(selected_mood, "No quote available.")
         messagebox.showinfo("Mood Saved!", f"Mood: {selected_mood}\n{quote}")
-        text_entry.delete(1.0, tk.END)  # clear the text box after saving
+
+        #Reset entry
+        text_entry.delete(1.0, tk.END)
+        selected_mood = ""
     else:
         messagebox.showwarning("No Mood Selected", "Please select a mood before saving.")
+        
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #function to handle the button click
 def set_mood(mood):
+    global selected_mood
+    selected_mood = mood #save clicked mood button
+    
     if mood=="Happy":
         bg_colour="#fff9c4"
         btn_colour="#ffe082"
@@ -101,12 +178,12 @@ relaxed_image=resize_image("C:/Users/qinen/project/moodify/relaxed.png")
 
 
 #button to choose the mood
-button_happy=tk.Button(frame_button,text="Happy😊", image=happy_image, font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Happy")) #command=lambda is to bind a function to button/expression 
-button_sad=tk.Button(frame_button,text="Sad😢", image=sad_image, font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Sad"))       #when button clicked lambda calls set_mood("") function
-button_angry=tk.Button(frame_button,text="Angry😠", image=angry_image, font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Angry"))
-button_excited=tk.Button(frame_button,text="Excited😆", image=excited_image, font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Excited"))
-button_sleepy=tk.Button(frame_button,text="Sleepy😴", image=sleepy_image, font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Sleepy"))
-button_relaxed=tk.Button(frame_button,text="Relaxed😌", image=relaxed_image, font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Relaxed"))
+button_happy=tk.Button(frame_button,text="Happy😊", font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Happy")) #command=lambda is to bind a function to button/expression 
+button_sad=tk.Button(frame_button,text="Sad😢", font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Sad"))       #when button clicked lambda calls set_mood("") function
+button_angry=tk.Button(frame_button,text="Angry😠", font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Angry"))
+button_excited=tk.Button(frame_button,text="Excited😆", font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Excited"))
+button_sleepy=tk.Button(frame_button,text="Sleepy😴", font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Sleepy"))
+button_relaxed=tk.Button(frame_button,text="Relaxed😌", font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Relaxed"))
 
 #add all buttons to the list
 emoji_buttons.extend([

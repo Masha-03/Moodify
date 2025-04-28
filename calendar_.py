@@ -34,6 +34,8 @@ def get_profile():
         profile = None  #Set profile to None if no profile found
 
 def show_entry(selected_date):
+    # Get the profile 
+    get_profile() 
     connect = sqlite3.connect('moodify_database.db')
     cursor = connect.cursor()
 
@@ -67,8 +69,6 @@ def show_entry(selected_date):
         
     connect.close()
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
-# Get the profile from the database once at the start
-get_profile() 
 
 #main window
 root=tk.Tk() #create the main app window

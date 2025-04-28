@@ -6,25 +6,6 @@ import requests #getting data from API
 import tkinter.font as tkfont #use to import font module from tkinter library
 import sqlite3
 
-#--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
-#Get profile from the database
-def get_profile():
-    global profile
-    connect = sqlite3.connect('moodify_database.db')
-    cursor = connect.cursor()
-    
-    #Fetch the profile
-    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
-    result = cursor.fetchone()
-    
-    connect.close() #Close connection
-    if result:
-        profile = result[0]  # Store the profile 
-    else:
-        profile = None  # Set profile to None if no profile found
-
-#----------------------------------------------------------------------------------------------------------------------------------------------------#
-
 #counts how many words are in the diary
 def word_count(event=None): #event=None:means it can be called with/without event
     content = text_entry.get("1.0", "end-1c")  #get full text from text widget #1.0=start from line 1,character 0(very beginning) #end-1c=means up to one character before the end 
@@ -60,8 +41,26 @@ def refresh_prompts():
 def update_font():
     chosen_font = selected_font.get()
     text_entry.configure(font=(chosen_font, 12))
+    smalltitle_entry.configure(font=(chosen_font,12)) #let the smalltitle can change the font too
     
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
+
+#Get profile from the database
+def get_profile():
+    global profile
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+    
+    #Fetch the profile
+    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
+    result = cursor.fetchone()
+    
+    connect.close() #Close connection
+    if result:
+        profile = result[0]  # Store the profile 
+    else:
+        profile = None  # Set profile to None if no profile found
+
 #Initialise table
 def initialise_table(): 
         #Connect to database
@@ -98,10 +97,10 @@ def save_entry():
         return
     
     #Get user input
-    diary_text = text_entry.get("1.0", "end-1c")
-    title_text = smalltitle_entry.get().strip()
-    current_date = datetime.now().strftime("%Y-%m-%d")
-    current_time = datetime.now().strftime("%H:%M:%S")  # Get current time
+    diary_text = text_entry.get("1.0", "end-1c") #Get diary content text
+    title_text = smalltitle_entry.get().strip() #Get title text
+    current_date = datetime.now().strftime("%Y-%m-%d") #Get current date
+    current_time = datetime.now().strftime("%H:%M:%S")  #Get current time
 
     # Database connection
     connect = sqlite3.connect('moodify_database.db')
@@ -119,7 +118,7 @@ def save_entry():
 
     #Clear text entry after saving
     text_entry.delete("1.0", "end")
-    smalltitle_entry.delete("1.0", "end")
+    smalltitle_entry.delete(0, "end")
     #reset the word count to 0 word
     word_count_label.config(text="0 words")
 
@@ -137,7 +136,7 @@ root.configure(bg="#fdf6f0")
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
 
 #title label
-title=tk.Label(root, text="My Diary😸", font=("Helvetica", 20, "bold"),bg="#fdf6f0",fg="#333")
+title=tk.Label(root, text="My Diary😸", font=("Helvetica", 21, "bold"),bg="#fdf6f0",fg="#444")
 title.pack(pady=(10,5))
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
@@ -160,13 +159,13 @@ prompts_frame=tk.Frame(root, bg="#fdf6f0")
 prompts_frame.pack(pady=(0,10))
 
 #label to display the reflection prompts
-promts_label=tk.Label(prompts_frame, text=random_writ_prom, font=("Calibri",13),bg="#fdf6f0", fg="#333", wraplength=600)
+promts_label=tk.Label(prompts_frame, text=random_writ_prom, font=("Comic Sans MS",11),bg="#fdf6f0", fg="#444", wraplength=600)
 promts_label.pack(side="left",pady=(10,10))
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
 
 #while button clicked the prompts will refresh
-refresh_button=tk.Button(prompts_frame, text="New Prompt", command=refresh_prompts, font=("Times New Roman",10), bg="#d0e1ff", fg="black",relief="groove")
+refresh_button=tk.Button(prompts_frame, text="New Prompt", command=refresh_prompts, font=("Comic Sans MS",10), bg="#b5d5ff", fg="#333",relief="groove")
 refresh_button.pack(side="left")
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
@@ -174,17 +173,17 @@ refresh_button.pack(side="left")
 
 #frame to hold the current date and weather
 info_frame=tk.Frame(root, bg="#fdf6f0")
-info_frame.pack(fill="x", padx=300, pady=(0,5))
+info_frame.pack(fill="x", padx=270, pady=(0,2))
 
 #get current date 
 current_date = datetime.now().strftime("%B %d, %Y")  #strftime=string format time #Format:%B=Month, %d=Day, %Y=Year
 
 #label to display the current date
-cur_date_label=tk.Label(info_frame, text=f"Date: {current_date}", font=("Times New Roman",14),bg="#fdf6f0", fg="#333")
+cur_date_label=tk.Label(info_frame, text=f"Date📅: {current_date}", font=("Times New Roman",14),bg="#fdf6f0", fg="#333")
 cur_date_label.pack(side="left")
 
 weather_info = get_weather()
-weather_label = tk.Label(info_frame, text=f"Weather: {weather_info}", font=("Times New Roman", 13), bg="#fdf6f0", fg="#333")
+weather_label = tk.Label(info_frame, text=f"Weather⛅: {weather_info}", font=("Times New Roman", 13), bg="#fdf6f0", fg="#333")
 weather_label.pack(side="right")
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
@@ -195,12 +194,12 @@ smalltitle_frame = tk.Frame(root, bg="#fdf6f0")
 smalltitle_frame.pack(pady=(5, 13))
 
 #label for small title
-smalltitle_label = tk.Label(smalltitle_frame, text="Title:", font=("Calibri", 13), bg="#fdf6f0", fg="#333")
+smalltitle_label = tk.Label(smalltitle_frame, text="Title:", font=("Times New Roman", 13), bg="#fdf6f0", fg="#333")
 smalltitle_label.pack(side="left")
 
 #blank text area for small title
 smalltitle_entry = tk.Entry(smalltitle_frame, width=60, font=("Times New Roman", 12))
-smalltitle_entry.pack(side="left", padx=10)
+smalltitle_entry.pack(side="left", padx=10, pady=(0,2))
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
 #About Font selection(OptionMenu)
@@ -214,7 +213,7 @@ font_frame.pack(pady=(5, 0))
 
 #create label for font selection
 font_label = tk.Label(font_frame, text="Choose Font:", font=("Times New Roman", 12), bg="#fdf6f0", fg="#333")
-font_label.pack(side="left")
+font_label.pack(side="left",pady=(0,5))
 
 #for storing selected font
 selected_font = tk.StringVar() #Stringvar()=to store the font that selected by user from the optionmenu
@@ -222,14 +221,14 @@ selected_font.set(available_fonts[0])  #sets the default value of the OptionMenu
 
 #create the optionmenu thing
 font_selection = tk.OptionMenu(font_frame, selected_font, *available_fonts, command=lambda _: update_font()) #*=used to unpack a list
-font_selection.config(font=("Times New Roman", 10)) #set the font of the optionmenu itself
+font_selection.config(font=("Times New Roman", 12)) #set the font of the optionmenu itself
 font_selection.pack(side="left", pady=(0,10))
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
 #About main text entry
 
 #create a fixed-size frame
-text_frame = tk.Frame(root, width=800, height=330)
+text_frame = tk.Frame(root, width=800, height=330, bg="#fff0f0", bd=2)
 text_frame.pack()
 text_frame.pack_propagate(False)  #prevent the frame from resizing based on content
 
@@ -237,22 +236,16 @@ text_frame.pack_propagate(False)  #prevent the frame from resizing based on cont
 text_entry = tk.Text(text_frame, wrap="word", bd="2", relief="groove")
 text_entry.pack(expand=True, fill="both")
 
-#------------------------------------------------------------------------------------------------------------------------------------------------#
-
-#frame to hold the diary area for styling
-diary_frame=tk.Frame(root, bg="#fdf6f0", bd=5, relief="ridge", padx=20, pady=20)
-diary_frame.pack()
-
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
 
 #word count
-word_count_label = tk.Label(root, text="0 words", font=("Times New Roman", 12), bg="#fdf6f0", fg="#666")
+word_count_label = tk.Label(root, text="0 words", font=("Comic Sans MS", 12), bg="#fdf6f0", fg="#999")
 word_count_label.pack(pady=(5, 5))
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
 
 #create a save button
-save_button=tk.Button(root,text="Save Entry", command=save_entry, font=("Times New Roman", 12), bg="#f8c9c9", fg="black") #command=save_entry is to call save_entry function to  save diary
+save_button=tk.Button(root,text="Save Entry", command=save_entry, font=("Comic Sans MS", 12), bg="#ffd3d3", fg="#333") #command=save_entry is to call save_entry function to  save diary
 save_button.pack(pady=1)
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
