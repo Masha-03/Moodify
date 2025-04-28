@@ -19,7 +19,7 @@ def get_profile():
     
     connect.close() #Close connection
     if result:
-        profile = result[0]  # Store the profile in the global variable
+        profile = result[0]  # Store the profile 
     else:
         profile = None  # Set profile to None if no profile found
 
@@ -62,6 +62,32 @@ def update_font():
     text_entry.configure(font=(chosen_font, 12))
     
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
+#Initialise table
+def initialise_table(): 
+        #Connect to database
+        connect = sqlite3.connect('moodify_database.db')
+        #Create cursor
+        cursor = connect.cursor()
+        
+        #Create the diary_entries table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS diary_entries (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                profile TEXT,
+                date DATE,
+                time TEXT,
+                title TEXT,
+                content TEXT
+            )
+        """)
+        
+        #Save data, update
+        connect.commit()
+        #Close connection
+        connect.close()
+        
+#Initialise table before GUI starts        
+initialise_table()  
 
 #Function to save diary entry with profile
 def save_entry():
@@ -80,18 +106,6 @@ def save_entry():
     # Database connection
     connect = sqlite3.connect('moodify_database.db')
     cursor = connect.cursor()
-
-    # Create the diary_entries table if not exists
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS diary_entries (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            profile TEXT,
-            date DATE,
-            time TEXT,
-            title TEXT,
-            content TEXT
-        )
-    """)
 
     # Save the diary entry
     cursor.execute("""
