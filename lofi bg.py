@@ -13,7 +13,7 @@ def play_background_music():
     pygame.mixer.init()
     pygame.mixer.music.load("lofi_music.wav") 
     pygame.mixer.music.set_volume(0.5)      
-    pygame.mixer.music.play(-1)                # -1 means loop indefinitely
+    pygame.mixer.music.play(-1)  # -1 means loop indefinitely
 
 play_background_music()
 

@@ -84,20 +84,51 @@ class Bubble:
             return distance <= self.radius #check if the click is within the bubble radius
         return False #if the bubble is already popped, return false
 
+class Button:
+    def __init__(self, x, y, width, height, text, onclick):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.color = (255, 200, 200)
+        self.hover_color = (255, 170, 170)
+        self.text = text
+        self.onclick = onclick
+        self.font = pygame.font.SysFont(None, 40)
+
+    def draw(self, surface):
+        mouse_pos = pygame.mouse.get_pos()
+        color = self.hover_color if self.rect.collidepoint(mouse_pos) else self.color
+        pygame.draw.rect(surface, color, self.rect, border_radius=12)
+
+        text_surf = self.font.render(self.text, True, (80, 20, 80))
+        text_rect = text_surf.get_rect(center=self.rect.center)
+        surface.blit(text_surf, text_rect)
+
+    def check_click(self, pos):
+        if self.rect.collidepoint(pos):
+            self.onclick()
+
+current_page = "bubble_popper"
+
+def switch_page():
+    global current_page
+    current_page = "other"
+
+
 def play_background_music():
     pygame.mixer.init()
     pygame.mixer.music.load("lofi_music.wav") 
     pygame.mixer.music.set_volume(0.5)      
     pygame.mixer.music.play(-1)                # -1 means loop indefinitely
 
-play_background_music()
-
-
-# Main loop
+#game variables 
 bubbles = []
 frame_count = 0
 running = True
+button = Button(50, 50, 200, 60, "Settings", switch_page) #create a button to switch to other page
 
+play_background_music() #play background music
+
+# Main loop
+running = True
 while running:
     screen.fill(BG_COLOR)
     frame_count += 1
@@ -106,25 +137,39 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
+            if current_page == "bubble_popper": #check if the current page is bubble popper
+                for bubble in bubbles:
+                    if bubble.check_click(event.pos):
+                        bubble.popped = True
+                        bubble.color = POP_COLOR
+                        if bubble.pop_sound:
+                            bubble.pop_sound.play()
+                button.check_click(event.pos)    
+
+        #add bubbles
+        if current_page == "bubble_popper":
+            if frame_count % BUBBLE_INTERVAL == 0:
+                bubbles.append(Bubble()) #to add new bubbles 
+
+            # Update and draw bubbles
+            bubbles = [b for b in bubbles if b.update()]
             for bubble in bubbles:
-                if bubble.check_click(event.pos):
-                    bubble.popped = True
-                    bubble.color = POP_COLOR
-                    if bubble.pop_sound:
-                        bubble.pop_sound.play()
-                
+                bubble.draw(screen) 
 
-    # Add bubbles
-    if frame_count % BUBBLE_INTERVAL == 0:
-        bubbles.append(Bubble())
+            button.draw(screen)
 
-    # Update and draw bubbles
-    bubbles = [b for b in bubbles if b.update()] #remove bubbles that are fully faded out
-    for bubble in bubbles:
-        bubble.draw(screen) #draw the bubbles and ring effect
+        #update and drw the bubbles    
+        elif current_page == "other":
+            screen.fill((255, 255, 255))
+            font = pygame.font.SysFont(None, 60)
+            txt = font.render("Settings Page", True, (100, 40, 100))
+            screen.blit(txt, (WIDTH//2 - txt._get_width()//2, HEIGHT//2 - txt.get_height()//2))
 
-    pygame.display.flip() #update the screen
-    clock.tick(FPS) #maintain the frame rate
+        pygame.display.flip()
+        clock.tick(FPS) #maintain the frame rate    
+pygame.quit()
+sys.exit()
+   
 
 
 
