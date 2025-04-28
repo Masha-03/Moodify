@@ -7,11 +7,12 @@ def grab_date():
     selected_date = calendar.get_date()  #Get the selected date from the calendar
     date_label.config(text =calendar.get_date()) #update the text of date_label
     #the config is to modify existing widget
+    
     show_entry(selected_date)  #Show diary entries for the selected date
-    if profile:  # Check if a profile exists
-        show_entry(selected_date)  # Show diary entries for the selected date
+    if profile:  #Check if a profile exists
+        show_entry(selected_date)  #Show diary entries for the selected date
     else:
-        print("No profile found.")  # Debug message if no profile exists
+        print("No profile found.")  #Debug message if no profile exists
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
 #Get profile from the database
@@ -24,13 +25,13 @@ def get_profile():
     cursor.execute('''SELECT profile 
                    FROM user_info 
                    ORDER BY ROWID DESC LIMIT 1''') #Fetch latest profile by sorting profile from newest to oldest
-    result = cursor.fetchone()
+    result = cursor.fetchone() #Fetch one only
     
     connect.close() #Close connection
     if result:
-        profile = result[0]  # Store the profile in the global variable
+        profile = result[0]  #Store the profile
     else:
-        profile = None  # Set profile to None if no profile found
+        profile = None  #Set profile to None if no profile found
 
 def show_entry(selected_date):
     connect = sqlite3.connect('moodify_database.db')
@@ -44,13 +45,13 @@ def show_entry(selected_date):
 
     result = cursor.fetchall() #Fetch all entries on the day
 
-    # If there are entries for the selected date
+    #If there are entries for the selected date
     if result:
-        # Clear any previous entries in the history frame before showing the new entries
+        #Clear any previous entries in the history frame before showing the new entries
         for widget in history_frame.winfo_children():
             widget.destroy()
 
-        # Display the entries
+        #Display the entries
         for entry in result:
             # Create a frame for each entry
             entry_frame = tk.Frame(history_frame, bg="#FCF8E8", pady=10, padx=10, bd=2, relief="solid")
@@ -108,10 +109,6 @@ choosedate_btn.grid(row=2, column=0, pady=10)
 #the display of the date yyyy-mm-dd
 date_label =tk.Label(left_frame,text="",font=("Arial Rounded MT Bold",15),bg="#FCF8E8") #display
 date_label.grid(row=3, column=0, pady=(10, 0), sticky="n")
-
-#(on hold)use for history_frame
-right_frame=tk.Frame(root, bg="#FCF8E8")
-right_frame.pack(side="left", fill="both", expand=True)
 
 # Frame for history
 history_frame = tk.Frame(root, padx=10, pady=10, bg="#FCF8E8")  # inside the frame

@@ -3,7 +3,6 @@ from tkinter import ttk #Styled widgets
 import sqlite3
 from tkinter import messagebox #To show popup boxes
 from PIL import Image, ImageTk #Handle and display images
-import subprocess #Allows to run another file from python
 import os
 
 # Find the folder where the current Python file is
@@ -13,7 +12,7 @@ db_path = os.path.join(base_dir, 'moodify_database.db')
 connect = sqlite3.connect(db_path)
 
 #Initialise shared database
-def initialise_db(): 
+def initialise_table(): 
         #Connect to database
         connect = sqlite3.connect('moodify_database.db')
         #Create cursor
@@ -29,8 +28,8 @@ def initialise_db():
         connect.commit()
         #Close connection
         connect.close()
-#Initialise database before GUI starts        
-initialise_db()  
+#Initialise table before GUI starts        
+initialise_table()  
 
 #Create main window
 root = tk.Tk()
@@ -113,14 +112,14 @@ def enter_data():
         #Display received data
         print(f": {profile}, Gender: {gender}") 
         
-        # Check for duplicate profile name
+        #Check for duplicate profile name
         cursor.execute("SELECT profile FROM user_info WHERE profile = ?", (profile,))
         result = cursor.fetchone() #Fetches matching profile name
 
         #If profile name is already taken
         if result:
                 #Pop up box to inform
-                tk.messagebox.showwarning("Duplicate Entry", "This profile name already exists. Choose a new one XD")
+                tk.messagebox.showwarning("Duplicate Entry", "Heyyy, sorry, pick a different profile name XD")
         else:
                 #Insert only if no duplicate profile name
                 data_insert_query = """ INSERT INTO user_info
@@ -129,7 +128,7 @@ def enter_data():
                 data_insert_tuple = (profile, gender)
                 connect.execute(data_insert_query, data_insert_tuple)
                 #Successful pop up box
-                tk.messagebox.showinfo("Success", "Profile saved successfully!")
+                tk.messagebox.showinfo("Success", "Lesgooo! Profile saved successfully!")
         
         #Clear field after profile input
         profile_entry.delete(0, tk.END)
@@ -141,12 +140,9 @@ def enter_data():
         connect.commit()
         #Close connection
         connect.close()
-        
-        #Launch homepage with profile
-        subprocess.Popen(["python", "diary_.py", profile]) #Pass profile
 
         #Close the current Tkinter window
-        #root.destroy()  
+        root.destroy()  
     
 #Submit button   
 button = tk.Button(main_frame, text="SUBMIT",font=label_font, bg=button_color, width=20, command= enter_data)  
