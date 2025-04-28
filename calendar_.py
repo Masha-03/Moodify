@@ -1,10 +1,73 @@
 import tkinter as tk
 from tkcalendar import Calendar
+import sqlite3
 
 #to get the date
 def grab_date():
+    selected_date = calendar.get_date()  #Get the selected date from the calendar
     date_label.config(text =calendar.get_date()) #update the text of date_label
     #the config is to modify existing widget
+    show_entry(selected_date)  #Show diary entries for the selected date
+    if profile:  # Check if a profile exists
+        show_entry(selected_date)  # Show diary entries for the selected date
+    else:
+        print("No profile found.")  # Debug message if no profile exists
+
+#--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
+#Get profile from the database
+def get_profile():
+    global profile
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+    
+    #Fetch the profile
+    cursor.execute('''SELECT profile 
+                   FROM user_info 
+                   ORDER BY ROWID DESC LIMIT 1''') #Fetch latest profile by sorting profile from newest to oldest
+    result = cursor.fetchone()
+    
+    connect.close() #Close connection
+    if result:
+        profile = result[0]  # Store the profile in the global variable
+    else:
+        profile = None  # Set profile to None if no profile found
+
+def show_entry(selected_date):
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+
+    #Fetch the entry for the selected date and current profile
+    cursor.execute('''
+        SELECT content FROM diary_entries
+        WHERE profile = ? AND date = ?
+    ''', (profile, selected_date))
+
+    result = cursor.fetchall() #Fetch all entries on the day
+
+    # If there are entries for the selected date
+    if result:
+        # Clear any previous entries in the history frame before showing the new entries
+        for widget in history_frame.winfo_children():
+            widget.destroy()
+
+        # Display the entries
+        for entry in result:
+            # Create a frame for each entry
+            entry_frame = tk.Frame(history_frame, bg="#FCF8E8", pady=10, padx=10, bd=2, relief="solid")
+            entry_frame.pack(fill="x", padx=10, pady=5)
+
+            # Create a label for the entry text
+            entry_label = tk.Label(entry_frame, text=entry[0], font=("Helvetica", 12), bg="#FCF8E8", wraplength=400)
+            entry_label.pack()
+    else:
+        # If no entries for the selected date, show a message
+        no_entry_label = tk.Label(history_frame, text="No diary entries for this date.", font=("Helvetica", 12, "italic"), bg="#FCF8E8")
+        no_entry_label.pack(pady=10)
+        
+    connect.close()
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
+# Get the profile from the database once at the start
+get_profile() 
 
 #main window
 root=tk.Tk() #create the main app window
@@ -50,9 +113,9 @@ date_label.grid(row=3, column=0, pady=(10, 0), sticky="n")
 right_frame=tk.Frame(root, bg="#FCF8E8")
 right_frame.pack(side="left", fill="both", expand=True)
 
-#(on hold)frame for history
-history_frame=tk.Frame(root,padx=10,pady=10, bg="#FCF8E8") #inside the frame
-history_frame.pack(padx=20, pady=20, fill="x", anchor="center")
+# Frame for history
+history_frame = tk.Frame(root, padx=10, pady=10, bg="#FCF8E8")  # inside the frame
+history_frame.pack(padx=20, pady=20, fill="both", expand=True)
 
 #run the whole program
 root.mainloop()
