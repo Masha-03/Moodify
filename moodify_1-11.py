@@ -19,10 +19,10 @@ def initialise_table():
         cursor = connect.cursor()
         
         #Create table
-        table_create_query = """ CREATE TABLE IF NOT EXISTS user_info
-                (profile TEXT UNIQUE NOT NULL, 
+        cursor.execute(""" CREATE TABLE IF NOT EXISTS user_info
+                (profile TEXT PRIMARY KEY, 
                 gender TEXT NOT NULL) """
-        cursor.execute(table_create_query)
+        )
         
         #Save data, update
         connect.commit()

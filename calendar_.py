@@ -44,7 +44,7 @@ def show_entry(selected_date):
     cursor.execute('''
         SELECT d.title, d.content, m.mood, m.mood_description
         FROM diary_entries d
-        LEFT JOIN mood_entries m ON d.profile = m.profile_name AND d.date = m.date
+        LEFT JOIN mood_entries m ON d.profile = m.profile AND d.date = m.date
         WHERE d.profile = ? AND d.date = ?
     ''', (profile, selected_date))
 

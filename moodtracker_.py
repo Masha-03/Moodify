@@ -42,11 +42,12 @@ def initialise_table():
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS mood_entries (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            profile_name TEXT,
+            profile TEXT,
             date DATE,
             time TEXT,
             mood TEXT,
-            mood_description TEXT
+            mood_description TEXT,
+            FOREIGN KEY (profile) REFERENCES user_info(profile)
         )
         ''')
         
