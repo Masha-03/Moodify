@@ -82,11 +82,11 @@ class Bubble:
             surface.blit(bubble_surface, (self.x - self.radius, self.y - self.radius)) #draw the bubble on the screen
 
         # blast effect ring coming out of the buble
-        if self.popped and self.blast_alpha > 0:  #draw the ring effect only if the bubble is popped and the ring is not fully faded out
+        if self.popped and self.blast_alpha > 0:      #draw the ring effect only if the bubble is popped and the ring is not fully faded out
             ring_surface = pygame.Surface((self.blast_radius*2, self.blast_radius*2), pygame.SRCALPHA) #create a surface for the ring
-            ring_color = (255, 255, 255, self.blast_alpha) #color with alpha for fade out effect
+            ring_color = (255, 255, 255, self.blast_alpha)       #color with alpha for fade out effect
             pygame.draw.circle(ring_surface, ring_color, (self.blast_radius, self.blast_radius), self.blast_radius, width=4) #draw the ring
-            surface.blit(ring_surface, (self.x - self.blast_radius, self.y - self.blast_radius)) #draw the ring on the screen
+            surface.blit(ring_surface, (self.x - self.blast_radius, self.y - self.blast_radius))      #draw the ring on the screen
 
     def check_click(self, pos):     #check if the bubble is clicked
         if not self.popped:     #check if the bubble is not yet popped
@@ -97,7 +97,7 @@ class Bubble:
 
 #particle class
 class Particle:
-    def __intit__(self):
+    def __init__(self):
         self.x = random.randint(0, WIDTH)       #random horizontal position
         self.y = random.randint(0, HEIGHT)      #random vertical position
         self.radius = random.randint(1, 3)      #random radius for the particle
@@ -141,8 +141,20 @@ def switch_page():
     global current_page
     current_page = "other"
 
+def go_to_game():
+    global current_page
+    current_page = "bubble_popper"
+
+def go_to_home():
+    global current_page
+    current_page = "home"
+
+def go_to_tv():
+    global current_page
+    current_page = "tv_page"
+
 def toggle_slow_motion():
-    global speed_nodifier
+    global speed_modifier
     if speed_modifier == 1.0:
         speed_modifier = 0.4
         pygame.mixer.music.set_volume(0.2) #lower the volume
@@ -158,7 +170,9 @@ frame_count = 0
 running = True
 button = Button(50, 50, 200, 60, "Settings", switch_page) #create a button to switch to other page
 slow_button = Button(270, 50, 200, 60, "Slow Motion", toggle_slow_motion) #create a button to toggle slow motion
-
+game_icon_button = Button(50, 50, 100, 100, "🎮", go_to_game)  # "🎮" game emoji
+home_icon_button = Button(170, 50, 100, 100, "🏠", go_to_home) # "🏠" home emoji
+tv_icon_button = Button(290, 50, 100, 100, "📺", go_to_tv) # "📺" tv emoji
 play_background_music() #play background music
 
 # Main loop
@@ -180,7 +194,14 @@ while running:
                             bubble.pop_sound.play()
                 button.check_click(event.pos)
                 slow_button.check_click(event.pos)
-    
+            elif current_page == "other":
+                game_icon_button.check_click(event.pos)
+                home_icon_button.check_click(event.pos)
+                tv_icon_button.check_click(event.pos)
+
+            elif current_page == "home":
+                game_icon_button.check_click(event.pos)
+        
         #add bubbles
     if current_page == "bubble_popper":
         if frame_count % BUBBLE_INTERVAL == 0:
@@ -197,6 +218,12 @@ while running:
         #update and drw the bubbles
         button.draw(screen)
         slow_button.draw(screen)
+
+    elif current_page == "tv_page":
+        screen.fill((220, 240, 255))
+        font = pygame.font.SysFont(None, 60)
+        txt = font.reader("Tv Page", True, (40, 80, 120))
+        screen.blit(txt, (WIDTH//2 - txt.get_width()//2, HEIGHT//2 - txt.get_height()//2))
       
     elif current_page == "other":
         screen.fill((240, 220, 255))
@@ -204,6 +231,9 @@ while running:
         txt = font.render("Settings Page", True, (100, 40, 100))
         screen.blit(txt, (WIDTH//2 - txt.get_width()//2, HEIGHT//2 - txt.get_height()//2))
 
+        game_icon_button.draw(screen) #draw the game icon button
+        home_icon_button.draw(screen)
+        tv_icon_button.draw(screen)
     pygame.display.flip()
     clock.tick(FPS) #maintain the frame rate    
     
