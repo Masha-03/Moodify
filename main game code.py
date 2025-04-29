@@ -129,7 +129,70 @@ class FemaleCharacter(pygame.sprite.Sprite):
                 Female.image = Female.idle[Female.current_image]
             else:
                 Female.image =Female.facing_left[Female.current_image]
-            
+
+
+class dog(pygame.sprite.Sprite):
+    def __init__(dog):
+        pygame.sprite.Sprite.__init__(dog)
+        dog.idle = dog_idle_img
+        dog.walking = dog_walking_img
+        dog.current_img =0
+        dog.image =dog.idle[dog.current_img]
+        dog.rect = dog.image.get_rect()
+        dog.rect.x = random.randint(0,screen_width- dog.rect.width) # the rect will put the top left corner of the rectangle of the dog in this range(SO cannot put screen width as limit)
+        dog.speedx = 3
+        dog.rect.y = 650
+        
+        
+        dog.idlefacing_left =True
+        dog.idlefacing_right= []
+        for i in dog.idle:
+            flipped_img = pygame.transform.flip(i,True,False)
+            dog.idlefacing_right.append(flipped_img)
+
+        dog.walkingfacing_left = True
+        dog.walkingfacing_right = []
+        for i in dog.walking:
+            flipped_img = pygame.transform.flip(i,True,False)
+            dog.walkingfacing_right.append(flipped_img)
+
+        dog.animation_timer =0
+        dog.animation_delay =150 
+        
+
+    def update_dog(dog):
+        current_dog_time = pygame.time.get_ticks()
+        dog_walking= False
+
+        
+        
+
+        if dog_walking :
+            if current_dog_time - dog.animation_timer > dog.animation_delay:
+                dog.animation_timer = current_dog_time
+                dog.current_img +=1
+                if dog.current_img >= len(dog.walking):
+                    dog.current_img =0
+            if dog.walkingfacing_left:
+                    dog.image =dog.walking[dog.current_img]
+            else: 
+                    dog.image = dog.walkingfacing_right[dog.current_img]
+        else:
+            if current_dog_time - dog.animation_timer > dog.animation_delay +25:
+                dog.animation_timer = current_dog_time
+                dog.current_img +=1
+                if dog.current_img >= len(dog.idle):
+                    dog.current_img =0
+            if dog.idlefacing_left:
+                dog.image =dog.idle[dog.current_img]
+            else: 
+                dog.image = dog.idlefacing_right[dog.current_img]
+
+       
+
+
+
+        
 # Load and play background music
 def play_background_music():
     pygame.mixer.init()
@@ -248,6 +311,20 @@ Fcharacter_walking_img =[
     pygame.image.load("Moodify/F-walking/pixil-frame-2.png"),
     pygame.image.load("Moodify/F-walking/pixil-frame-3.png"),
 ]
+
+dog_walking_img =[ 
+    pygame.image.load("Moodify/dog frames/pixil-frame-0.png"),
+    pygame.image.load("Moodify/dog frames/pixil-frame-1.png"),
+    pygame.image.load("Moodify/dog frames/pixil-frame-2.png"),
+    pygame.image.load("Moodify/dog frames/pixil-frame-3.png"),
+]
+
+dog_idle_img =[
+    pygame.image.load("Moodify/dog idle frame/pixil-frame-0.png"),
+    pygame.image.load("Moodify/dog idle frame/pixil-frame-1.png"),
+    pygame.image.load("Moodify/dog idle frame/pixil-frame-2.png"),
+    pygame.image.load("Moodify/dog idle frame/pixil-frame-3.png"),
+]
 #TV and radio img
 TV_mini_games_img =pygame.image.load("Moodify/graphics/mini games interface.png")
 quit_button_img = pygame.image.load("Moodify/graphics/cancel button.png")
@@ -265,6 +342,7 @@ show_text =False
 rain_group = rain_or_not()
 #the female character 
 Female_character=FemaleCharacter()
+dog_character=dog()
 
 #Tv and radio entry
 radio_entry = pygame.Rect(1000, 595, 160, 110) 
@@ -345,6 +423,9 @@ while True:
 
     #background
     screen.blit(background_surface,(0,0))
+
+    dog_character.update_dog()
+    screen.blit(dog_character.image,dog_character.rect)
 
     Female_character.update_character()
     screen.blit(Female_character.image,Female_character.rect)
