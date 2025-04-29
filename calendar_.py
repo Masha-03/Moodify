@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from tkcalendar import Calendar
 import sqlite3
 
@@ -39,34 +40,43 @@ def show_entry(selected_date):
     connect = sqlite3.connect('moodify_database.db')
     cursor = connect.cursor()
 
-    #Fetch the entry for the selected date and current profile
+    #Fetch entry for selected date, current profile, and join mood_entries table
     cursor.execute('''
-        SELECT content FROM diary_entries
-        WHERE profile = ? AND date = ?
+        SELECT d.title, d.content, m.mood, m.mood_description
+        FROM diary_entries d
+        LEFT JOIN mood_entries m ON d.profile = m.profile_name AND d.date = m.date
+        WHERE d.profile = ? AND d.date = ?
     ''', (profile, selected_date))
 
     result = cursor.fetchall() #Fetch all entries on the day
 
     #If there are entries for the selected date
-    if result:
-        #Clear any previous entries in the history frame before showing the new entries
-        for widget in history_frame.winfo_children():
-            widget.destroy()
+    if result: 
+        title, content, mood, mood_desc = result[0]  # Get the title, content, mood, mood description
 
-        #Display the entries
-        for entry in result:
-            # Create a frame for each entry
-            entry_frame = tk.Frame(history_frame, bg="#FCF8E8", pady=10, padx=10, bd=2, relief="solid")
-            entry_frame.pack(fill="x", padx=10, pady=5)
+        # Update title
+        title_display.config(text=title)
 
-            # Create a label for the entry text
-            entry_label = tk.Label(entry_frame, text=entry[0], font=("Helvetica", 12), bg="#FCF8E8", wraplength=400)
-            entry_label.pack()
-    else:
-        # If no entries for the selected date, show a message
-        no_entry_label = tk.Label(history_frame, text="No diary entries for this date.", font=("Helvetica", 12, "italic"), bg="#FCF8E8")
-        no_entry_label.pack(pady=10)
+        # Update content
+        content_text.config(state="normal")  # Enable editing to update
+        content_text.delete("1.0", tk.END)
+        content_text.insert(tk.END, content)
+        content_text.config(state="disabled")  # Disable editing again
         
+        # Update mood & mood description
+        mood_display.config(text=mood if mood else "No mood")
+        mooddesc_display.config(text=mood_desc if mood_desc else "No mood description")
+    else:
+        title_display.config(text="No title")
+        content_text.config(state="normal")
+        content_text.delete("1.0", tk.END)
+        content_text.insert(tk.END, "No diary entry found for this date.")
+        content_text.config(state="disabled")
+        
+        #Mood and mood description
+        mood_display.config(text="No mood")
+        mooddesc_display.config(text="No mood description")
+   
     connect.close()
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -110,9 +120,35 @@ choosedate_btn.grid(row=2, column=0, pady=10)
 date_label =tk.Label(left_frame,text="",font=("Arial Rounded MT Bold",15),bg="#FCF8E8") #display
 date_label.grid(row=3, column=0, pady=(10, 0), sticky="n")
 
-# Frame for history
-history_frame = tk.Frame(root, padx=10, pady=10, bg="#FCF8E8")  # inside the frame
-history_frame.pack(padx=20, pady=20, fill="both", expand=True)
+#History frame
+history_frame = tk.Frame(root, bg="#FFF0D9", bd=2, relief="ridge")
+history_frame.pack(expand=True, fill="both", padx=60, pady=60)
+
+#Title label and value
+title_label = tk.Label(history_frame, text="Title:", font=("Arial", 12, "bold"), bg="#FFF0D9", fg="#444")
+title_label.pack(anchor="w", padx=20, pady=(20, 5))
+
+title_display = tk.Label(history_frame, text="", font=("Arial", 11), bg="white", fg="#333", bd=1, relief="groove", padx=10, pady=5)
+title_display.pack(fill="x", padx=20, pady=(0, 10))
+
+#Content text box
+content_text = tk.Text(history_frame, height=15, wrap="word", bg="white", fg="#333", bd=1, relief="groove", font=("Arial", 11))
+content_text.pack(fill="both", expand=True, padx=20, pady=10)
+content_text.config(state="disabled")  #Make read-only by default
+
+#Mood label
+mood_label = tk.Label(history_frame, text="Mood:", font=("Arial", 12, "bold"), bg="#FFF0D9", fg="#444")
+mood_label.pack(anchor="w", padx=20, pady=(0, 5))
+
+mood_display = tk.Label(history_frame, text="", font=("Arial", 11), bg="white", fg="#333", bd=1, relief="groove", padx=10, pady=5)
+mood_display.pack(fill="x", padx=20, pady=(0, 10))
+
+#Mood description label
+mooddesc_label = tk.Label(history_frame, text="Mood Description:", font=("Arial", 12, "bold"), bg="#FFF0D9", fg="#444")
+mooddesc_label.pack(anchor="w", padx=20, pady=(0, 5))
+
+mooddesc_display = tk.Label(history_frame, text="", font=("Arial", 11), bg="white", fg="#333", bd=1, relief="groove", padx=10, pady=5, anchor="center", justify="left", wraplength=500)
+mooddesc_display.pack(fill="x", padx=20, pady=(0, 10))
 
 #run the whole program
 root.mainloop()
