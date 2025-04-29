@@ -3,38 +3,51 @@ import os
 
 pygame.init()
 
-# Screen setup
+#screen setup
 screen_width, screen_height = 1920, 1020
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Worry Cloud")
 
-# Colors and font
+#colors and font
 white = (255, 255, 255)
 black = (0, 0, 0)
 light_gray = (200, 200, 200)
 font = pygame.font.Font(None, 48)
 
-# Load background
+#load background
 background = pygame.image.load('star_bg2.jpg')
 background = pygame.transform.scale(background, (screen_width, screen_height))
 
-# Try to load cloud image
+#load cloud image
 use_image_cloud = os.path.exists("cloud.png")
 if use_image_cloud:
     cloud_img = pygame.image.load("cloud.png").convert_alpha()
-    cloud_img = pygame.transform.scale(cloud_img, (360, 200))
+    cloud_img = pygame.transform.scale(cloud_img, (240, 130))
 
 # Input box
-input_box = pygame.Rect(250, 270, 300, 40)
+input_box_width = 400
+input_box_height = 50
+input_box = pygame.Rect(
+    (screen_width - input_box_width) // 2,
+    (screen_height - input_box_height) // 2,
+    input_box_width,
+    input_box_height)
 text = ''
 active = False
 
-# Button
-button_rect = pygame.Rect(325, 330, 150, 40)
+#button
+button_width = 150
+button_height = 50
+button_rect = pygame.Rect(
+    (screen_width - button_width) // 2,
+    input_box.bottom + 30,  # below input box
+    button_width,
+    button_height)
+
 button_text = font.render("Release", True, black)
 button_color = light_gray
 
-# Fade settings
+#fade settings
 fade_alpha = 255
 fading = False
 fade_text = ''
@@ -58,7 +71,7 @@ while running:
 
             if button_rect.collidepoint(event.pos) and text.strip():
                 fade_text = text
-                fade_pos = (input_box.centerx - 90, input_box.top - 100)
+                fade_pos = (screen_width // 2 - 120, input_box.top - 140)
                 text = ''
                 fade_alpha = 255
                 fading = True
@@ -71,16 +84,16 @@ while running:
             else:
                 text += event.unicode
 
-    # Draw input box
+    #draw input box
     pygame.draw.rect(screen, light_gray, input_box, 2)
     txt_surface = font.render(text, True, black)
     screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
 
-    # Draw button
+    #draw button
     pygame.draw.rect(screen, button_color, button_rect)
     screen.blit(button_text, button_text.get_rect(center=button_rect.center))
 
-    # Fade cloud with text
+    #fade cloud with text
     if fading:
         if use_image_cloud:
             cloud = cloud_img.copy()

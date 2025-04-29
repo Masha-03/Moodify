@@ -23,8 +23,8 @@ SPARKLE_COLOR = (255, 255, 255)
 # Bubble settings
 BUBBLE_MIN_RADIUS = 50
 BUBBLE_MAX_RADIUS = 90
-BUBBLE_SPEED = 3
-BUBBLE_INTERVAL = 60  # frames between spawns for each bubbles
+BUBBLE_SPEED = 2 #reduced base speed for better realism
+BUBBLE_INTERVAL = 60  #frames between spawns for each bubbles
 
 #particle settings
 PARTICLE_COUNT = 50
@@ -57,14 +57,37 @@ class Bubble:
         self.alpha = 255   # fade out on pop
         self.pop_sound = random.choice(pop_sounds) if pop_sounds else None #assign random pop sound if available
 
-        # Blast effect
+        #realistic floating effect
+        self.vertical_speed = BUBBLE_SPEED + random.uniform(-0.5, 0.5)  #vary vertical speed
+        self.horizontal_drift = random.uniform(-0.2, 0.2)  #gentle horizontal drift
+        self.size_change_rate = random.uniform(-0.05, 0.05)  #subtle size change
+        self.color_offset = [random.uniform(-10, 10) for _ in range(3)]  #subtle color shift
+        self.alpha_change_rate = random.uniform(-1, 1)  #subtle alpha change
+        self.rotation_angle = 0
+        self.rotation_speed = random.uniform(-0.02, 0.02)
+
+        #blast effect
         self.blast_radius = self.radius #ring effect same size with the bbbles starts
         self.blast_alpha = 255 #ring is fully available at first
        
 
     def update(self):
         if not self.popped:
-            self.y -= BUBBLE_SPEED #move up the screen
+            self.y -= self.vertical_speed * speed_modifier
+            self.x += self.horizontal_drift * speed_modifier
+            self.radius += self.size_change_rate * speed_modifier
+            self.alpha += self.alpha_change_rate * speed_modifier
+            self.rotation_angle += self.rotation_speed * speed_modifier
+
+            #keep radius within reasonable bounds
+            self.radius = max(BUBBLE_MIN_RADIUS * 0.8, min(self.radius, BUBBLE_MAX_RADIUS * 1.2))
+            self.alpha = max(50, min(self.alpha, 255))  #to keep alpha within bounds
+
+            #wrap around horizontally
+            if self.x < -self.radius:
+                self.x = WIDTH + self.radius
+            elif self.x > WIDTH + self.radius:
+                self.x = -self.radius
         else:
             self.alpha -= 10 #fade out the bubble
             self.blast_radius += 3 #increase the ring size
@@ -77,9 +100,18 @@ class Bubble:
         # bubble
         if self.alpha > 0: 
             bubble_surface = pygame.Surface((self.radius*2, self.radius*2), pygame.SRCALPHA) #create a surface for the bubble
-            draw_color = (*self.color, self.alpha)                                              #color with alpha for fade out effect
-            pygame.draw.circle(bubble_surface, draw_color, (self.radius, self.radius), self.radius) #draw the bubble
-            surface.blit(bubble_surface, (self.x - self.radius, self.y - self.radius)) #draw the bubble on the screen
+            draw_color =  (
+                int(max(0, min(255, self.color[0] + self.color_offset[0]))),
+                int(max(0, min(255, self.color[1] + self.color_offset[1]))),
+                int(max(0, min(255, self.color[2] + self.color_offset[2]))),
+                int(self.alpha)
+            ) #color with alpha for fade out effect
+            pygame.draw.circle(bubble_surface, draw_color, (int(self.radius), int(self.radius)), int(self.radius))
+
+            # Rotate the bubble slightly
+            rotated_surface = pygame.transform.rotate(bubble_surface, self.rotation_angle)
+            rotated_rect = rotated_surface.get_rect(center=(int(self.x), int(self.y)))
+            surface.blit(rotated_surface, rotated_rect)
 
         # blast effect ring coming out of the buble
         if self.popped and self.blast_alpha > 0:      #draw the ring effect only if the bubble is popped and the ring is not fully faded out
@@ -120,15 +152,18 @@ class Button:
         self.text = text
         self.onclick = onclick
         self.font = pygame.font.SysFont(None, 40)
+        self.text_surf = self.font.render(self.text, True, (0, 128, 128))
+        self.text_rect = self.text_surf.get_rect(center=self.rect.center)
+        self.image = None  #add an image attribute, initialized to None
 
     def draw(self, surface):
         mouse_pos = pygame.mouse.get_pos()
         color = self.hover_color if self.rect.collidepoint(mouse_pos) else self.color
         pygame.draw.rect(surface, color, self.rect, border_radius=12)
-
-        text_surf = self.font.render(self.text, True, (0, 128, 128))
-        text_rect = text_surf.get_rect(center=self.rect.center)
-        surface.blit(text_surf, text_rect)
+        if self.image is not None:
+            surface.blit(self.image, self.image.get_rect(center=self.rect.center))
+        else:
+            surface.blit(self.text_surf, self.text_rect)
 
     def check_click(self, pos):
         if self.rect.collidepoint(pos):
@@ -170,9 +205,32 @@ frame_count = 0
 running = True
 button = Button(50, 50, 200, 60, "Settings", switch_page) #create a button to switch to other page
 slow_button = Button(270, 50, 200, 60, "Slow Motion", toggle_slow_motion) #create a button to toggle slow motion
-game_icon_button = Button(50, 50, 100, 100, "🎮", go_to_game)  # "🎮" game emoji
-home_icon_button = Button(170, 50, 100, 100, "🏠", go_to_home) # "🏠" home emoji
-tv_icon_button = Button(290, 50, 100, 100, "📺", go_to_tv) # "📺" tv emoji
+
+#load the images
+game_icon = pygame.image.load("1.png").convert_alpha()
+home_icon = pygame.image.load("2.png").convert_alpha()
+tv_icon = pygame.image.load("3.png").convert_alpha()
+
+button_size_settings = 120 * 2  #double the button size for settings page
+button_spacing_settings = 40 * 2  #double the button spacing for settings page
+total_button_width_settings = 3 * button_size_settings + 2 * button_spacing_settings
+start_x_settings = WIDTH // 2 - total_button_width_settings // 2
+button_y_settings = 80 + pygame.font.SysFont(None, 80).get_height() + 80  #position below the text
+
+#scale the images to fit the button size
+scaled_game_icon = pygame.transform.scale(game_icon, (button_size_settings - 40, button_size_settings - 40))  # Add some padding
+scaled_home_icon = pygame.transform.scale(home_icon, (button_size_settings - 40, button_size_settings - 40))
+scaled_tv_icon = pygame.transform.scale(tv_icon, (button_size_settings - 40, button_size_settings - 40))
+
+game_icon_button = Button(start_x_settings, button_y_settings, button_size_settings, button_size_settings, "", go_to_game)
+game_icon_button.image = scaled_game_icon
+
+home_icon_button = Button(start_x_settings + button_size_settings + button_spacing_settings, button_y_settings, button_size_settings, button_size_settings, "", go_to_home)
+home_icon_button.image = scaled_home_icon
+
+tv_icon_button = Button(start_x_settings + 2 * button_size_settings + 2 * button_spacing_settings, button_y_settings, button_size_settings, button_size_settings, "", go_to_tv)
+tv_icon_button.image = scaled_tv_icon
+
 play_background_music() #play background music
 
 # Main loop
