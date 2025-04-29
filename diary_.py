@@ -76,7 +76,8 @@ def initialise_table():
                 date DATE,
                 time TEXT,
                 title TEXT,
-                content TEXT
+                content TEXT,
+                FOREIGN KEY (profile) REFERENCES user_info(profile)
             )
         """)
         
