@@ -2,7 +2,7 @@ import tkinter as tk
 
 #function for buttons
 def play_sound():
-        print("Playing sound...")
+        print("Playing sound...") #(would replace them with real audio functionality)
 
 def pause_sound():
         print("Pausing sound...")
@@ -21,16 +21,15 @@ def prev_sound():
 
 #----------------------------------------------------------------------------------------------------------------------#
 
-#function for volume
+#function for volume control, it will be triggered when volume slider is moved
 def set_volume(val): #val=the value when users slide the volume slider(val is originally a string)
     volume = float(val) #float=converts it into numbers 
-    print(f"Volume: {volume}")
 
 #----------------------------------------------------------------------------------------------------------------------#
 
 #main window
 root=tk.Tk()
-root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}") 
+root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}") #full-screen sized
 root.title("Soothing Sound Player")
 root.configure(bg="#e1f5fe") 
 
@@ -38,43 +37,45 @@ root.configure(bg="#e1f5fe")
 
 #title
 title=tk.Label(root,text="Relax Soothing Sound Player🎶", font=("Helvetica", 18, "bold"),bg="#e1f5fe",fg="#333")
-title.pack(pady=(10,5))
+title.pack(pady=(10,5)) #pady=(10,5)adds vertical spacing above and below.
 
 #----------------------------------------------------------------------------------------------------------------------#
 
-#frame to hold center and volume(left)
+#frame to hold center and volume(right)
 center_volume_frame=tk.Frame(root, bg="#e1f5fe")
 center_volume_frame.pack(expand=True,fill="both",padx=30,pady=20)
 
-#frame to hold playlist and buttons
+#frame to hold playlist and buttons(left)
 playlist_button_frame=tk.Frame(center_volume_frame,bg="#e1f5fe")
 playlist_button_frame.pack(side="left",expand=True,fill="both", anchor="center",padx=(150,0))
 
 #----------------------------------------------------------------------------------------------------------------------#
 
-#label for now playing
+#label for now playing(since now dont have song yet,so display"no sound is playing")
 label_now_playing=tk.Label(playlist_button_frame, text="No sound is playing.", bg="#e1f5fe", font=("Comic Sans MS", 12))
 label_now_playing.pack(pady=(3,7))
 
 #----------------------------------------------------------------------------------------------------------------------#
 #PLAYLIST
 
-#label for playlist
+#title for playlist
 label_playlist=tk.Label(playlist_button_frame, text="Playlist🎧", bg="#e1f5fe", font=("Comic Sans MS", 14))
 label_playlist.pack(pady=(0,5))
 
-#the box of playlist
+#the listbox to show available sound
 playlist_box=tk.Listbox(playlist_button_frame, width=100, height=20, bg="white", fg="#333")
 playlist_box.pack(pady=(0,5),anchor="center")
 
-#frame for button
+#hold all control button
 button_frame=tk.Frame(playlist_button_frame,bg="#e1f5fe")
 button_frame.pack(pady=(10,10),anchor="center")
 
+#song lists
 songs=["Rain sounds", "Ocean sounds"]
 
-for songs in songs:
-    playlist_box.insert(tk.END, songs)
+#loop through each elements in "songs" list
+for songs in songs: #each element is temporarily stored in variable "songs" during each loop 
+    playlist_box.insert(tk.END, songs) #tk.End=the song will be added to the end of the listbox
 
 #----------------------------------------------------------------------------------------------------------------------#
 #CONTROL BUTTON
