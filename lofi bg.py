@@ -11,10 +11,10 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Lofi Game with Settings")
 font = pygame.font.Font(None, 36)  # Default font, can be changed
 text_color = (255, 255, 255)  # White text
-button_color = (50, 50, 50)  #dark grey button
-button_hover_color = (70, 70, 70)  #slightly lighter on hover
-slider_color = (100, 100, 100)  #grey slider
-slider_handle_color = (150, 150, 150)  #lighter grey handle
+button_color = (245, 175,145)  #OE Copper color button
+button_hover_color = (0, 255, 255)  #slightly different on hover
+slider_color = (255, 122, 122)  #color of slider
+slider_handle_color = (255, 112, 255)  #color of handle
 dropdown_color = (50, 50, 50)
 dropdown_active_color = (70, 70, 70)
 dropdown_option_color = (60, 60, 60)
@@ -150,7 +150,7 @@ while running:
     # Draw settings window if open
     if settings_open:
         # Background for the settings window
-        pygame.draw.rect(screen, (0, 0, 0), (100, 100, screen_width - 200, screen_height - 200))
+        pygame.draw.rect(screen, (175, 214, 255), (100, 100, screen_width - 200, screen_height - 200))
         draw_text(screen, "Settings", 350, 120, text_color)
 
         # Music toggle
@@ -167,9 +167,9 @@ while running:
         draw_text(screen, f"Selected: {selected_gender}", 250, 300, text_color) # display selected gender
 
         # Character preview (placeholder)
-        draw_text(screen, "Character Preview:", 150, 350, text_color)
+        draw_text(screen, "Character preview:", 150, 350, text_color)
         # Display the character image based on the selected gender
-        screen.blit(character_images[selected_gender], (250, 350))  #  display image
+        #screen.blit(character_images[selected_gender], (250, 350))  #  display image
 
     pygame.display.flip()
 
