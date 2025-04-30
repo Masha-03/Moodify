@@ -107,11 +107,17 @@ def save_entry():
     connect = sqlite3.connect('moodify_database.db')
     cursor = connect.cursor()
 
+    #Check for any empty field
+    if not title_text or diary_text: 
+            #Warning box
+            messagebox.showwarning("Incomplete Entry", "Please fill in both Title and Diary Content")
+            return
+
     # Save the diary entry
-    cursor.execute("""
+    cursor.execute('''
         INSERT INTO diary_entries (profile, date, time, title, content)
         VALUES (?, ?, ?, ?, ?)
-    """, (profile, current_date, current_time, title_text, diary_text))
+    ''', (profile, current_date, current_time, title_text, diary_text))
     
     #Save data, update
     connect.commit()
