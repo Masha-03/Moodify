@@ -75,7 +75,13 @@ def save_mood():
         # Insert into database
         conn = sqlite3.connect('moodify_database.db')
         cursor = conn.cursor()
-
+        
+        #Check for any empty field
+        if not selected_mood: 
+                #Warning box
+                messagebox.showwarning("Incomplete Information", "Please select mood or write about it~")
+                return
+            
         cursor.execute('''
             INSERT INTO mood_entries (profile_name, date, time, mood, mood_description)
             VALUES (?, ?, ?, ?, ?)

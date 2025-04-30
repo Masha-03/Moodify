@@ -15,21 +15,21 @@ def word_count(event=None): #event=None:means it can be called with/without even
 
 #function for the weather
 def get_weather():
-    api_key= "84fef18519a48ec1188bd03abd5494e5" #the api key from OpenWeatherApp
+    api_key= "84fef18519a48ec1188bd03abd5494e5" #the api key from OpenWeatherApp #without api key,api will reject your requests
     city= "Kuala Lumpur"
-    url= f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+    url= f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric" #units=metric:return temperature in celsius,wind speed in meters/second #to request weather data
 
     try:
-        response = requests.get(url) #format used to send a get request to the specific URL
-        data = response.json()
+        response = requests.get(url) #format used to send a get request to the specific URL #it try to connect openweather's server and download the data
+        data = response.json()#takes weather data from internet(which come in a format-JSON) and change it into python dictionary,so can read and use the information easily
 
         if data["cod"] == 200: #"cod"=code #200=success
-            temp = data["main"]["temp"] #"main"=a dictionary that contain temperature and other weather details #"temp"=give the current temperature
-            weather = data["weather"][0]["description"].capitalize() #weather=give a list of weather condition #0=get the first item in the list #description=is like:"rain","clear sky"
-            return f"{weather}, {temp}°C" #returns a formatted string combining both values 
-        else:
+            temp = data["main"]["temp"] #data"main"=a dictionary that contain temperature and other weather details #"temp"=give the current temperature
+            weather = data["weather"][0]["description"].capitalize() #data"weather"=give a list of weather condition #0=get the first item in the list #description=is like:"rain","clear sky"
+            return f"{weather}, {temp}°C" #here display what user see #returns a formatted string combining both values 
+        else:  #if cod not equal to 200,then display
             return "Failed to load weather"
-    except:
+    except: #if something breaks
         return "Error fetching weather" #catches any unexpected error
 
 #function to refresh the prompts
@@ -107,11 +107,17 @@ def save_entry():
     connect = sqlite3.connect('moodify_database.db')
     cursor = connect.cursor()
 
+    #Check for any empty field
+    if not title_text or diary_text: 
+            #Warning box
+            messagebox.showwarning("Incomplete Information", "Please fill in both Title and Diary Content")
+            return
+
     # Save the diary entry
-    cursor.execute("""
+    cursor.execute('''
         INSERT INTO diary_entries (profile, date, time, title, content)
         VALUES (?, ?, ?, ?, ?)
-    """, (profile, current_date, current_time, title_text, diary_text))
+    ''', (profile, current_date, current_time, title_text, diary_text))
     
     #Save data, update
     connect.commit()
@@ -183,6 +189,7 @@ current_date = datetime.now().strftime("%B %d, %Y")  #strftime=string format tim
 cur_date_label=tk.Label(info_frame, text=f"Date📅: {current_date}", font=("Times New Roman",14),bg="#fdf6f0", fg="#333")
 cur_date_label.pack(side="left")
 
+#label to display the current weather
 weather_info = get_weather()
 weather_label = tk.Label(info_frame, text=f"Weather⛅: {weather_info}", font=("Times New Roman", 13), bg="#fdf6f0", fg="#333")
 weather_label.pack(side="right")
