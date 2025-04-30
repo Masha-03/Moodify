@@ -5,7 +5,7 @@ import random
 
 # Initialize Pygame
 pygame.init()
-pygame.mixer.init()  # Initialize the mixer for sound
+pygame.mixer.init()  #initialize the mixer for sound
 
 #define screen dimensions
 WIDTH = 1920
@@ -25,8 +25,8 @@ pygame.mixer.music.load("background_music.wav")
 pygame.mixer.music.set_volume(0.5)  
 pygame.mixer.music.play(-1)  # Play in a loop (-1 means infinite loop)
 
-#load player image
-PLAYER_IMAGE = pygame.image.load("catcher.png").convert_alpha()  # 
+#load catchet image
+PLAYER_IMAGE = pygame.image.load("catcher.png").convert_alpha()   
 PLAYER_WIDTH = 225
 PLAYER_HEIGHT = 190
 SCALED_PLAYER = pygame.transform.scale(PLAYER_IMAGE, (PLAYER_WIDTH, PLAYER_HEIGHT))
