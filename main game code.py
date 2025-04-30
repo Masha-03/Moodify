@@ -142,7 +142,9 @@ class dog(pygame.sprite.Sprite):
         dog.rect.x = random.randint(0,screen_width- dog.rect.width) # the rect will put the top left corner of the rectangle of the dog in this range(SO cannot put screen width as limit)
         dog.speedx = 3
         dog.rect.y = 650
-        dog.status = "Idle"
+        dog.state = "idle"
+        dog.target_x =dog.rect.x
+        dog.idle_time = pygame.time.get_ticks()
         
         dog.idlefacing_left =True
         dog.idlefacing_right= []
@@ -162,10 +164,29 @@ class dog(pygame.sprite.Sprite):
 
     def update_dog(dog):
         current_dog_time = pygame.time.get_ticks()
-        dog_walking= False
         
+        #if the dog is idle more than 5s
+        if dog.state == "idle":
+            if current_dog_time - dog.idle_time > 5000:
+                dog.target_x = random.randint(0, screen_width - dog.rect.width) #get target
+                if dog.target_x < dog.rect.x: #to see where is the position do comparison
+                    dog.speedx = -abs(dog.speedx)
+                    dog.walkingfacing_left = True
+                    dog.idlefacing_left = True
+                else:
+                    dog.speedx = abs(dog.speedx)
+                    dog.walkingfacing_left = False
+                    dog.idlefacing_left = False
+                dog.state = "walking" #swicth to walk after comparison
 
-        if dog_walking :
+        elif dog.state == "walking":
+            dog.rect.x += dog.speedx #do the walking 
+            if abs(dog.rect.x - dog.target_x) < abs(dog.speedx): #if its near the target then change to idle
+                dog.rect.x = dog.target_x
+                dog.state = "idle"
+                dog.idle_time = current_dog_time
+
+        if dog.state == "walking" :
             if current_dog_time - dog.animation_timer > dog.animation_delay:
                 dog.animation_timer = current_dog_time
                 dog.current_img +=1
