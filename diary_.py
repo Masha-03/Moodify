@@ -6,25 +6,6 @@ import requests #getting data from API
 import tkinter.font as tkfont #use to import font module from tkinter library
 import sqlite3
 
-#--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
-#Get profile from the database
-def get_profile():
-    global profile
-    connect = sqlite3.connect('moodify_database.db')
-    cursor = connect.cursor()
-    
-    #Fetch the profile
-    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
-    result = cursor.fetchone()
-    
-    connect.close() #Close connection
-    if result:
-        profile = result[0]  # Store the profile in the global variable
-    else:
-        profile = None  # Set profile to None if no profile found
-
-#----------------------------------------------------------------------------------------------------------------------------------------------------#
-
 #counts how many words are in the diary
 def word_count(event=None): #event=None:means it can be called with/without event
     content = text_entry.get("1.0", "end-1c")  #get full text from text widget #1.0=start from line 1,character 0(very beginning) #end-1c=means up to one character before the end 
@@ -34,21 +15,21 @@ def word_count(event=None): #event=None:means it can be called with/without even
 
 #function for the weather
 def get_weather():
-    api_key= "84fef18519a48ec1188bd03abd5494e5" #the api key from OpenWeatherApp
+    api_key= "84fef18519a48ec1188bd03abd5494e5" #the api key from OpenWeatherApp #without api key,api will reject your requests
     city= "Kuala Lumpur"
-    url= f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+    url= f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric" #units=metric:return temperature in celsius,wind speed in meters/second #to request weather data
 
     try:
-        response = requests.get(url) #format used to send a get request to the specific URL
-        data = response.json()
+        response = requests.get(url) #format used to send a get request to the specific URL #it try to connect openweather's server and download the data
+        data = response.json()#takes weather data from internet(which come in a format-JSON) and change it into python dictionary,so can read and use the information easily
 
         if data["cod"] == 200: #"cod"=code #200=success
-            temp = data["main"]["temp"] #"main"=a dictionary that contain temperature and other weather details #"temp"=give the current temperature
-            weather = data["weather"][0]["description"].capitalize() #weather=give a list of weather condition #0=get the first item in the list #description=is like:"rain","clear sky"
-            return f"{weather}, {temp}°C" #returns a formatted string combining both values 
-        else:
+            temp = data["main"]["temp"] #data"main"=a dictionary that contain temperature and other weather details #"temp"=give the current temperature
+            weather = data["weather"][0]["description"].capitalize() #data"weather"=give a list of weather condition #0=get the first item in the list #description=is like:"rain","clear sky"
+            return f"{weather}, {temp}°C" #here display what user see #returns a formatted string combining both values 
+        else:  #if cod not equal to 200,then display
             return "Failed to load weather"
-    except:
+    except: #if something breaks
         return "Error fetching weather" #catches any unexpected error
 
 #function to refresh the prompts
@@ -64,6 +45,50 @@ def update_font():
     
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
 
+#Get profile from the database
+def get_profile():
+    global profile
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+    
+    #Fetch the profile
+    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
+    result = cursor.fetchone()
+    
+    connect.close() #Close connection
+    if result:
+        profile = result[0]  # Store the profile 
+    else:
+        profile = None  # Set profile to None if no profile found
+
+#Initialise table
+def initialise_table(): 
+        #Connect to database
+        connect = sqlite3.connect('moodify_database.db')
+        #Create cursor
+        cursor = connect.cursor()
+        
+        #Create the diary_entries table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS diary_entries (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                profile TEXT,
+                date DATE,
+                time TEXT,
+                title TEXT,
+                content TEXT,
+                FOREIGN KEY (profile) REFERENCES user_info(profile)
+            )
+        """)
+        
+        #Save data, update
+        connect.commit()
+        #Close connection
+        connect.close()
+        
+#Initialise table before GUI starts        
+initialise_table()  
+
 #Function to save diary entry with profile
 def save_entry():
     get_profile() #Retrieve profile
@@ -73,26 +98,14 @@ def save_entry():
         return
     
     #Get user input
-    diary_text = text_entry.get("1.0", "end-1c")
-    title_text = smalltitle_entry.get().strip()
-    current_date = datetime.now().strftime("%Y-%m-%d")
-    current_time = datetime.now().strftime("%H:%M:%S")  # Get current time
+    diary_text = text_entry.get("1.0", "end-1c") #Get diary content text
+    title_text = smalltitle_entry.get().strip() #Get title text
+    current_date = datetime.now().strftime("%Y-%m-%d") #Get current date
+    current_time = datetime.now().strftime("%H:%M:%S")  #Get current time
 
     # Database connection
     connect = sqlite3.connect('moodify_database.db')
     cursor = connect.cursor()
-
-    # Create the diary_entries table if not exists
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS diary_entries (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            profile TEXT,
-            date DATE,
-            time TEXT,
-            title TEXT,
-            content TEXT
-        )
-    """)
 
     # Save the diary entry
     cursor.execute("""
@@ -106,7 +119,7 @@ def save_entry():
 
     #Clear text entry after saving
     text_entry.delete("1.0", "end")
-    smalltitle_entry.delete("1.0", "end")
+    smalltitle_entry.delete(0, "end")
     #reset the word count to 0 word
     word_count_label.config(text="0 words")
 
@@ -170,6 +183,7 @@ current_date = datetime.now().strftime("%B %d, %Y")  #strftime=string format tim
 cur_date_label=tk.Label(info_frame, text=f"Date📅: {current_date}", font=("Times New Roman",14),bg="#fdf6f0", fg="#333")
 cur_date_label.pack(side="left")
 
+#label to display the current weather
 weather_info = get_weather()
 weather_label = tk.Label(info_frame, text=f"Weather⛅: {weather_info}", font=("Times New Roman", 13), bg="#fdf6f0", fg="#333")
 weather_label.pack(side="right")
