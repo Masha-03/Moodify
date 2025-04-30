@@ -21,12 +21,12 @@ BACKGROUND = pygame.transform.scale(BACKGROUND, (WIDTH, HEIGHT))
 CATCH_SOUND = pygame.mixer.Sound("catch_sound.wav")  #catching sound
 
 # Load background music
-pygame.mixer.music.load("background_music.wav")  # Replace "background_music.mp3" with your music file
-pygame.mixer.music.set_volume(0.5)  # Adjust volume (0.0 to 1.0)
+pygame.mixer.music.load("background_music.wav") 
+pygame.mixer.music.set_volume(0.5)  
 pygame.mixer.music.play(-1)  # Play in a loop (-1 means infinite loop)
 
 #load player image
-PLAYER_IMAGE = pygame.image.load("catcher.png").convert_alpha()  # Replace "catcher.png" with your image
+PLAYER_IMAGE = pygame.image.load("catcher.png").convert_alpha()  # 
 PLAYER_WIDTH = 225
 PLAYER_HEIGHT = 190
 SCALED_PLAYER = pygame.transform.scale(PLAYER_IMAGE, (PLAYER_WIDTH, PLAYER_HEIGHT))

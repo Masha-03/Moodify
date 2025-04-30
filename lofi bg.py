@@ -11,10 +11,10 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Lofi Game with Settings")
 font = pygame.font.Font(None, 36)  # Default font, can be changed
 text_color = (255, 255, 255)  # White text
-button_color = (50, 50, 50)  # Dark grey button
-button_hover_color = (70, 70, 70)  # Slightly lighter on hover
-slider_color = (100, 100, 100)  # Grey slider
-slider_handle_color = (150, 150, 150)  # Lighter grey handle
+button_color = (50, 50, 50)  #dark grey button
+button_hover_color = (70, 70, 70)  #slightly lighter on hover
+slider_color = (100, 100, 100)  #grey slider
+slider_handle_color = (150, 150, 150)  #lighter grey handle
 dropdown_color = (50, 50, 50)
 dropdown_active_color = (70, 70, 70)
 dropdown_option_color = (60, 60, 60)
@@ -22,7 +22,7 @@ dropdown_option_hover_color = (80, 80, 80)
 
 # Music settings
 pygame.mixer.init()
-music_file = "lofi_music.wav"  # Replace with your music file
+music_file = "lofi_music.wav"  
 pygame.mixer.music.load(music_file)
 pygame.mixer.music.set_volume(0.5)  # Initial volume
 pygame.mixer.music.play(-1)  # Loop indefinitely
