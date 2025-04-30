@@ -142,7 +142,7 @@ class dog(pygame.sprite.Sprite):
         dog.rect.x = random.randint(0,screen_width- dog.rect.width) # the rect will put the top left corner of the rectangle of the dog in this range(SO cannot put screen width as limit)
         dog.speedx = 3
         dog.rect.y = 650
-        
+        dog.status = "Idle"
         
         dog.idlefacing_left =True
         dog.idlefacing_right= []
@@ -163,8 +163,6 @@ class dog(pygame.sprite.Sprite):
     def update_dog(dog):
         current_dog_time = pygame.time.get_ticks()
         dog_walking= False
-
-        
         
 
         if dog_walking :
@@ -380,33 +378,35 @@ while True:
             if show_radio:
                 if Radio_quit_button_rect.collidepoint(event.pos):
                     show_radio =False
-            if radio_entry.collidepoint(event.pos): #where it click on and check if its inside the box
-                show_radio =True
-            if TV_entry.collidepoint(event.pos):
-                show_tv_screen = True
-            if teddy.collidepoint(event.pos):
-                show_text =True
-                text_surface = font.render(teddy_speech(),True,(0,0,0))
-                text_rect =text_surface.get_rect(center =speechbar_rect.center)
-            if cockroach.collidepoint(event.pos):
-                show_text =True
-                text_surface = font.render(cockroach_speech(),True,(0,0,0))
-                text_rect =text_surface.get_rect(center =speechbar_rect.center)
-            if sofa.collidepoint(event.pos):
-                show_text =True
-                text_surface = font.render(sofa_speech(),True,(0,0,0))
-                text_rect =text_surface.get_rect(center =speechbar_rect.center)
-            if picture.collidepoint(event.pos):
-                show_text =True
-                text_surface = font.render(picture_speech(),True,(0,0,0))
-                text_rect =text_surface.get_rect(center =speechbar_rect.center)
-            if plant.collidepoint(event.pos):
-                show_text =True
-                text_surface = font.render(plant_speech(),True,(0,0,0))
-                text_rect =text_surface.get_rect(center =speechbar_rect.center)
-            # Only close the speech bar if not clicking on any important object
-            if not (teddy.collidepoint(event.pos) or cockroach.collidepoint(event.pos) or sofa.collidepoint(event.pos) or picture.collidepoint(event.pos) or plant.collidepoint(event.pos)):
-                show_text = False
+
+            elif not show_tv_screen and not show_radio:
+                if radio_entry.collidepoint(event.pos): #where it click on and check if its inside the box
+                    show_radio =True
+                if TV_entry.collidepoint(event.pos):
+                    show_tv_screen = True
+                if teddy.collidepoint(event.pos):
+                    show_text =True
+                    text_surface = font.render(teddy_speech(),True,(0,0,0))
+                    text_rect =text_surface.get_rect(center =speechbar_rect.center)
+                if cockroach.collidepoint(event.pos):
+                    show_text =True
+                    text_surface = font.render(cockroach_speech(),True,(0,0,0))
+                    text_rect =text_surface.get_rect(center =speechbar_rect.center)
+                if sofa.collidepoint(event.pos):
+                    show_text =True
+                    text_surface = font.render(sofa_speech(),True,(0,0,0))
+                    text_rect =text_surface.get_rect(center =speechbar_rect.center)
+                if picture.collidepoint(event.pos):
+                    show_text =True
+                    text_surface = font.render(picture_speech(),True,(0,0,0))
+                    text_rect =text_surface.get_rect(center =speechbar_rect.center)
+                if plant.collidepoint(event.pos):
+                    show_text =True
+                    text_surface = font.render(plant_speech(),True,(0,0,0))
+                    text_rect =text_surface.get_rect(center =speechbar_rect.center)
+                # Only close the speech bar if not clicking on any important object
+                if not (teddy.collidepoint(event.pos) or cockroach.collidepoint(event.pos) or sofa.collidepoint(event.pos) or picture.collidepoint(event.pos) or plant.collidepoint(event.pos)):
+                    show_text = False
 
 
                 
