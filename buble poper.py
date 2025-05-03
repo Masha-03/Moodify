@@ -42,15 +42,12 @@ for i in range (1,5):
         print(f"not playing pop{i}.wav") # shows if the sound is not playing because file missing
 
 def show_loading_screen():
-    pygame.event.clear()            # Clear any old events
-    pygame.display.update()         # Force display refresh (if needed first)
-    pygame.time.wait(10)    
     screen.fill(LOADING_COLOR)  # Fill with light blue
     loading_text = font.render("Returning to Main Game...", True, (0, 0, 0))  # Text to show on loading screen
     screen.blit(loading_text, (270, 330))  # Position the loading text
-    pygame.display.flip()           # Now do the actual screen update
-    pygame.event.pump()  # Refresh the screen immediately
-    
+    pygame.display.update()  # Refresh the screen immediately
+    pygame.event.clear() # Prevent needing to click before it responds
+    pygame.time.delay(2000)  # Wait 2 seconds without freezing rendering
 
 #bubble class
 class Bubble:
@@ -214,6 +211,8 @@ while running:
                 #loading page
                 show_loading_screen()
                 running = False
+                
+                
                 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if current_page == "bubble_popper": #check if the current page is bubble popper
