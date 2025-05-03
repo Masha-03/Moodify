@@ -170,7 +170,7 @@ class dog(pygame.sprite.Sprite):
             if current_dog_time - dog.idle_time > 5000:
                 dog.target_x = random.randint(0, screen_width - dog.rect.width) #get target
                 if dog.target_x < dog.rect.x: #to see where is the position do comparison
-                    dog.speedx = -abs(dog.speedx)
+                    dog.speedx = -abs(dog.speedx) #abs always return positive value
                     dog.walkingfacing_left = True
                     dog.idlefacing_left = True
                 else:
