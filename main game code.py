@@ -2,6 +2,8 @@ import pygame
 import sys 
 import random
 import datetime # to get user device time
+import subprocess
+import time
 
 #create the rain sprite and set up its speed and postion
 class Rain(pygame.sprite.Sprite): 
@@ -349,6 +351,11 @@ TV_mini_games_img =pygame.image.load("Moodify/graphics/mini games interface.png"
 quit_button_img = pygame.image.load("Moodify/graphics/cancel button.png")
 radio_img = pygame.image.load("Moodify/graphics/radio interface.png")
 
+#icon in TV
+bubble_icon = pygame.image.load("Moodify/1.png").convert_alpha()
+bubble_icon_rect = bubble_icon.get_rect(center=(350, 250)) 
+open_bubble_popper = False
+
 # speech bar position and img
 Speech_bar =pygame.image.load("Moodify/graphics/speech bar.png")
 speechbar_rect =Speech_bar.get_rect()
@@ -385,6 +392,7 @@ font =pygame.font.Font(None,40)
 
 
 
+
 #game main loop
 while True:
     for event in pygame.event.get(): #collects all the events and goes through it one by one
@@ -396,6 +404,8 @@ while True:
             if show_tv_screen:
                 if TV_quit_button_rect.collidepoint(event.pos):
                     show_tv_screen = False
+                if bubble_icon_rect.collidepoint(event.pos):
+                    open_bubble_popper = True
             if show_radio:
                 if Radio_quit_button_rect.collidepoint(event.pos):
                     show_radio =False
@@ -458,6 +468,7 @@ while True:
         TV_quit_button_rect = quit_button_img.get_rect()
         TV_quit_button_rect.topright =(1440,80) #assign correct position
         screen.blit(quit_button_img,TV_quit_button_rect)
+        screen.blit(bubble_icon, bubble_icon_rect)
 
     if show_radio:
         scaled_radio_img = pygame.transform.scale(radio_img,(screen_width,screen_height))
@@ -469,6 +480,22 @@ while True:
     if show_text:
         screen.blit(Speech_bar,speechbar_rect)
         screen.blit(text_surface,text_rect)
+
+    if open_bubble_popper:
+        #loading page
+        screen.fill((180,220,255))
+        loading_text = font.render("Loading Bubble Popper...", True, (0,0,0))
+        screen.blit(loading_text, (400, 330))
+        pygame.display.flip()
+
+        process =subprocess.Popen([sys.executable,"Moodify/buble poper.py"]) #without freezing the main game
+
+        
+
+        while process.poll() is None: #to check and see wether its finished
+            time.sleep(0.1) #avoid high cpu usage by pausing 100ms each loop
+
+        open_bubble_popper =False #avoid open multiple times
 
     pygame.display.update() #update the display of the screen 
     Time.tick(60)# tells loop dont just faster then 60 fps
