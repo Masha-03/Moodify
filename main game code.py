@@ -482,20 +482,14 @@ while True:
         screen.blit(text_surface,text_rect)
 
     if open_bubble_popper:
-        #loading page
-        screen.fill((180,220,255))
-        loading_text = font.render("Loading Bubble Popper...", True, (0,0,0))
-        screen.blit(loading_text, (400, 330))
-        pygame.display.flip()
-
         process =subprocess.Popen([sys.executable,"Moodify/buble poper.py"]) #without freezing the main game
-
-        
 
         while process.poll() is None: #to check and see wether its finished
             time.sleep(0.1) #avoid high cpu usage by pausing 100ms each loop
 
         open_bubble_popper =False #avoid open multiple times
+
+        
 
     pygame.display.update() #update the display of the screen 
     Time.tick(60)# tells loop dont just faster then 60 fps
