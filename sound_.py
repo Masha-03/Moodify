@@ -1,4 +1,19 @@
 import tkinter as tk
+from PIL import Image,ImageTk
+import pygame
+
+#initialize pygame mixer
+pygame.mixer.init()
+
+#----------------------------------------------------------------------------------------------------------------------#
+
+#load and resize the image using PIL 
+def resize_image(image_path, size=(40,40)):
+    img=Image.open(image_path)
+    img=img.resize(size, Image.Resampling.LANCZOS) #Resampling=process of changing size of an image #LANCZOS=high quality resizing
+    return ImageTk.PhotoImage(img)
+
+#----------------------------------------------------------------------------------------------------------------------#
 
 #function for buttons
 def play_sound():
@@ -6,9 +21,6 @@ def play_sound():
 
 def pause_sound():
         print("Pausing sound...")
-
-def resume_sound():
-        print("Resuming sound...")
 
 def stop_sound():
         print("Stopping sound...")
@@ -80,19 +92,24 @@ for songs in songs: #each element is temporarily stored in variable "songs" duri
 #----------------------------------------------------------------------------------------------------------------------#
 #CONTROL BUTTON
 
+#image for button
+play_image=resize_image("C:/Users/qinen/project/moodify/play.png")
+pause_image=resize_image("C:/Users/qinen/project/moodify/pause.png")
+stop_image=resize_image("C:/Users/qinen/project/moodify/stop.png")
+next_image=resize_image("C:/Users/qinen/project/moodify/next.png")
+previous_image=resize_image("C:/Users/qinen/project/moodify/previous.png")
+
 #Control buttons for the sound player
-play_button=tk.Button(button_frame, text="▶️ Play", command=play_sound, relief="raised", bg="#4dd0e1")
-play_button.pack(side="left",padx=10)
-pause_button=tk.Button(button_frame, text="⏸️ Pause", command=pause_sound, relief="raised", bg="#4dd0e1")
-pause_button.pack(side="left",padx=10)
-resume_button=tk.Button(button_frame, text="▶️ Resume", command=resume_sound, relief="raised", bg="#4dd0e1")
-resume_button.pack(side="left",padx=10)
-stop_button=tk.Button(button_frame, text="⏹️ Stop", command=stop_sound, relief="raised", bg="#4dd0e1")
-stop_button.pack(side="left",padx=10)
-next_button=tk.Button(button_frame, text="⏭️ Next", command=next_sound, relief="raised", bg="#4dd0e1")
-next_button.pack(side="left",padx=10)
-previous_button=tk.Button(button_frame, text="⏮️ Previous", command=prev_sound, relief="raised", bg="#4dd0e1")
+previous_button=tk.Button(button_frame, image=previous_image, command=prev_sound, relief="groove", bg="#0077be")
 previous_button.pack(side="left",padx=10)
+stop_button=tk.Button(button_frame, image=stop_image, command=stop_sound, relief="groove", bg="#0077be")
+stop_button.pack(side="left",padx=10)
+play_button=tk.Button(button_frame, image=play_image, command=play_sound, relief="groove", bg="#0077be")
+play_button.pack(side="left",padx=10)
+pause_button=tk.Button(button_frame, image=pause_image, command=pause_sound, relief="groove", bg="#0077be")
+pause_button.pack(side="left",padx=10)
+next_button=tk.Button(button_frame, image=next_image, command=next_sound, relief="groove", bg="#0077be")
+next_button.pack(side="left",padx=10)
 
 #----------------------------------------------------------------------------------------------------------------------#
 #VOLUME CONTROL
