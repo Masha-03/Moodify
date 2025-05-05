@@ -48,6 +48,7 @@ diary_image=resize_image("C:/Users/qinen/project/moodify/diary.png")
 calendar_image=resize_image("C:/Users/qinen/project/moodify/calendar.png")
 moodtracker_image=resize_image("C:/Users/qinen/project/moodify/moodtracker.png")
 sound_image=resize_image("C:/Users/qinen/project/moodify/sound.png")
+hourglass_image=resize_image("C:/Users/qinen/project/moodify/hourglass.png")
 
 #create a single feature card
 def create_feature(parent, image, text): #parent=where to place the card #image=the image you want to show #text=label below the image
@@ -88,7 +89,8 @@ features = [
     (diary_image, "Diary"),
     (calendar_image, "Calendar"),
     (moodtracker_image, "Mood Tracker"),
-    (sound_image, "Soothing Sounds")
+    (sound_image, "Soothing Sounds"),
+    (hourglass_image, "Breathing Timer")
 ]
 
 #loop through each image/text pair

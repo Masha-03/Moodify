@@ -1,6 +1,6 @@
 import tkinter as tk
 from PIL import Image,ImageTk
-import pygame
+import pygame #for pygame.mixer
 
 #initialize pygame mixer
 pygame.mixer.init()
@@ -14,6 +14,14 @@ def resize_image(image_path, size=(40,40)):
     return ImageTk.PhotoImage(img)
 
 #----------------------------------------------------------------------------------------------------------------------#
+#for sound
+
+#song dictionary
+song_dict={
+       "Rain sounds":"",
+       ""
+}
+
 
 #function for buttons
 def play_sound():
@@ -81,9 +89,6 @@ playlist_box.pack(pady=(0,5),anchor="center")
 #hold all control button
 button_frame=tk.Frame(playlist_button_frame,bg="#e1f5fe")
 button_frame.pack(pady=(10,10),anchor="center")
-
-#song lists
-songs=["Rain sounds", "Ocean sounds"]
 
 #loop through each elements in "songs" list
 for songs in songs: #each element is temporarily stored in variable "songs" during each loop 
