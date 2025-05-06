@@ -1,7 +1,19 @@
 import pygame
 import os
+import random
 
 pygame.init()
+
+#load and play ambient music
+pygame.mixer.music.load("calm_music.mp3")
+pygame.mixer.music.set_volume(0.5)
+pygame.mixer.music.play(-1)
+
+#load rain sound
+rain_sound = pygame.mixer.Sound("rain_sound.wav")
+rain_sound.set_volume(0.6)
+
+music_on = True
 
 #screen setup
 screen_width, screen_height = 1920, 1020
@@ -52,6 +64,24 @@ fade_alpha = 255
 fading = False
 fade_text = ''
 fade_pos = (0, 0)
+
+class Star:
+    def __init__(self):
+        self.x = random.randint(0, screen_width)
+        self.y = random.randint(0, screen_height)
+        self.speed = random.uniform(0.2, 0.6)
+        self.size = random.randint(1, 3)
+
+    def update(self):
+        self.y += self.speed
+        if self.y > screen_height:
+            self.y = 0
+            self.x = random.randint(0, screen_width)
+
+    def draw(self, screen):
+        pygame.draw.circle(screen, white, (int(self.x), int(self.y)), self.size)
+
+stars = [Star() for _ in range(100)]
 
 clock = pygame.time.Clock()
 running = True
