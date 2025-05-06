@@ -350,6 +350,10 @@ dog_idle_img =[
 TV_mini_games_img =pygame.image.load("Moodify/graphics/mini games interface.png")
 quit_button_img = pygame.image.load("Moodify/graphics/cancel button.png")
 radio_img = pygame.image.load("Moodify/graphics/radio interface.png")
+plant_img =pygame.image.load("Moodify/graphics/plant interface.png")
+watering_pot =pygame.image.load("Moodify/graphics/watering pot.png")
+waterdrops = pygame.image.load("Moodify/graphics/water drops.png")
+water_button = pygame.image.load("Moodify/graphics/water button.png")
 
 #icon in TV
 bubble_icon = pygame.image.load("Moodify/1.png").convert_alpha()
@@ -370,16 +374,23 @@ rain_group = rain_or_not()
 Female_character=FemaleCharacter()
 dog_character=dog()
 
-#Tv and radio entry
+#Tv plant and radio entry
 radio_entry = pygame.Rect(1000, 595, 160, 110) 
 TV_entry = pygame.Rect(310, 325, 295, 195) 
+plant_entry =pygame.Rect(650,380,90,155)
+watering_button_rect =pygame.Rect(90,200,90,155)
 show_tv_screen = False
 show_radio =False
+show_plant = False
+watering = False
+watering_timer =0 
+waterdrop_y = 0
+
+
 
 #interaction points
 picture = pygame.Rect(110,68,300,230)
 teddy = pygame.Rect(1460,535,90,120)
-plant = pygame.Rect(650,380,90,155)
 cockroach = pygame.Rect(65,690,50,65)
 sofa = pygame.Rect(300,600,600,200)
 
@@ -409,12 +420,22 @@ while True:
             if show_radio:
                 if Radio_quit_button_rect.collidepoint(event.pos):
                     show_radio =False
+            if show_plant:
+                if plant_quit_button_rect.collidepoint(event.pos):
+                    show_plant =False
+                if watering_button_rect.collidepoint(event.pos):
+                    watering = True
+                    watering_timer = pygame.time.get_ticks()
+                    waterdrop_y =300
+                    
 
-            elif not show_tv_screen and not show_radio:
+            elif not show_tv_screen and not show_radio and not show_plant:
                 if radio_entry.collidepoint(event.pos): #where it click on and check if its inside the box
                     show_radio =True
                 if TV_entry.collidepoint(event.pos):
                     show_tv_screen = True
+                if plant_entry.collidepoint(event.pos):
+                    show_plant = True
                 if teddy.collidepoint(event.pos):
                     show_text =True
                     text_surface = font.render(teddy_speech(),True,(0,0,0))
@@ -431,12 +452,10 @@ while True:
                     show_text =True
                     text_surface = font.render(picture_speech(),True,(0,0,0))
                     text_rect =text_surface.get_rect(center =speechbar_rect.center)
-                if plant.collidepoint(event.pos):
-                    show_text =True
-                    text_surface = font.render(plant_speech(),True,(0,0,0))
-                    text_rect =text_surface.get_rect(center =speechbar_rect.center)
+                
+                    
                 # Only close the speech bar if not clicking on any important object
-                if not (teddy.collidepoint(event.pos) or cockroach.collidepoint(event.pos) or sofa.collidepoint(event.pos) or picture.collidepoint(event.pos) or plant.collidepoint(event.pos)):
+                if not (teddy.collidepoint(event.pos) or cockroach.collidepoint(event.pos) or sofa.collidepoint(event.pos) or picture.collidepoint(event.pos)):
                     show_text = False
 
 
@@ -466,7 +485,7 @@ while True:
         scaled_tv_image = pygame.transform.scale(TV_mini_games_img,(screen_width,screen_height))
         screen.blit(scaled_tv_image,(0,0))
         TV_quit_button_rect = quit_button_img.get_rect()
-        TV_quit_button_rect.topright =(1440,80) #assign correct position
+        TV_quit_button_rect.topright =(1440,80) 
         screen.blit(quit_button_img,TV_quit_button_rect)
         screen.blit(bubble_icon, bubble_icon_rect)
 
@@ -474,9 +493,29 @@ while True:
         scaled_radio_img = pygame.transform.scale(radio_img,(screen_width,screen_height))
         screen.blit(scaled_radio_img,(0,0))
         Radio_quit_button_rect = quit_button_img.get_rect()
-        Radio_quit_button_rect.topright =(1400,160) #assign correct position
+        Radio_quit_button_rect.topright =(1400,160) 
         screen.blit(quit_button_img,Radio_quit_button_rect)
     
+    if show_plant:
+        scaled_plant_img =pygame.transform.scale(plant_img,(screen_width,screen_height))
+        screen.blit(scaled_plant_img,(0,0))
+        plant_quit_button_rect = quit_button_img.get_rect()
+        plant_quit_button_rect.topright =(1500,50) 
+        screen.blit(quit_button_img,plant_quit_button_rect)
+        screen.blit(water_button,watering_button_rect)
+        
+    if watering :
+        screen.blit(watering_pot,(870,150))
+        screen.blit(waterdrops,(700,waterdrop_y))
+        waterdrop_y+=8
+        #reset waterdrops
+        if waterdrop_y> 470:
+            waterdrop_y =300
+
+        if pygame.time.get_ticks() - watering_timer >3000 :
+            watering = False
+
+
     if show_text:
         screen.blit(Speech_bar,speechbar_rect)
         screen.blit(text_surface,text_rect)
