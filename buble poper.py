@@ -1,13 +1,21 @@
 import pygame
 import random
 import sys
+import time
+import subprocess
+
+calming_words = [
+    "Breathe", "Relax", "Peace", "Calm", "Let Go", 
+    "Focus", "Stillness", "Soft", "Ease", "Clear"
+]
 
 # Initialize Pygame
 pygame.init()
+word_font = pygame.font.SysFont(None, 28) #font for the words in the bubble
 
-# Screen settings
-WIDTH, HEIGHT = 1920, 1020
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+# Screen settings   
+screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
+screen_width,screen_height = screen.get_size()
 pygame.display.set_caption("Bubble Popper")
 
 # Clock
@@ -19,12 +27,13 @@ BG_COLOR = (180, 220, 255)
 BUBBLE_COLOR = (255, 255, 255)
 POP_COLOR = (200, 200, 255)
 SPARKLE_COLOR = (255, 255, 255)
+LOADING_COLOR = (180, 220, 255)
 
 # Bubble settings
 BUBBLE_MIN_RADIUS = 50
 BUBBLE_MAX_RADIUS = 90
 BUBBLE_SPEED = 2 #reduced base speed for better realism
-BUBBLE_INTERVAL = 60  #frames between spawns for each bubbles
+BUBBLE_INTERVAL = 30  #frames between spawns for each bubbles
 
 #particle settings
 PARTICLE_COUNT = 50
@@ -33,30 +42,32 @@ PARTICLE_COUNT = 50
 pop_sounds = []
 for i in range (1,5):
     try:
-        sound = pygame.mixer.Sound(f"pop{i}.wav") #load sound files
+        sound = pygame.mixer.Sound(f"bubble sound/pop{i}.wav") #load sound files
         sound.set_volume(1.0) #setting volume to max
         pop_sounds.append(sound)    #add to the list
     except:
         print(f"not playing pop{i}.wav") # shows if the sound is not playing because file missing
 
-#play background music
-def play_background_music():
-    pygame.mixer.init()
-    pygame.mixer.music.load("lofi_music.wav") 
-    pygame.mixer.music.set_volume(0.5)      
-    pygame.mixer.music.play(-1)                # -1 means loop indefinitely
+def show_loading_screen():
+    screen.fill(LOADING_COLOR)  # Fill with light blue
+    loading_text = font.render("Returning to Main Game...", True, (0, 0, 0))  # Text to show on loading screen
+    screen.blit(loading_text, (270, 330))  # Position the loading text
+    pygame.display.update()  # Refresh the screen immediately
+    pygame.event.clear() # Prevent needing to click before it responds
+    pygame.time.delay(2000)  # Wait 2 seconds without freezing rendering
 
 #bubble class
 class Bubble:
     def __init__(self):
         self.radius = random.randint(BUBBLE_MIN_RADIUS, BUBBLE_MAX_RADIUS)  #random bubble radius
-        self.x = random.randint(self.radius, WIDTH - self.radius)  #random horizontol position that stays within the screen
-        self.y = HEIGHT + self.radius  #starts below the screen
+        self.x = random.randint(self.radius, screen_width - self.radius)  #random horizontol position that stays within the screen
+        self.y = screen_height + self.radius  #starts below the screen
         self.color = BUBBLE_COLOR  #white color before popped
         self.popped = False  #not yet popped
         self.alpha = 255   # fade out on pop
         self.pop_sound = random.choice(pop_sounds) if pop_sounds else None #assign random pop sound if available
-
+        self.show_text = random.random() < 0.4 #40% to show the text
+        self.word = random.choice(calming_words) if self.show_text else ""   #random word from the list
         #realistic floating effect
         self.vertical_speed = BUBBLE_SPEED + random.uniform(-0.5, 0.5)  #vary vertical speed
         self.horizontal_drift = random.uniform(-0.2, 0.2)  #gentle horizontal drift
@@ -85,8 +96,8 @@ class Bubble:
 
             #wrap around horizontally
             if self.x < -self.radius:
-                self.x = WIDTH + self.radius
-            elif self.x > WIDTH + self.radius:
+                self.x = screen_width + self.radius
+            elif self.x > screen_height + self.radius:
                 self.x = -self.radius
         else:
             self.alpha -= 10 #fade out the bubble
@@ -113,6 +124,12 @@ class Bubble:
             rotated_rect = rotated_surface.get_rect(center=(int(self.x), int(self.y)))
             surface.blit(rotated_surface, rotated_rect)
 
+            #draw the word centered in the bubble if not popped
+            if not self.popped:
+                word_surf = word_font.render(self.word, True, (80, 80, 120))  # soft color
+                word_rect = word_surf.get_rect(center=(int(self.x), int(self.y)))
+                surface.blit(word_surf, word_rect)
+
         # blast effect ring coming out of the buble
         if self.popped and self.blast_alpha > 0:      #draw the ring effect only if the bubble is popped and the ring is not fully faded out
             ring_surface = pygame.Surface((self.blast_radius*2, self.blast_radius*2), pygame.SRCALPHA) #create a surface for the ring
@@ -130,16 +147,16 @@ class Bubble:
 #particle class
 class Particle:
     def __init__(self):
-        self.x = random.randint(0, WIDTH)       #random horizontal position
-        self.y = random.randint(0, HEIGHT)      #random vertical position
+        self.x = random.randint(0, screen_width)       #random horizontal position
+        self.y = random.randint(0, screen_height)      #random vertical position
         self.radius = random.randint(1, 3)      #random radius for the particle
         self.speed = random.uniform(0.2, 0.8)   #random speed for the particle
 
     def update(self):
         self.y -= self.speed
         if self.y < 0: 
-            self.y = HEIGHT
-            self.x = random.randint(0, WIDTH) 
+            self.y = screen_height
+            self.x = random.randint(0, screen_width) 
 
     def draw(self, surface):
         pygame.draw.circle(surface, SPARKLE_COLOR, (int(self.x), int(self.y)), self.radius)
@@ -176,18 +193,6 @@ def switch_page():
     global current_page
     current_page = "other"
 
-def go_to_game():
-    global current_page
-    current_page = "bubble_popper"
-
-def go_to_home():
-    global current_page
-    current_page = "home"
-
-def go_to_tv():
-    global current_page
-    current_page = "tv_page"
-
 def toggle_slow_motion():
     global speed_modifier
     if speed_modifier == 1.0:
@@ -203,45 +208,26 @@ bubbles = []
 particles = [Particle() for _ in range(PARTICLE_COUNT)]
 frame_count = 0
 running = True
-button = Button(50, 50, 200, 60, "Settings", switch_page) #create a button to switch to other page
+button = Button(50, 50, 200, 60, "Back", switch_page) #create a button to switch to other page
 slow_button = Button(270, 50, 200, 60, "Slow Motion", toggle_slow_motion) #create a button to toggle slow motion
 
-#load the images
-game_icon = pygame.image.load("1.png").convert_alpha()
-home_icon = pygame.image.load("2.png").convert_alpha()
-tv_icon = pygame.image.load("3.png").convert_alpha()
-
-button_size_settings = 120 * 2  #double the button size for settings page
-button_spacing_settings = 40 * 2  #double the button spacing for settings page
-total_button_width_settings = 3 * button_size_settings + 2 * button_spacing_settings
-start_x_settings = WIDTH // 2 - total_button_width_settings // 2
-button_y_settings = 80 + pygame.font.SysFont(None, 80).get_height() + 80  #position below the text
-
-#scale the images to fit the button size
-scaled_game_icon = pygame.transform.scale(game_icon, (button_size_settings - 40, button_size_settings - 40))  # Add some padding
-scaled_home_icon = pygame.transform.scale(home_icon, (button_size_settings - 40, button_size_settings - 40))
-scaled_tv_icon = pygame.transform.scale(tv_icon, (button_size_settings - 40, button_size_settings - 40))
-
-game_icon_button = Button(start_x_settings, button_y_settings, button_size_settings, button_size_settings, "", go_to_game)
-game_icon_button.image = scaled_game_icon
-
-home_icon_button = Button(start_x_settings + button_size_settings + button_spacing_settings, button_y_settings, button_size_settings, button_size_settings, "", go_to_home)
-home_icon_button.image = scaled_home_icon
-
-tv_icon_button = Button(start_x_settings + 2 * button_size_settings + 2 * button_spacing_settings, button_y_settings, button_size_settings, button_size_settings, "", go_to_tv)
-tv_icon_button.image = scaled_tv_icon
-
-play_background_music() #play background music
-
+#text font size 
+font =pygame.font.Font(None,40)
 # Main loop
 running = True
 while running:
     screen.fill(BG_COLOR)
     frame_count += 1
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+    for event in pygame.event.get(): #collects all the events and goes through it one by one
+        if event.type == pygame.KEYDOWN:#check if any key is press 
+            if event.key == pygame.K_ESCAPE: #if its the ESC key
+                #loading page
+                show_loading_screen()
+                running = False
+                
+                
+                
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if current_page == "bubble_popper": #check if the current page is bubble popper
                 for bubble in bubbles:
@@ -253,12 +239,11 @@ while running:
                 button.check_click(event.pos)
                 slow_button.check_click(event.pos)
             elif current_page == "other":
-                game_icon_button.check_click(event.pos)
-                home_icon_button.check_click(event.pos)
-                tv_icon_button.check_click(event.pos)
-
-            elif current_page == "home":
-                game_icon_button.check_click(event.pos)
+                #loading page
+                show_loading_screen() 
+                running = False
+                
+                
         
         #add bubbles
     if current_page == "bubble_popper":
@@ -276,25 +261,11 @@ while running:
         #update and drw the bubbles
         button.draw(screen)
         slow_button.draw(screen)
-
-    elif current_page == "tv_page":
-        screen.fill((220, 240, 255))
-        font = pygame.font.SysFont(None, 60)
-        txt = font.reader("Tv Page", True, (40, 80, 120))
-        screen.blit(txt, (WIDTH//2 - txt.get_width()//2, HEIGHT//2 - txt.get_height()//2))
-      
-    elif current_page == "other":
-        screen.fill((240, 220, 255))
-        font = pygame.font.SysFont(None, 60)
-        txt = font.render("Settings Page", True, (100, 40, 100))
-        screen.blit(txt, (WIDTH//2 - txt.get_width()//2, HEIGHT//2 - txt.get_height()//2))
-
-        game_icon_button.draw(screen) #draw the game icon button
-        home_icon_button.draw(screen)
-        tv_icon_button.draw(screen)
+        
     pygame.display.flip()
     clock.tick(FPS) #maintain the frame rate    
     
+pygame.mixer.quit()
 pygame.quit()
 sys.exit()
    
