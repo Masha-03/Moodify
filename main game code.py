@@ -354,6 +354,7 @@ plant_img =pygame.image.load("Moodify/graphics/plant interface.png")
 watering_pot =pygame.image.load("Moodify/graphics/watering pot.png")
 waterdrops = pygame.image.load("Moodify/graphics/water drops.png")
 water_button = pygame.image.load("Moodify/graphics/water button.png")
+watering_button_rect = water_button.get_rect()
 
 #icon in TV
 bubble_icon = pygame.image.load("Moodify/1.png").convert_alpha()
@@ -378,7 +379,7 @@ dog_character=dog()
 radio_entry = pygame.Rect(1000, 595, 160, 110) 
 TV_entry = pygame.Rect(310, 325, 295, 195) 
 plant_entry =pygame.Rect(650,380,90,155)
-watering_button_rect =pygame.Rect(90,200,90,155)
+watering_button_rect.topleft=(90,100)
 show_tv_screen = False
 show_radio =False
 show_plant = False
@@ -507,9 +508,9 @@ while True:
     if watering :
         screen.blit(watering_pot,(870,150))
         screen.blit(waterdrops,(700,waterdrop_y))
-        waterdrop_y+=8
+        waterdrop_y+=10
         #reset waterdrops
-        if waterdrop_y> 470:
+        if waterdrop_y> 490:
             waterdrop_y =300
 
         if pygame.time.get_ticks() - watering_timer >3000 :
