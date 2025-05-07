@@ -4,7 +4,7 @@ import random
 
 pygame.init() #gotta start pygame
 
-#paths for my assets. need to make sure 'worry_cloud' folder is there.
+#paths for my files. need to make sure 'worry_cloud' folder is there.
 MUSIC_PATH = os.path.join("Worry_cloud", "calm_music.wav")
 RAIN_SOUND_PATH = os.path.join("Worry_cloud", "rain_sound.wav")
 # Keeping the background as star_bg2.jpg 
@@ -19,14 +19,14 @@ pygame.mixer.music.set_volume(0.5) #not too loud
 pygame.mixer.music.play(-1) #loop it forever
 
 
-#now, load the rain sound.
+#now the rain sound.
 #also check if this file exists.
 rain_sound = None # Initialize to None
 rain_sound = pygame.mixer.Sound(RAIN_SOUND_PATH)
 rain_sound.set_volume(0.6)
 
 
-music_on = True #keep track of whether music is playing (state is managed internally by pygame.mixer.music)
+music_on = True #keep track of whether music is playing 
 
 #setting up the screen.
 screen_width, screen_height = 1920, 1020 #my preferred dimensions

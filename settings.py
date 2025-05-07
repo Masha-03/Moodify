@@ -21,27 +21,27 @@ DROPDOWN_OPTION_COLOR = (220, 200, 180) #dropdown option button bg
 DROPDOWN_OPTION_HOVER_COLOR = (200, 180, 160) #hover effects for options
 FONT = pygame.font.Font("texts/PressStart2P-Regular.ttf", 20) #font style and size
 
-# Window setup
+#window screen setup
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Game Settings") #create game window
 
-# Load music
+#looad music
 pygame.mixer.music.load("lofi_music.wav")
 pygame.mixer.music.set_volume(0.5)
 pygame.mixer.music.play(-1)
 
-# Load settings icon
+#load settings icon
 settings_icon = pygame.image.load("settings/settings_icon.png")  #should be a small 40x40 icon
 settings_icon = pygame.transform.scale(settings_icon, (80, 80)) #resize icon
 
-# Load character animations (4 frames)
+#load character animations got (4 frames)
 male_frames = [pygame.image.load(f"male/boy_pixil_frame_{i}.png") for i in range(0, 4)]
 female_frames = [pygame.image.load(f"female/girl_pixil_frame_{i}.png") for i in range(0, 4)]
 animation_index = 0
 animation_timer = 0
 animation_speed = 10
 
-# State variables
+#put the variables
 music_muted = False
 current_volume = 0.5
 genders = ["Male", "Female"]
@@ -49,7 +49,7 @@ selected_gender_index = 0
 gender_dropdown_active = False
 settings_open = False
 
-# Utility functions
+#utility functions
 def draw_text(surface, text, x, y, color):
     text_surface = FONT.render(text, True, color)
     surface.blit(text_surface, (x, y))
