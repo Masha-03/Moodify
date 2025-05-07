@@ -4,8 +4,14 @@ import sys
 import time
 import subprocess
 
+calming_words = [
+    "Breathe", "Relax", "Peace", "Calm", "Let Go", 
+    "Focus", "Stillness", "Soft", "Ease", "Clear"
+]
+
 # Initialize Pygame
 pygame.init()
+word_font = pygame.font.SysFont(None, 28) #font for the words in the bubble
 
 # Screen settings   
 screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
@@ -27,7 +33,7 @@ LOADING_COLOR = (180, 220, 255)
 BUBBLE_MIN_RADIUS = 50
 BUBBLE_MAX_RADIUS = 90
 BUBBLE_SPEED = 2 #reduced base speed for better realism
-BUBBLE_INTERVAL = 60  #frames between spawns for each bubbles
+BUBBLE_INTERVAL = 30  #frames between spawns for each bubbles
 
 #particle settings
 PARTICLE_COUNT = 50
@@ -36,7 +42,7 @@ PARTICLE_COUNT = 50
 pop_sounds = []
 for i in range (1,5):
     try:
-        sound = pygame.mixer.Sound(f"Moodify/bubble sound/pop{i}.wav") #load sound files
+        sound = pygame.mixer.Sound(f"bubble sound/pop{i}.wav") #load sound files
         sound.set_volume(1.0) #setting volume to max
         pop_sounds.append(sound)    #add to the list
     except:
@@ -47,7 +53,6 @@ def show_loading_screen():
     loading_text = font.render("Returning to Main Game...", True, (0, 0, 0))  # Text to show on loading screen
     screen.blit(loading_text, (270, 330))  # Position the loading text
     pygame.display.update()  # Refresh the screen immediately
-    pygame.event.clear() # Prevent needing to click before it responds
     pygame.time.delay(2000)  # Wait 2 seconds without freezing rendering
 
 #bubble class
@@ -60,7 +65,8 @@ class Bubble:
         self.popped = False  #not yet popped
         self.alpha = 255   # fade out on pop
         self.pop_sound = random.choice(pop_sounds) if pop_sounds else None #assign random pop sound if available
-
+        self.show_text = random.random() < 0.4 #40% to show the text
+        self.word = random.choice(calming_words) if self.show_text else ""   #random word from the list
         #realistic floating effect
         self.vertical_speed = BUBBLE_SPEED + random.uniform(-0.5, 0.5)  #vary vertical speed
         self.horizontal_drift = random.uniform(-0.2, 0.2)  #gentle horizontal drift
@@ -116,6 +122,12 @@ class Bubble:
             rotated_surface = pygame.transform.rotate(bubble_surface, self.rotation_angle)
             rotated_rect = rotated_surface.get_rect(center=(int(self.x), int(self.y)))
             surface.blit(rotated_surface, rotated_rect)
+
+            #draw the word centered in the bubble if not popped
+            if not self.popped:
+                word_surf = word_font.render(self.word, True, (80, 80, 120))  # soft color
+                word_rect = word_surf.get_rect(center=(int(self.x), int(self.y)))
+                surface.blit(word_surf, word_rect)
 
         # blast effect ring coming out of the buble
         if self.popped and self.blast_alpha > 0:      #draw the ring effect only if the bubble is popped and the ring is not fully faded out
