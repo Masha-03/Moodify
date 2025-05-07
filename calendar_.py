@@ -168,7 +168,7 @@ mooddesc_label.pack(anchor="w", padx=20, pady=(0, 5))
 mooddesc_display = tk.Label(history_frame, text="", font=("Arial", 11), bg="white", fg="#333", bd=1, relief="groove", padx=10, pady=5, anchor="center", justify="left", wraplength=500)
 mooddesc_display.pack(fill="x", padx=20, pady=(0, 10))
 
-#----------------------------------------------------------------------------------------------------------------------------------------------------#
+#---------------------------------------------------------------------------------------------------------`-------------------------------------------#
 
 #run the whole program
 root.mainloop()
