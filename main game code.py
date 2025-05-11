@@ -15,17 +15,17 @@ class Rain(pygame.sprite.Sprite):
         rain.speedx=2
         rain.speedy= random.randint(10,20)
         #tells where the raindrops should spawn
-        rain.rect.x=random.randint(0,window_width)
-        rain.rect.y=random.randint(-window_height,-5)
+        rain.rect.x=random.randint(0,VIRTUAL_WIDTH)
+        rain.rect.y=random.randint(-VIRTUAL_HEIGHT,-5)
         
 
     def update(rain):
             #when the sprite touches the the end of the screen, reuse the sprite to spawn it again
-        if rain.rect.bottom >window_height:
+        if rain.rect.bottom >screen_height:
             rain.speedx=2
             rain.speedy= random.randint(10,20)
-            rain.rect.x=random.randint(0,window_width)
-            rain.rect.y=random.randint(-window_height,-5)
+            rain.rect.x=random.randint(0,VIRTUAL_WIDTH)
+            rain.rect.y=random.randint(-VIRTUAL_HEIGHT,-5)
 
         #add value keep on update the rain
         rain.rect.x=rain.rect.x + rain.speedx 
@@ -50,7 +50,7 @@ def rain_or_not():
 def display_rain(rain_group):
     if rain_group : #if there is a sprite
         rain_group.update() #moves all the raindrops
-        rain_group.draw(screen) #a screen blit for the rain group loops it one by one
+        rain_group.draw(virtual_surface) #a screen blit for the rain group loops it one by one
 
 
 class FemaleCharacter(pygame.sprite.Sprite):
@@ -63,7 +63,7 @@ class FemaleCharacter(pygame.sprite.Sprite):
         Female.rect=Female.image.get_rect()
         Female.speedx =5
         Female.rect.x=-1
-        Female.rect.y=window_height -Female.rect.height +25 #place the character bottom of the user screen
+        Female.rect.y=screen_height -Female.rect.height +25 #place the character bottom of the user screen
 
         #where the character facing for idle
         Female.facing_right = True
@@ -102,9 +102,9 @@ class FemaleCharacter(pygame.sprite.Sprite):
                     
         #spawn right side of the screen if cross the left side
         if Female.rect.right < 0:
-            Female.rect.x = window_width
+            Female.rect.x = screen_width
         #spawn at left side if cross the right
-        if Female.rect.left > window_width:
+        if Female.rect.left > screen_width:
             Female.rect.right= 0 
             #fixed the jumping issue here before: rect.x=0
 
@@ -143,7 +143,7 @@ class dog(pygame.sprite.Sprite):
         dog.rect = dog.image.get_rect()
         dog.rect.x = random.randint(0,screen_width- dog.rect.width) # the rect will put the top left corner of the rectangle of the dog in this range(SO cannot put screen width as limit)
         dog.speedx = 3
-        dog.rect.y = 650
+        dog.rect.y = 490
         dog.state = "idle"
         dog.target_x =dog.rect.x
         dog.idle_time = pygame.time.get_ticks()
@@ -245,16 +245,6 @@ def teddy_speech():
     return speech 
 
 def cockroach_speech():
-    speech_forteddy =["You can't catch me!",
-                        "Home sweet... kitchen!",
-                        "I'm faster than you think!",
-                        "Oops! You saw me!",
-                        "Just passing through!",
-                        "I'm tiny but mighty!"]
-    speech = random.choice(speech_forteddy)
-    return speech 
-
-def cockroach_speech():
     speech_forck =["You can't catch me!",
                         "Home sweet... kitchen!",
                         "I'm faster than you think!",
@@ -283,25 +273,26 @@ def sofa_speech():
                         "This sofa has ‘comfort’ written all over it!"]
     speech = random.choice(speech_forsofa)
     return speech 
+#tried to fix the fullscreen alignment problem but failed using a virtual surface
+VIRTUAL_WIDTH = 1280
+VIRTUAL_HEIGHT = 720
 
 #setting up pygame
 pygame.init() # to start the system: sound,graphics etc of pygame module
 #screen here is like a canvas to store the window and u can draw/ add other images
-screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
+screen = pygame.display.set_mode((VIRTUAL_WIDTH, VIRTUAL_HEIGHT))  # windowed mode
 # tells pygame automatically set to full-screen on users computer 
 Time = pygame.time.Clock()
 #set game speed
 
+screen_width,screen_height = screen.get_size()
+virtual_surface = pygame.Surface((VIRTUAL_WIDTH, VIRTUAL_HEIGHT))
 
-
-#to get the height and width of screen
-window_width,window_height = screen.get_size()
 
 #to get the users device time
 current_hour = datetime.datetime.now().hour 
 
-
-
+#----------------------------------------------------------------------------
 #images
 #raining image
 raindrops= pygame.image.load("Moodify/graphics/raindrops.png").convert_alpha()
@@ -314,9 +305,9 @@ sunny_background = pygame.image.load("Moodify/graphics/sunny day background.png"
 
 #background image
 background_surface =pygame.image.load("Moodify/graphics/main game page no window.png").convert_alpha()
-# to scale background image to match full screen of user
-screen_width,screen_height = screen.get_size()
-background_surface = pygame.transform.scale(background_surface,(screen_width,screen_height))
+# to scale background image on the virtual surface
+background_surface = pygame.transform.scale(background_surface,(VIRTUAL_WIDTH,VIRTUAL_HEIGHT))
+
 
 #character image (female)
 Fcharacter_image_idle = [
@@ -357,18 +348,51 @@ water_button = pygame.image.load("Moodify/graphics/water button.png")
 watering_button_rect = water_button.get_rect()
 
 #icon in TV
-bubble_icon = pygame.image.load("Moodify/1.png").convert_alpha()
-bubble_icon_rect = bubble_icon.get_rect(center=(350, 250)) 
+bubble_icon = pygame.image.load("Moodify/bubble popper/1.png").convert_alpha()
+bubble_icon_rect = bubble_icon.get_rect(center=(300, 200)) 
 open_bubble_popper = False
 
 # speech bar position and img
 Speech_bar =pygame.image.load("Moodify/graphics/speech bar.png")
 speechbar_rect =Speech_bar.get_rect()
-speechbar_rect.x = 330
-speechbar_rect.y =595
+speechbar_rect.x = 300
+speechbar_rect.y =520
 show_text =False
 
-#(Spawn only once) 
+#to other feature img
+hourglass_img = pygame.image.load("Moodify/graphics/hourglass.png")
+hourglass_rect = hourglass_img.get_rect()
+hourglass_rect.x = 130
+hourglass_rect.y = 355
+show_breathing= False
+breathing_opened = False
+diary_img = pygame.image.load("Moodify/graphics/diary.png")
+diary_rect = diary_img.get_rect()
+diary_rect.x = 920
+diary_rect.y = 455
+show_diary = False
+diary_opened = False #to prevent opening multiple times
+
+moodtracker_img = pygame.image.load("Moodify/graphics/mood tracker.png")
+moodtracker_rect = moodtracker_img.get_rect()
+moodtracker_rect.x= 350
+moodtracker_rect.y= 70
+show_moodtracker = False
+moodtracker_opened = False
+
+play_button_img = pygame.image.load("Moodify/graphics/play button.png")
+play_button_rect = play_button_img.get_rect()
+
+calendar_img = pygame.image.load("Moodify/graphics/calendar.png")
+calendar_rect = calendar_img.get_rect()
+calendar_rect.x= 370
+calendar_rect.y= 140
+show_calendar = False
+calendar_opened = False
+
+
+#--------------------------------------------------------------------------
+
 #determine will rain or not
 rain_group = rain_or_not()
 #the female character 
@@ -376,10 +400,10 @@ Female_character=FemaleCharacter()
 dog_character=dog()
 
 #Tv plant and radio entry
-radio_entry = pygame.Rect(1000, 595, 160, 110) 
-TV_entry = pygame.Rect(310, 325, 295, 195) 
-plant_entry =pygame.Rect(650,380,90,155)
-watering_button_rect.topleft=(90,100)
+radio_entry = pygame.Rect(800, 480, 130, 80) 
+TV_entry = pygame.Rect(251, 275, 230, 150) 
+plant_entry =pygame.Rect(500,290,100,140)
+watering_button_rect.topleft=(60,50)
 show_tv_screen = False
 show_radio =False
 show_plant = False
@@ -387,20 +411,18 @@ watering = False
 watering_timer =0 
 waterdrop_y = 0
 
-
-
 #interaction points
-picture = pygame.Rect(110,68,300,230)
-teddy = pygame.Rect(1460,535,90,120)
-cockroach = pygame.Rect(65,690,50,65)
-sofa = pygame.Rect(300,600,600,200)
+picture = pygame.Rect(90,55,250,180)
+teddy = pygame.Rect(1150,420,80,120)
+cockroach = pygame.Rect(54,550,40,50)
+sofa = pygame.Rect(220,470,530,180)
 
 
 #bg music
 play_background_music()
 
 #text font size 
-font =pygame.font.Font(None,40)
+font =pygame.font.Font(None,30)
 
 
 
@@ -408,6 +430,9 @@ font =pygame.font.Font(None,40)
 #game main loop
 while True:
     for event in pygame.event.get(): #collects all the events and goes through it one by one
+        if event.type == pygame.QUIT:
+            pygame.quit() 
+            sys.exit() 
         if event.type == pygame.KEYDOWN:#check if any key is press 
             if event.key == pygame.K_ESCAPE: #if its the ESC key
                 pygame.quit() # shut down eveythig u open/ initialized (includes the program that is running in the background)
@@ -427,7 +452,7 @@ while True:
                 if watering_button_rect.collidepoint(event.pos):
                     watering = True
                     watering_timer = pygame.time.get_ticks()
-                    waterdrop_y =300
+                    waterdrop_y =350
                     
 
             elif not show_tv_screen and not show_radio and not show_plant:
@@ -458,78 +483,101 @@ while True:
                 # Only close the speech bar if not clicking on any important object
                 if not (teddy.collidepoint(event.pos) or cockroach.collidepoint(event.pos) or sofa.collidepoint(event.pos) or picture.collidepoint(event.pos)):
                     show_text = False
-
-
                 
+                if diary_rect.collidepoint(event.pos):
+                    show_diary = True
+                if calendar_rect.collidepoint(event.pos):
+                    show_calendar = True
+                if moodtracker_rect.collidepoint(event.pos):
+                    show_moodtracker = True
+
+    
+    scaled_surface = pygame.transform.scale(virtual_surface, (screen_width, screen_height))
+    screen.blit(scaled_surface,(0,0))
 
     #the night and day background
     current_hour = datetime.datetime.now().hour
     if 7 <= current_hour < 18: #set time between  7 to 6pm
-        screen.blit(sunny_background, (570,50))
+        virtual_surface.blit(sunny_background, (420,40))
     else:
-        screen.blit(night_background, (600,50))
+        virtual_surface.blit(night_background, (420,40))
 
     #if it rain the display if not None
     display_rain(rain_group)
 
-    #background
-    screen.blit(background_surface,(0,0))
+    virtual_surface.blit(background_surface,(0,0))
+
+    virtual_surface.blit(diary_img,diary_rect)
+    virtual_surface.blit(calendar_img,calendar_rect)
+    virtual_surface.blit(moodtracker_img,moodtracker_rect)
+    virtual_surface.blit(hourglass_img,hourglass_rect)
 
     dog_character.update_dog()
-    screen.blit(dog_character.image,dog_character.rect)
+    virtual_surface.blit(dog_character.image,dog_character.rect)
 
     Female_character.update_character()
-    screen.blit(Female_character.image,Female_character.rect)
-                #   image                    position
+    virtual_surface.blit(Female_character.image,Female_character.rect)
+
+    
     #for the Tv mini game interface
     if show_tv_screen:
-        scaled_tv_image = pygame.transform.scale(TV_mini_games_img,(screen_width,screen_height))
-        screen.blit(scaled_tv_image,(0,0))
+        scaled_tv_image = pygame.transform.scale(TV_mini_games_img,(VIRTUAL_WIDTH,VIRTUAL_HEIGHT))
+        virtual_surface.blit(scaled_tv_image,(0,0))
         TV_quit_button_rect = quit_button_img.get_rect()
-        TV_quit_button_rect.topright =(1440,80) 
-        screen.blit(quit_button_img,TV_quit_button_rect)
-        screen.blit(bubble_icon, bubble_icon_rect)
+        TV_quit_button_rect.topright =(1145,80) 
+        virtual_surface.blit(quit_button_img,TV_quit_button_rect)
+        virtual_surface.blit(bubble_icon, bubble_icon_rect)
 
     if show_radio:
-        scaled_radio_img = pygame.transform.scale(radio_img,(screen_width,screen_height))
-        screen.blit(scaled_radio_img,(0,0))
+        scaled_radio_img = pygame.transform.scale(radio_img,(VIRTUAL_WIDTH,VIRTUAL_HEIGHT))
+        virtual_surface.blit(scaled_radio_img,(0,0))
         Radio_quit_button_rect = quit_button_img.get_rect()
-        Radio_quit_button_rect.topright =(1400,160) 
-        screen.blit(quit_button_img,Radio_quit_button_rect)
+        Radio_quit_button_rect.topright =(1100,130) 
+        virtual_surface.blit(quit_button_img,Radio_quit_button_rect)
     
     if show_plant:
-        scaled_plant_img =pygame.transform.scale(plant_img,(screen_width,screen_height))
-        screen.blit(scaled_plant_img,(0,0))
+        scaled_plant_img =pygame.transform.scale(plant_img,(VIRTUAL_WIDTH,VIRTUAL_HEIGHT))
+        virtual_surface.blit(scaled_plant_img,(0,0))
         plant_quit_button_rect = quit_button_img.get_rect()
-        plant_quit_button_rect.topright =(1500,50) 
-        screen.blit(quit_button_img,plant_quit_button_rect)
-        screen.blit(water_button,watering_button_rect)
+        plant_quit_button_rect.topright =(1200,40) 
+        virtual_surface.blit(quit_button_img,plant_quit_button_rect)
+        virtual_surface.blit(water_button,watering_button_rect)
         
     if watering :
-        screen.blit(watering_pot,(870,150))
-        screen.blit(waterdrops,(700,waterdrop_y))
-        waterdrop_y+=10
+        virtual_surface.blit(watering_pot,(710,150))
+        virtual_surface.blit(waterdrops,(630,waterdrop_y))
+        waterdrop_y+=3
         #reset waterdrops
-        if waterdrop_y> 490:
-            waterdrop_y =300
+        if waterdrop_y> 420:
+            waterdrop_y =350
 
         if pygame.time.get_ticks() - watering_timer >3000 :
             watering = False
 
 
     if show_text:
-        screen.blit(Speech_bar,speechbar_rect)
-        screen.blit(text_surface,text_rect)
+        virtual_surface.blit(Speech_bar,speechbar_rect)
+        virtual_surface.blit(text_surface,text_rect)
 
     if open_bubble_popper:
-        process =subprocess.Popen([sys.executable,"Moodify/buble poper.py"]) #without freezing the main game
+        process =subprocess.Popen([sys.executable,"Moodify/bubble popper/buble poper.py"]) #without freezing the main game
 
         while process.poll() is None: #to check and see wether its finished
             time.sleep(0.1) #avoid high cpu usage by pausing 100ms each loop
 
         open_bubble_popper =False #avoid open multiple times
 
-        
+    if show_diary and not diary_opened:
+        subprocess.Popen(["python","Moodify/qin en/diary_.py"]) 
+        diary_opened = True #prevent opening multiple times 
+    
+    if show_calendar and not calendar_opened:
+        subprocess.Popen(["Python","Moodify/qin en/calendar_.py"])
+        calendar_opened = True
+
+    if show_moodtracker:
+        subprocess.Popen(["Python","Moodify/qin en/moodtracker/moodtracker_.py"])
+        moodtracker_opened = True
 
     pygame.display.update() #update the display of the screen 
     Time.tick(60)# tells loop dont just faster then 60 fps
