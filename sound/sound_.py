@@ -64,7 +64,7 @@ def prev_sound():
 
 #function for volume control, it will be triggered when volume slider is moved
 def set_volume(val): #val=the value when users slide the volume slider(val is originally a string)
-    volume = float(val) /30  #float=converts it into numbers #/30=divides it by 30 to scale it down to a number between 0.0 and 1.0.
+    volume = float(val) /100  #float=converts it into numbers #/100=divides it by 30 to scale it down to a number between 0.0 and 1.0.
     pygame.mixer.music.set_volume(volume) #set actual sound volume
 
 #----------------------------------------------------------------------------------------------------------------------#
@@ -148,8 +148,8 @@ volume_label = tk.Label(volume_frame, text="Volume 🔊", bg="#e1f5fe", fg="#0d4
 volume_label.pack()
 
 #volume control slider                                 #resolution=1:slider moves in steps of 1 unit                                   #troughcolor=the track colour
-volume_control = tk.Scale(volume_frame, from_=0, to=30, resolution=1, orient="vertical", command=set_volume,bg="#e1f5fe", fg="#0d47a1", troughcolor="#b3e5fc", width=15, sliderlength=20)
-volume_control.set(15) #set default volume position to 15,like when users open this window the volume will be at 15
+volume_control = tk.Scale(volume_frame, from_=0, to=100, resolution=1, orient="vertical", command=set_volume,bg="#e1f5fe", fg="#0d47a1", troughcolor="#b3e5fc", width=15, sliderlength=20)
+volume_control.set(50) #set default volume position to 50,like when users open this window the volume will be at 50
 volume_control.pack()
 
 #----------------------------------------------------------------------------------------------------------------------#

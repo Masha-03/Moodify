@@ -10,17 +10,17 @@ def resize_image(image_path, size=(70,70)):
 #------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #hover effect function #they bound to widgets by using .bind()
-def on_enter(e): #when mouse enter a widget(eg.button) it changes the widget's background to bg="#DDE6ED"
-    e.widget.config(bg="#DDE6ED")
+def enter(event): #when mouse enter a widget(eg.button) it changes the widget's background to bg="#DDE6ED" #event=event subject
+    event.widget.config(bg="#DDE6ED") #changing the properties of the widget that triggered the event
 
-def on_leave(e): #when mouse leave the widget, background colour returns to bg="#FFFFFF"
-    e.widget.config(bg="#FFFFFF")
+def leave(event): #when mouse leave the widget, background colour returns to bg="#FFFFFF"
+    event.widget.config(bg="#FFFFFF")
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #main window
 root=tk.Tk() #create the main app window
-root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}")  #Full-screen size
+root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}")  #Full-screen size   
 root.title("All Features")
 root.configure(bg="#F0F9F1") #change the background color of entire window
 
@@ -66,12 +66,12 @@ def create_feature(parent, image, text): #parent=where to place the card #image=
     label.pack()
 
     #hover effect changes
-    def on_card_enter(e): #when move the mouse into of the card, all parts of it change color together
+    def card_enter(event): #when move the mouse into of the card, all parts of it change color together
         card.config(bg="#D0F0E0")
         button.config(bg="#D0F0E0", activebackground="#D0F0E0")
         label.config(bg="#D0F0E0")
 
-    def on_card_leave(e): #when move the mouse out of the card, all parts of it change color together
+    def card_leave(event): #when move the mouse out of the card, all parts of it change color together
         card.config(bg="#FFFFFF")
         button.config(bg="#FFFFFF", activebackground="#FFFFFF")
         label.config(bg="#FFFFFF")
@@ -79,8 +79,8 @@ def create_feature(parent, image, text): #parent=where to place the card #image=
     #bind hover functions to all parts card including frame,image button and label
     widgets = [card, button, label]
     for w in widgets:
-        w.bind("<Enter>", on_card_enter)
-        w.bind("<Leave>", on_card_leave)
+        w.bind("<Enter>", card_enter)
+        w.bind("<Leave>", card_leave)
 
     return card #returns full card widget so can place it anywhere on the screen
 
