@@ -143,7 +143,7 @@ class dog(pygame.sprite.Sprite):
         dog.rect = dog.image.get_rect()
         dog.rect.x = random.randint(0,screen_width- dog.rect.width) # the rect will put the top left corner of the rectangle of the dog in this range(SO cannot put screen width as limit)
         dog.speedx = 3
-        dog.rect.y = 490
+        dog.rect.y = 495
         dog.state = "idle"
         dog.target_x =dog.rect.x
         dog.idle_time = pygame.time.get_ticks()
