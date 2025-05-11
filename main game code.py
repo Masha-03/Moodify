@@ -221,11 +221,18 @@ def play_background_music():
     pygame.mixer.music.set_volume(0.5)      
     pygame.mixer.music.play(-1)  # -1 means loop indefinitely
 
+raining_sound = None
 def play_rain_sound():
-    raining_sound = pygame.mixer.Sound("Moodify/sound effect/raining sound.mp3") 
-    raining_sound.set_volume(0.4)
-    raining_sound.play(-1)
+    global raining_sound
+    if raining_sound is None: 
+        raining_sound = pygame.mixer.Sound("Moodify/sound effect/raining sound.mp3")
+        raining_sound.set_volume(0.4)
+    raining_sound.play(-1) 
     
+def stop_rain_sound():
+    global raining_sound
+    if raining_sound: #if its a sound
+        raining_sound.stop()
 
 def picture_speech():
     speech_forpicture =["Arrr matey! Ready for an adventure?",
@@ -364,31 +371,31 @@ hourglass_img = pygame.image.load("Moodify/graphics/hourglass.png")
 hourglass_rect = hourglass_img.get_rect()
 hourglass_rect.x = 130
 hourglass_rect.y = 355
-show_breathing= False
-breathing_opened = False
+breathing_process = None
+
 diary_img = pygame.image.load("Moodify/graphics/diary.png")
 diary_rect = diary_img.get_rect()
 diary_rect.x = 920
 diary_rect.y = 455
-show_diary = False
-diary_opened = False #to prevent opening multiple times
+diary_process = None
 
 moodtracker_img = pygame.image.load("Moodify/graphics/mood tracker.png")
 moodtracker_rect = moodtracker_img.get_rect()
 moodtracker_rect.x= 350
 moodtracker_rect.y= 70
-show_moodtracker = False
-moodtracker_opened = False
+moodtracker_process = None
 
 play_button_img = pygame.image.load("Moodify/graphics/play button.png")
 play_button_rect = play_button_img.get_rect()
+play_button_rect.x = 550
+play_button_rect.y = 400
+tkinterradio_process = None
 
 calendar_img = pygame.image.load("Moodify/graphics/calendar.png")
 calendar_rect = calendar_img.get_rect()
 calendar_rect.x= 370
 calendar_rect.y= 140
-show_calendar = False
-calendar_opened = False
+calendar_process = None
 
 
 #--------------------------------------------------------------------------
@@ -431,7 +438,14 @@ font =pygame.font.Font(None,30)
 while True:
     for event in pygame.event.get(): #collects all the events and goes through it one by one
         if event.type == pygame.QUIT:
-            pygame.quit() 
+            if calendar_process and calendar_process.poll() is None:# if its not open = None for first statement no action taken / open before but closed alr, poll() will check and see if its open if open poll()=None 
+                calendar_process.terminate()
+            if diary_process and diary_process.poll() is None:
+                diary_process.terminate()
+            if moodtracker_process and moodtracker_process.poll() is None:
+                moodtracker_process.terminate()
+            if tkinterradio_process and tkinterradio_process.poll() is None:
+                tkinterradio_process.terminate()
             sys.exit() 
         if event.type == pygame.KEYDOWN:#check if any key is press 
             if event.key == pygame.K_ESCAPE: #if its the ESC key
@@ -441,11 +455,19 @@ while True:
             if show_tv_screen:
                 if TV_quit_button_rect.collidepoint(event.pos):
                     show_tv_screen = False
+                    pygame.mixer.music.unpause()
+                    play_rain_sound()
                 if bubble_icon_rect.collidepoint(event.pos):
                     open_bubble_popper = True
             if show_radio:
                 if Radio_quit_button_rect.collidepoint(event.pos):
                     show_radio =False
+                if play_button_rect.collidepoint(event.pos):
+                    if not tkinterradio_process or tkinterradio_process is not None:
+                        pygame.mixer.music.stop() #stop the music
+                        stop_rain_sound()
+                        subprocess.Popen(["Python","Moodify/qin en/sound/sound_.py"])
+                        
             if show_plant:
                 if plant_quit_button_rect.collidepoint(event.pos):
                     show_plant =False
@@ -485,12 +507,16 @@ while True:
                     show_text = False
                 
                 if diary_rect.collidepoint(event.pos):
-                    show_diary = True
-                if calendar_rect.collidepoint(event.pos):
-                    show_calendar = True
-                if moodtracker_rect.collidepoint(event.pos):
-                    show_moodtracker = True
+                    if not diary_process or diary_process.poll() is not None:
+                        subprocess.Popen(["python","Moodify/qin en/diary_.py"]) 
 
+                if calendar_rect.collidepoint(event.pos):
+                    if not calendar_process or calendar_process.poll() is not None:#if its not open yet or close rn poll()is not None = closed
+                        calendar_process = subprocess.Popen(["python", "Moodify/qin en/calendar_.py"])
+
+                if moodtracker_rect.collidepoint(event.pos):
+                    if not moodtracker_process or moodtracker_process.poll() is not None:
+                        calendar_process = subprocess.Popen(["python", "Moodify/qin en/moodtracker/moodtracker_.py"])
     
     scaled_surface = pygame.transform.scale(virtual_surface, (screen_width, screen_height))
     screen.blit(scaled_surface,(0,0))
@@ -500,7 +526,7 @@ while True:
     if 7 <= current_hour < 18: #set time between  7 to 6pm
         virtual_surface.blit(sunny_background, (420,40))
     else:
-        virtual_surface.blit(night_background, (420,40))
+        virtual_surface.blit(night_background, (460,40))
 
     #if it rain the display if not None
     display_rain(rain_group)
@@ -534,6 +560,8 @@ while True:
         Radio_quit_button_rect = quit_button_img.get_rect()
         Radio_quit_button_rect.topright =(1100,130) 
         virtual_surface.blit(quit_button_img,Radio_quit_button_rect)
+        virtual_surface.blit(play_button_img,play_button_rect)
+        
     
     if show_plant:
         scaled_plant_img =pygame.transform.scale(plant_img,(VIRTUAL_WIDTH,VIRTUAL_HEIGHT))
@@ -567,17 +595,13 @@ while True:
 
         open_bubble_popper =False #avoid open multiple times
 
-    if show_diary and not diary_opened:
-        subprocess.Popen(["python","Moodify/qin en/diary_.py"]) 
-        diary_opened = True #prevent opening multiple times 
+  
     
-    if show_calendar and not calendar_opened:
-        subprocess.Popen(["Python","Moodify/qin en/calendar_.py"])
-        calendar_opened = True
 
-    if show_moodtracker:
-        subprocess.Popen(["Python","Moodify/qin en/moodtracker/moodtracker_.py"])
-        moodtracker_opened = True
+    
+    
+    
+        
 
     pygame.display.update() #update the display of the screen 
     Time.tick(60)# tells loop dont just faster then 60 fps

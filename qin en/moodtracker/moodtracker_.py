@@ -18,7 +18,7 @@ mood_quotes = {
 #Get profile from the database
 def get_profile():
     global profile
-    connect = sqlite3.connect('moodify_database.db')
+    connect = sqlite3.connect('Moodify/moodify_database.db')
     cursor = connect.cursor()
     
     #Fetch the profile
@@ -34,7 +34,7 @@ def get_profile():
 #Initialise table
 def initialise_table(): 
         #Connect to database
-        connect = sqlite3.connect('moodify_database.db')
+        connect = sqlite3.connect('Moodify/moodify_database.db')
         #Create cursor
         cursor = connect.cursor()
         
@@ -75,7 +75,7 @@ def save_mood():
         current_time = now.strftime("%H:%M:%S") #Get time
 
         # Insert into database
-        conn = sqlite3.connect('moodify_database.db')
+        conn = sqlite3.connect('Moodify/moodify_database.db')
         cursor = conn.cursor()
 
         cursor.execute('''
@@ -180,12 +180,12 @@ def resize_image(image_path, size=(50,50)):
     return ImageTk.PhotoImage(img)
 
 #image for button
-happy_image=resize_image("C:/Users/qinen/project/moodify/happy.png")
-sad_image=resize_image("C:/Users/qinen/project/moodify/sad.png")
-angry_image=resize_image("C:/Users/qinen/project/moodify/angry.png")
-excited_image=resize_image("C:/Users/qinen/project/moodify/excited.png")
-sleepy_image=resize_image("C:/Users/qinen/project/moodify/sleepy.png")
-relaxed_image=resize_image("C:/Users/qinen/project/moodify/relaxed.png")
+happy_image=resize_image("Moodify/qin en/moodtracker/happy.png")
+sad_image=resize_image("Moodify/qin en/moodtracker/sad.png")
+angry_image=resize_image("Moodify/qin en/moodtracker/angry.png")
+excited_image=resize_image("Moodify/qin en/moodtracker/excited.png")
+sleepy_image=resize_image("Moodify/qin en/moodtracker/sleepy.png")
+relaxed_image=resize_image("Moodify/qin en/moodtracker/relaxed.png")
 
 
 #button to choose the mood
