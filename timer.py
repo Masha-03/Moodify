@@ -1,8 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-from ttkbootstrap import ttk, Style #Modern widget
+from ttkbootstrap import Style #Modern widget
 import time #Animations
+import random
 
 #Set default timings
 INHALE = 4
@@ -15,35 +16,43 @@ class Timer:
         self.root = tk.Tk()
         self.root.state("zoomed")
         self.root.title("Breathing Exercise")
-        self.style = Style(theme="simplex")
+        self.style = Style(theme="morph")
         self.style.theme_use()
         
+        #Main container frame
+        self.container = ttk.Frame(self.root, padding=(40, 30))
+        self.container.pack(expand=True)
+        
         #Canvas frame to draw the breathing circle
-        self.canvas = tk.Canvas(self.root, width=300, height=300)
-        self.canvas.pack(pady=20)
+        self.canvas = tk.Canvas(self.container, width=300, height=300, bg="#f0f0f0", highlightthickness=0)
+        self.canvas.grid(row=0, column=0, pady=(0, 30))
         
         #Initial circle
-        self.circle = self.canvas.create_oval(100, 100, 200, 200, fill="lightblue")
+        self.circle = self.canvas.create_oval(100, 100, 200, 200, fill="#add8e6", outline="#87ceeb")
 
         #Label to show current round number
-        self.round_label = tk.Label(self.root, text="Round 0 of 3", font=("Arial", 16))
-        self.round_label.pack()
+        self.round_label = ttk.Label(self.container, text="Round 0 of 3", font=("Arial", 16), bootstyle="primary")
+        self.round_label.grid(row=1, column=0, pady=(0, 10))
 
         #Label to show countdown timer and current phase
-        self.timer_label = tk.Label(self.root, text="", font=("Arial", 24))
-        self.timer_label.pack(pady=10)
+        self.timer_label = ttk.Label(self.container, text="", font=("Arial", 24), bootstyle="secondary")
+        self.timer_label.grid(row=2, column=0, pady=(10, 20))
+        
+        #Instruction label 
+        self.instruction_label = ttk.Label(self.container, text="", font=("Arial", 14), bootstyle="secondary")
+        self.instruction_label.grid(row=3, column=0, pady=(10, 20))
 
         #Frame to hold the Start and Stop buttons
-        button_frame = tk.Frame(self.root)
-        button_frame.pack(pady=10)
+        button_frame = ttk.Frame(self.container)
+        button_frame.grid(row=4, column=0, pady=(10, 0))
 
         #Start button
-        self.start_button = ttk.Button(button_frame, text="Start", command=self.start_timer)
-        self.start_button.pack(side=tk.LEFT, padx=10)
+        self.start_button = ttk.Button(button_frame, text="Start", command=self.start_timer, bootstyle="success-outline", width=12)
+        self.start_button.grid(row=0, column=0, padx=(0, 20), ipady=5)
 
         #Stop button
-        self.stop_button = ttk.Button(button_frame, text="Stop", command=self.stop_timer, state=tk.DISABLED)
-        self.stop_button.pack(side=tk.LEFT, padx=10)
+        self.stop_button = ttk.Button(button_frame, text="Stop", command=self.stop_timer, state=tk.DISABLED,bootstyle="danger-outline", width=12)
+        self.stop_button.grid(row=0, column=1, ipady=5)
 
         #Total breathing cycles
         self.total_rounds = 3
@@ -53,10 +62,10 @@ class Timer:
         self.phase = "inhale"
         #Time left
         self.time_remaining = INHALE       
-        self.is_running = False            
+        self.is_running = False     
         
         self.root.mainloop()
-
+        
     def start_timer(self):
         self.is_running = True
         #Disable start button
@@ -66,6 +75,8 @@ class Timer:
         self.rounds_completed = 0
         self.phase = "inhale"
         self.time_remaining = INHALE
+        #Clear the completion message when starting a new session
+        self.instruction_label.config(text="Inhale deeply...")
         self.update_timer()
 
     def stop_timer(self):
@@ -78,8 +89,15 @@ class Timer:
         #Disable stop
         self.stop_button.config(state=tk.DISABLED)
         #Reset circle
-        self.reset_circle()                                  
-
+        self.reset_circle()
+        #Check if stopped midway or completed
+        if self.rounds_completed >= self.total_rounds:
+            #Display completion message if all rounds are done
+            self.instruction_label.config(text="You've completed your breathing exercise. Well done!")
+        else:
+            #Clear the instruction if stopped midway
+            self.instruction_label.config(text="")
+        
     #Main loop that updates every second
     def update_timer(self):
         if not self.is_running:
@@ -101,24 +119,34 @@ class Timer:
             if self.phase == "inhale":
                 self.phase = "hold"
                 self.time_remaining = HOLD
-                messagebox.showinfo("Hold", "Hold your breath.")
+                self.instruction_label.config(text="Hold your breath...")
             elif self.phase == "hold":
                 self.phase = "exhale"
                 self.time_remaining = EXHALE
-                messagebox.showinfo("Exhale", "Exhale slowly.")
+                self.instruction_label.config(text="Exhale slowly...")
             elif self.phase == "exhale":
                 self.rounds_completed += 1
                 #After 3 rounds it stops
                 if self.rounds_completed >= self.total_rounds:
-                    messagebox.showinfo("Done", "You’ve completed your breathing exercise!")
+                    self.instruction_label.config(text="You've completed your breathing exercise. Well done!")
                     self.stop_timer()
                     return
-                self.phase = "inhale"
-                self.time_remaining = INHALE
-                messagebox.showinfo("Inhale", "Inhale again.")
+                
+                #Pause before starting the next round
+                self.instruction_label.config(text="Resting for 2 seconds...")
+                self.timer_label.config(text="2s - Rest")
+                self.root.after(2000, self.start_next_round)  # 2-second pause
+                return
             
-            #Start the timer for the new phase
+            #Start the timer
             self.update_timer()
+            
+    def start_next_round(self):
+        self.phase = "inhale"
+        self.time_remaining = INHALE
+        self.instruction_label.config(text="Inhale deeply...")
+        #Start the timer for the new phase
+        self.update_timer()
             
     #Adjust the size of the circle            
     def animate_circle(self, phase):
@@ -127,14 +155,13 @@ class Timer:
             return
 
         if phase == "inhale":
-            self.animate_resize(100, 75, 200, 225, INHALE) #top-left corner (first 2), bottom-right corner(last 2)
+            self.animate_resize(100, 75, 200, 225, duration=4)
         elif phase == "exhale":
-            self.animate_resize(75, 110, 225, 190, EXHALE)
+            self.animate_resize(75, 100, 225, 200, duration=4)
 
     def animate_resize(self, start_x0, end_x0, start_x1, end_x1, duration):
         start_time = time.time()
-        end_time = start_time + duration
-        steps = 100  #For smoother animation
+        steps = 60 
 
         def animate():
             #Doesn't animate circle during hold
