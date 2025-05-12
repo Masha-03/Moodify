@@ -3,7 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox
 import customtkinter as ctk
 import time #Animations
-import random
+from PIL import Image, ImageDraw, ImageTk
 
 #Set default timings
 INHALE = 4
@@ -20,7 +20,7 @@ class Timer:
         self.root = tk.Tk()
         self.root.state("zoomed")
         self.root.title("Breathing Exercise")
-        self.root.configure(bg="#DDEFFB")  # Soft blue background
+        self.root.configure(bg="#DDEFFB")  # Soft blue background    
         
         #Main container frame
         self.container = ctk.CTkFrame(self.root, width=600, height=600, corner_radius=20, fg_color="#DDEFFB")
