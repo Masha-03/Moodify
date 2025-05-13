@@ -18,11 +18,11 @@ def resize_image(image_path, size=(40,40)):
 
 #song dictionary
 song_dict={
-       "Rain sounds":"C:/Users/qinen/project/moodify/rain.mp3",
-       "Ocean waves sounds":"C:/Users/qinen/project/moodify/ocean.mp3",
-       "Spring sounds":"C:/Users/qinen/project/moodify/bird.mp3",
-       "Clicking keyboard sounds":"C:/Users/qinen/project/moodify/keyboard.mp3",
-       "Waterfall sounds":"C:/Users/qinen/project/moodify/waterfall.mp3"
+       "Rain sounds":"C:/Users/qinen/project/Moodify/sound/rain.mp3",
+       "Ocean waves sounds":"C:/Users/qinen/project/Moodify/sound/ocean.mp3",
+       "Spring sounds":"C:/Users/qinen/project/Moodify/sound/bird.mp3",
+       "Clicking keyboard sounds":"C:/Users/qinen/project/Moodify/sound/keyboard.mp3",
+       "Waterfall sounds":"C:/Users/qinen/project/Moodify/sound/waterfall.mp3"
 }
 
 #----------------------------------------------------------------------------------------------------------------------#
@@ -120,11 +120,11 @@ for song_name in song_dict: #each element is temporarily stored in variable "son
 #CONTROL BUTTON
 
 #image for button
-play_image=resize_image("C:/Users/qinen/project/moodify/play.png")
-pause_image=resize_image("C:/Users/qinen/project/moodify/pause.png")
-stop_image=resize_image("C:/Users/qinen/project/moodify/stop.png")
-next_image=resize_image("C:/Users/qinen/project/moodify/next.png")
-previous_image=resize_image("C:/Users/qinen/project/moodify/previous.png")
+play_image=resize_image("C:/Users/qinen/project/Moodify/sound/play.png")
+pause_image=resize_image("C:/Users/qinen/project/Moodify/sound/pause.png")
+stop_image=resize_image("C:/Users/qinen/project/Moodify/sound/stop.png")
+next_image=resize_image("C:/Users/qinen/project/Moodify/sound/next.png")
+previous_image=resize_image("C:/Users/qinen/project/Moodify/sound/previous.png")
 
 #Control buttons for the sound player
 previous_button=tk.Button(button_frame, image=previous_image, command=prev_sound, relief="flat", bg="#4fc3f7", activebackground="#29b6f6",bd=0, highlightthickness=0)
