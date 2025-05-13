@@ -8,7 +8,7 @@ pygame.mixer.init()
 
 # Get the current monitor size for fullscreen support
 monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
-screen = pygame.display.set_mode((1600, 900), pygame.RESIZABLE)
+screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
 fullscreen = False
 
 # Constants for screen dimension and colors
@@ -23,6 +23,8 @@ DROPDOWN_COLOR = (230, 210, 190)
 DROPDOWN_ACTIVE_COLOR = (210, 190, 170)
 DROPDOWN_OPTION_COLOR = (220, 200, 180)
 DROPDOWN_OPTION_HOVER_COLOR = (200, 180, 160)
+INPUT_BG_COLOR = (255, 255, 255)
+INPUT_BORDER_COLOR = (180, 140, 100)
 FONT = pygame.font.Font("texts/PressStart2P-Regular.ttf", 20)
 
 # Load music
@@ -35,8 +37,21 @@ settings_icon = pygame.image.load("settings/settings_icon.png")
 settings_icon = pygame.transform.scale(settings_icon, (80, 80))
 
 # Load character animations (4 frames)
-male_frames = [pygame.image.load(f"male/boy_pixil_frame_{i}.png") for i in range(0, 4)]
-female_frames = [pygame.image.load(f"female/girl_pixil_frame_{i}.png") for i in range(0, 4)]
+scale_size = 0.75
+
+male_frames = [
+    pygame.transform.scale_by(
+        pygame.image.load(f"male/boy_pixil_frame_{i}.png"), scale_size
+    )
+    for i in range(4)]
+
+female_frames = [
+    pygame.transform.scale_by(
+        pygame.image.load(f"female/girl_pixil_frame_{i}.png"), scale_size
+    )
+    for i in range(4)]
+
+# Animation variables
 animation_index = 0
 animation_timer = 0
 animation_speed = 10
@@ -48,6 +63,9 @@ genders = ["Male", "Female"]
 selected_gender_index = 0
 gender_dropdown_active = False
 settings_open = False
+nickname = ""
+input_active = False
+nickname_confirmed = False
 
 # Utility functions
 def draw_text(surface, text, x, y, color):
@@ -68,6 +86,7 @@ def draw_icon_button(surface, icon, x, y):
     rect = pygame.Rect(x, y, icon.get_width(), icon.get_height())
     screen.blit(icon, (x, y))
     return rect
+
 
 def draw_slider(surface, x, y, width, height, value):
     pygame.draw.rect(surface, SLIDER_COLOR, (x, y, width, height), border_radius=6)
@@ -91,6 +110,14 @@ def draw_dropdown(surface, x, y, width, height, options, selected_index, is_acti
                 pygame.draw.rect(surface, DROPDOWN_OPTION_HOVER_COLOR, option_rect, border_radius=6)
                 surface.blit(option_text, option_text.get_rect(center=option_rect.center))
     return rect
+
+def draw_input_box(surface, text, x, y, width, height, active):
+    color = INPUT_BORDER_COLOR if active else BUTTON_COLOR
+    pygame.draw.rect(surface, color, (x, y, width, height), border_radius=8)
+    pygame.draw.rect(surface, INPUT_BG_COLOR, (x + 2, y + 2, width - 4, height - 4), border_radius=8)
+    text_surface = FONT.render(text + ("|" if active else ""), True, TEXT_COLOR)
+    surface.blit(text_surface, (x + 10, y + 10))
+    return pygame.Rect(x, y, width, height)
 
 # Main loop
 running = True
@@ -124,10 +151,19 @@ while running:
         draw_text(screen, "Gender:", settings_x + 40, start_y + 180, TEXT_COLOR)
         gender_dropdown_rect = draw_dropdown(screen, settings_x + 300, start_y + 180, 200, 40, genders, selected_gender_index, gender_dropdown_active)
         
-        draw_text(screen, "Character Preview:", settings_x + settings_width - 550, settings_y + 80, TEXT_COLOR)
+        draw_text(screen, "Character Preview:", settings_x + settings_width - 450, settings_y + 80, TEXT_COLOR)
         current_frame = male_frames[animation_index] if genders[selected_gender_index] == "Male" else female_frames[animation_index]
-        screen.blit(current_frame, (settings_x + settings_width - 550, settings_y + 120))
+        screen.blit(current_frame, (settings_x + settings_width - 450, settings_y + 120))
 
+        # Draw nickname input
+        draw_text(screen, "Nickname:", settings_x + 40, start_y + 320, TEXT_COLOR)
+        nickname_input_rect = draw_input_box(screen, nickname, settings_x + 300, start_y + 300, 250, 50, input_active)
+        
+        # Draw nickname preview only if confirmed
+        if nickname_confirmed:
+            draw_text(screen, nickname, settings_x + settings_width - 400
+            , settings_y + 500, TEXT_COLOR)
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -143,6 +179,15 @@ while running:
                     screen = pygame.display.set_mode(monitor_size, pygame.FULLSCREEN)
                 else:
                     screen = pygame.display.set_mode((screen.get_width(), screen.get_height()), pygame.RESIZABLE)
+            if input_active:
+                if event.key == pygame.K_BACKSPACE:
+                    nickname = nickname[:-1]
+                elif event.key == pygame.K_RETURN:
+                    input_active = False
+                    nickname_confirmed = True
+                elif len(nickname) < 11:  # Limit nickname length to 10 characters
+                    nickname += event.unicode
+
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
             if settings_button_rect.collidepoint(mouse_pos):
@@ -164,7 +209,10 @@ while running:
                             selected_gender_index = i
                             gender_dropdown_active = False
                             break
-
+                input_active = nickname_input_rect.collidepoint(mouse_pos)
+                if not input_active:
+                    nickname_confirmed = True
+                    
     pygame.display.flip()
     clock.tick(60)
 
