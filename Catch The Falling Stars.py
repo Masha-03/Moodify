@@ -28,7 +28,7 @@ BACKGROUND = pygame.image.load("nightsky.png").convert() #load the background im
 BACKGROUND = pygame.transform.scale(BACKGROUND, (WIDTH, HEIGHT)) #scale the background to the default resolution
 #-----------------------------------------------------------------------------------------------------------------------------------
 #load sound effect
-CATCH_SOUND = pygame.mixer.Sound("catch_sound.wav")  #catching sound
+CATCH_SOUND = pygame.mixer.Sound("catch_sound.wav")  #catching sound 
 
 # Load background music
 pygame.mixer.music.load("background_music.wav") 
