@@ -108,7 +108,7 @@ def save_entry():
     cursor = connect.cursor()
 
     #Check for any empty field
-    if not title_text or diary_text: 
+    if not title_text or not diary_text: 
             #Warning box
             messagebox.showwarning("Incomplete Information", "Please fill in both Title and Diary Content")
             return
