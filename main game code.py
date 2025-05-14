@@ -209,8 +209,9 @@ class dog(pygame.sprite.Sprite):
             else: 
                 dog.image = dog.idlefacing_right[dog.current_img]
 
-       
-
+def scale_bg():
+    current_w, current_h = screen.get_size() #must use new one
+    return pygame.transform.scale(background_surface, (current_w, current_h))
 
 
         
@@ -283,15 +284,15 @@ def sofa_speech():
 #tried to fix the fullscreen alignment problem but failed using a virtual surface
 VIRTUAL_WIDTH = 1280
 VIRTUAL_HEIGHT = 720
-
 #setting up pygame
 pygame.init() # to start the system: sound,graphics etc of pygame module
-#screen here is like a canvas to store the window and u can draw/ add other images
-screen = pygame.display.set_mode((VIRTUAL_WIDTH, VIRTUAL_HEIGHT))  # windowed mode
-# tells pygame automatically set to full-screen on users computer 
+
+screen = pygame.display.set_mode((VIRTUAL_WIDTH, VIRTUAL_HEIGHT),pygame.RESIZABLE)
+fullscreen =False
 Time = pygame.time.Clock()
 #set game speed
-
+#get monitor size info
+monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
 screen_width,screen_height = screen.get_size()
 virtual_surface = pygame.Surface((VIRTUAL_WIDTH, VIRTUAL_HEIGHT))
 
@@ -313,7 +314,7 @@ sunny_background = pygame.image.load("Moodify/graphics/sunny day background.png"
 #background image
 background_surface =pygame.image.load("Moodify/graphics/main game page no window.png").convert_alpha()
 # to scale background image on the virtual surface
-background_surface = pygame.transform.scale(background_surface,(VIRTUAL_WIDTH,VIRTUAL_HEIGHT))
+background_surface = scale_bg()
 
 
 #character image (female)
@@ -451,6 +452,18 @@ while True:
             if event.key == pygame.K_ESCAPE: #if its the ESC key
                 pygame.quit() # shut down eveythig u open/ initialized (includes the program that is running in the background)
                 sys.exit() 
+            if event.key == pygame.K_f:
+                fullscreen = not fullscreen
+                if fullscreen :
+                    monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
+                    screen = pygame.display.set_mode((monitor_size),pygame.FULLSCREEN) 
+                else:
+                    screen = pygame.display.set_mode((VIRTUAL_WIDTH,VIRTUAL_HEIGHT),pygame.RESIZABLE) 
+                background_surface = scale_bg() #resale bg to new size
+        if event.type == pygame.VIDEORESIZE:
+            screen = pygame.display.set_mode((event.w, event.h),pygame.RESIZABLE) 
+            background_surface= scale_bg()
+        
         if event.type == pygame.MOUSEBUTTONDOWN:
             if show_tv_screen:
                 if TV_quit_button_rect.collidepoint(event.pos):
