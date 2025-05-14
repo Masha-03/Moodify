@@ -144,7 +144,7 @@ def draw_window():
     font_size = int(36 / 1080 * screen.get_height())  # scale font size based on height
     score_font = pygame.font.Font(None, font_size)  # create a scaled font
     score_text = score_font.render(f"Resilience: {resilience_points}/{basket_capacity}", True, (0, 0, 0))  # render the score text in black
-    screen.blit(score_text, (int(0.10 * screen.get_width()), int(0.10 * screen.get_height())))  # 10% padding from the top left
+    screen.blit(score_text, (int(0.03 * screen.get_width()), int(0.03 * screen.get_height())))  # 3% padding from the top left
 
     # draw the message if active
     display_message()
@@ -174,8 +174,8 @@ def handle_resize(event):
         star_info["rect"].height = STAR_SIZE
         star_info["image"] = random.choice(SCALED_STAR_IMAGES)
 
-    # update star speed based on the new vertical scale
-    star_speed = int(2 / 1080 * event.h)
+        # update star speed based on the new vertical scale
+        star_speed = int(2 / 1080 * event.h)
 
     # scale bg to fit the new screen size
     BACKGROUND = pygame.transform.scale(MOODS[current_mood], (event.w, event.h))

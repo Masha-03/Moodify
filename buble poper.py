@@ -5,8 +5,8 @@ import time
 import subprocess
 
 calming_words = [
-    "Breathe", "Relax", "Peace", "Calm", "Let Go", 
-    "Focus", "Stillness", "Soft", "Ease", "Clear"
+    "Fail", "Weak", "Loser", "Alone", "Broken",
+    "Fake", "Empty", "Lost", "Stuck", "Worthless"
 ]
 
 # Initialize Pygame
