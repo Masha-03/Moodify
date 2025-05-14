@@ -5,20 +5,21 @@ import random
 
 # Initialize Pygame
 pygame.init()
-pygame.mixer.init()  # initialize the mixer for sound
+pygame.mixer.init()  #initialize the mixer for sound
 # -----------------------------------------------------------------------------------------------------------------------------------
-# Initialize the game window with adaptive scaling
+#initialize the game window with adaptive scaling
 monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]  # get the current monitor size
 WIDTH, HEIGHT = 1280, 720  # default base resolution for scaling
 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)  # create a resizable window
 pygame.display.set_caption("Catch the Falling Stars")  # set the window title
-fullscreen = False  # track if the game is in fullscreen mode
+fullscreen = False  # track if the game is in fullscreen mode (it starts as windowed)
 
-# define function to get the current scaling factors based on the window size
-def get_scale_factors(current_width, current_height):
-    return current_width / WIDTH, current_height / HEIGHT
+#define function to get the current scaling factors based on the window size
+def get_scale_factors(current_width, current_height): #a function that takes the current width and height of the window as input
+    return current_width / WIDTH, current_height / HEIGHT 
+#these factors are used to adjust the size and speed of game
 
-# initialize scaling factors
+# assign the scaling factors to this variable
 scale_x, scale_y = get_scale_factors(screen.get_width(), screen.get_height())
 # -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -28,11 +29,11 @@ MOODS = {
     "Calm Night": pygame.image.load("catch_star/starrynight.png").convert(),
     "Peaceful Moonlight": pygame.image.load("catch_star/moonlight.png").convert(),
     "Serene Aurora": pygame.image.load("catch_star/aurora.png").convert()
-}
-current_mood = "Calm Night"
-BACKGROUND = pygame.transform.scale(MOODS[current_mood], (screen.get_width(), screen.get_height()))
+} #.convert() --> change the pixel format of an image with no arguments, to create a copy that will draw more quickly on the screen
+current_mood = "Calm Night" #sets the initial background mood
+BACKGROUND = pygame.transform.scale(MOODS[current_mood], (screen.get_width(), screen.get_height())) #stretches/shrinks it to match the screen size.
 mood_menu_active = False
-mood_options = list(MOODS.keys())
+mood_options = list(MOODS.keys()) #create a list of the mood names from the MOODS dictionary above
 mood_index = 0
 # -----------------------------------------------------------------------------------------------------------------------------------
 # load sound effect
@@ -45,15 +46,15 @@ pygame.mixer.music.play(-1)  # Play in a loop (-1 means infinite loop)
 # -----------------------------------------------------------------------------------------------------------------------------------
 
 # load catcher image
-PLAYER_WIDTH_RATIO = 225 / WIDTH  # relative width of the player image
-PLAYER_HEIGHT_RATIO = 190 / HEIGHT  # relative height of the player image
-PLAYER_IMAGE = pygame.image.load("catch_star/catcher.png").convert_alpha()
-PLAYER_WIDTH = int(PLAYER_WIDTH_RATIO * screen.get_width())  # scale the player width based on the screen size
-PLAYER_HEIGHT = int(PLAYER_HEIGHT_RATIO * screen.get_height())  # scale the player height based on the screen size
+PLAYER_WIDTH_RATIO = 225 / WIDTH  # calculate the ratio of the basket original width to the current window width
+PLAYER_HEIGHT_RATIO = 190 / HEIGHT  # calculate the ratio of the basket original height to the current window height
+PLAYER_IMAGE = pygame.image.load("catch_star/catcher.png").convert_alpha() #sincge the image has transparency bg, use alpha to avoid having solid color at the back
+PLAYER_WIDTH = int(PLAYER_WIDTH_RATIO * screen.get_width())  # calculate the player width based on the screen size
+PLAYER_HEIGHT = int(PLAYER_HEIGHT_RATIO * screen.get_height())  # calculate the player height based on the screen size
 SCALED_PLAYER = pygame.transform.scale(PLAYER_IMAGE, (PLAYER_WIDTH, PLAYER_HEIGHT))  # scale the player image
 
-player_x = (screen.get_width() - PLAYER_WIDTH // 2)  # position the player in the center horizontally
-player_y = int(0.9 * screen.get_height() - PLAYER_HEIGHT)  # near bottom, 10% padding
+player_x = (screen.get_width() - PLAYER_WIDTH // 2)  # set the baskett in the center horizontally
+player_y = int(0.9 * screen.get_height() - PLAYER_HEIGHT)  # set the basket near bottom, 10% padding
 player_speed = 5 * scale_x  # player speed based on the screen size
 # -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -69,13 +70,13 @@ STAR_IMAGES = [
 STAR_SIZE_RATIO = 200 / WIDTH  # RELATIVE STAR SIZE
 STAR_SIZE = int(STAR_SIZE_RATIO * screen.get_width())  # scale the star size
 SCALED_STAR_IMAGES = [pygame.transform.scale(img, (STAR_SIZE, STAR_SIZE)) for img in STAR_IMAGES]  # scale each star image
-star_speed = int(2 / 1080 * screen.get_height())  # scale star speed based on height
+star_speed = int(2 / 1080 * screen.get_height())  # scale star speed based on current window height
 stars = []  # list to store active stars
-STAR_SPAWN_RATE = 30  # number of frames between each star spawn
+STAR_SPAWN_RATE = 60  # number of frames between each star spawn
 # -----------------------------------------------------------------------------------------------------------------------------------
 
 # score/Basket
-resilience_points = 0
+resilience_points = 0 # set (number of caught stars) to zero
 basket_capacity = 10  # number of stars the basket can hold
 emotional_messages = [
     "Every catch is a small win, just like focusing on the good in life.",
@@ -97,31 +98,33 @@ large_font_size = 72  # base font size for large text
 def get_scaled_font(size):
     return pygame.font.Font(None, int(size / 1080 * screen.get_height()))  # scale font size based on height
 
-font = get_scaled_font(base_font_size)  # font for normal text
-large_font = get_scaled_font(large_font_size)  # font for large messages
+font = get_scaled_font(base_font_size)  # font for normal text multiplied by the ratio of the current height to the base height
+large_font = get_scaled_font(large_font_size)  # font for large messages multiplied by the ratio of the current height to the base height
 # -----------------------------------------------------------------------------------------------------------------------------------
 def draw_player():
-    screen.blit(SCALED_PLAYER, (player_x, player_y))
+    screen.blit(SCALED_PLAYER, (player_x, player_y)) # draw the player at the current position
 
 def draw_star(star_info):
-    star_rect = star_info["rect"]
-    image = star_info["image"]
-    screen.blit(image, star_rect)
+    star_rect = star_info["rect"] # extract the rect object from the star_info dictionary
+    image = star_info["image"]    # extract the surface object from the star_info dictionary
+    screen.blit(image, star_rect)     # draw the star
 
 def display_message():
     if message_display:
         scaled_large_font = get_scaled_font(large_font_size)  # scale font based on current height
         message_text = scaled_large_font.render(current_message, True, (0, 0, 0))  # render the message in black
-        text_rect = message_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))  # center the message
+        text_rect = message_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))  # creates .Rect object for the rendered text and center the message
         screen.blit(message_text, text_rect)  # draw the message
 
 def draw_mood_menu():
+     #create a semi-transparentish overlay
     overlay = pygame.Surface((screen.get_width(), screen.get_height()))
-    overlay.set_alpha(180)
-    overlay.fill((0, 0, 0))
-    screen.blit(overlay, (0, 0))
+    overlay.set_alpha(180) # 180/255 transparency (70% opacity)
+    overlay.fill((0, 0, 0)) # fill it with black
+    screen.blit(overlay, (0, 0)) # covers entire screen
     scaled_large_font = get_scaled_font(large_font_size)
-    for i, mood in enumerate(mood_options):
+
+    for i, mood in enumerate(mood_options): #mood_options is a list of moods
         color = (255, 255, 255) if i == mood_index else (150, 150, 150)
         mood_text = scaled_large_font.render(mood, True, color)
         text_rect = mood_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 - 100 + i * 100))
@@ -130,7 +133,7 @@ def draw_mood_menu():
 # -----------------------------------------------------------------------------------------------------------------------------------
 # Draw all the game elements on the screen
 def draw_window():
-    # scale the background to match the current window size
+    # scale the bg to match the current window size
     scaled_bg = pygame.transform.scale(BACKGROUND, (screen.get_width(), screen.get_height()))
     screen.blit(scaled_bg, (0, 0))  # draw the scaled background
     draw_player()  # draw the player
@@ -141,11 +144,11 @@ def draw_window():
     font_size = int(36 / 1080 * screen.get_height())  # scale font size based on height
     score_font = pygame.font.Font(None, font_size)  # create a scaled font
     score_text = score_font.render(f"Resilience: {resilience_points}/{basket_capacity}", True, (0, 0, 0))  # render the score text in black
-    screen.blit(score_text, (int(0.01 * screen.get_width()), int(0.01 * screen.get_height())))  # 1% padding from the top left
+    screen.blit(score_text, (int(0.10 * screen.get_width()), int(0.10 * screen.get_height())))  # 10% padding from the top left
 
     # draw the message if active
     display_message()
-    if mood_menu_active:
+    if mood_menu_active: #if it is true, draw the mood menu
         draw_mood_menu()
     pygame.display.update()  # update the display to show the changes
 # -----------------------------------------------------------------------------------------------------------------------------------
@@ -154,7 +157,7 @@ def draw_window():
 def handle_resize(event):
     global scale_x, scale_y, PLAYER_WIDTH, PLAYER_HEIGHT, SCALED_PLAYER, player_x, player_y, star_speed, STAR_SIZE, SCALED_STAR_IMAGES, BACKGROUND
 
-    scale_x, scale_y = get_scale_factors(event.w, event.h)  # update scaling factors
+    scale_x, scale_y = get_scale_factors(event.w, event.h)  # takes the new width (event.w) and new height (event.h) of the resized window from the event object
 
     # update player size and position
     PLAYER_WIDTH = int(225 * scale_x)  # scale player width
@@ -174,7 +177,7 @@ def handle_resize(event):
     # update star speed based on the new vertical scale
     star_speed = int(2 / 1080 * event.h)
 
-    # scale background to fit the new screen size
+    # scale bg to fit the new screen size
     BACKGROUND = pygame.transform.scale(MOODS[current_mood], (event.w, event.h))
 # -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -189,14 +192,14 @@ def main():
         clock.tick(60)
         frame_count += 1
 
-        for event in pygame.event.get():
+        for event in pygame.event.get(): # iterates through all the events that happened ( mouse clicks, key presses, window resizing).
             if event.type == pygame.QUIT:
                 run = False
             elif event.type == pygame.VIDEORESIZE:
                 handle_resize(event)  # handle window resizing
-            elif event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN: #checks if any key is pressed
                 if event.key == pygame.K_f:
-                    if screen.get_flags() & pygame.FULLSCREEN:
+                    if screen.get_flags() & pygame.FULLSCREEN: # returns the current display flags (like FULLSCREEN RESIZABLE), the & (bitwise AND) checks if FULLSCREEN flag is active
                         pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)  # exit fullscreen
                     else:
                         pygame.display.set_mode((monitor_size[0], monitor_size[1]), pygame.FULLSCREEN)  # enter fullscreen
@@ -226,17 +229,17 @@ def main():
             player_x = screen.get_width() - PLAYER_WIDTH
 
         # spawn new stars
-        if not mood_menu_active:
+        if not mood_menu_active: #Stars will only spawn if the mood menu is not active
             if frame_count % STAR_SPAWN_RATE == 0:
-                star_x = random.randint(0, screen.get_width() - STAR_SIZE)
+                star_x = random.randint(0, screen.get_width() - STAR_SIZE) # randomize number for x from possible positions
                 star_rect = pygame.Rect(star_x, -STAR_SIZE, STAR_SIZE, STAR_SIZE)
                 random_image = random.choice(SCALED_STAR_IMAGES)
-                stars.append({"rect": star_rect, "image": random_image})
+                stars.append({"rect": star_rect, "image": random_image}) #stores the star images
 
             # move stars
             for star_info in stars[:]:
                 star_rect = star_info["rect"]
-                star_rect.y += star_speed
+                star_rect.y += star_speed # increases the star vertical position (y), making it fall down the screen
                 player_rect = pygame.Rect(player_x, player_y, PLAYER_WIDTH, PLAYER_HEIGHT)
                 if star_rect.colliderect(player_rect):
                     CATCH_SOUND.play()  # play the catch sound
