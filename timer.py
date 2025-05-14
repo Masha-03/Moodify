@@ -1,9 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter import messagebox
 import customtkinter as ctk
 import time #Animations
-from PIL import Image, ImageDraw, ImageTk
+import pygame  #For background music
 
 #Set default timings
 INHALE = 4
@@ -13,14 +12,25 @@ EXHALE = 4
 #Theme
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
-        
+
 class Timer:
     def __init__(self):
+        
+        #Initialize Pygame for music playback
+        pygame.mixer.init()
+        #Load the background music 
+        pygame.mixer.music.load("breathing.mp3")
+        pygame.mixer.music.play(loops=-1)  # -1 for infinite loop
+        
         #Window setup
         self.root = tk.Tk()
         self.root.state("zoomed")
         self.root.title("Breathing Exercise")
         self.root.configure(bg="#DDEFFB")  # Soft blue background    
+        
+        #Title
+        title=tk.Label(self.root,text="Breathing Exercise",font=("Segoe UI",18,"bold"), bg="#DDEFFB", fg="#152238")
+        title.pack(pady=30)
         
         #Main container frame
         self.container = ctk.CTkFrame(self.root, width=600, height=600, corner_radius=20, fg_color="#DDEFFB")
@@ -38,7 +48,7 @@ class Timer:
         self.circle = self.canvas.create_oval(100, 100, 200, 200, fill="#add8e6", outline="#87ceeb")
 
         #Label to show current round number
-        self.round_label = ctk.CTkLabel(self.container, text="ROUND 0 OF 3", font=("Arial", 20, "bold"), fg_color="#DDEFFB")
+        self.round_label = ctk.CTkLabel(self.container, text="ROUND 0 OF 3", font=("Arial", 20, "bold"), text_color="#152238", fg_color="#DDEFFB")
         self.round_label.grid(row=1, column=0, pady=(0, 10))
 
         #Label to show countdown timer and current phase
@@ -54,11 +64,11 @@ class Timer:
         button_frame.grid(row=4, column=0, pady=(10, 0))
 
         #Start button
-        self.start_button = ctk.CTkButton(button_frame, text="START", command=self.start_timer, width=120, height=40, corner_radius=10, fg_color="#32CD32", hover_color="#228B22", font=("Arial", 15))
+        self.start_button = ctk.CTkButton(button_frame, text="START", command=self.start_timer, width=120, height=40, corner_radius=10, fg_color="#152238", hover_color="#228B22", font=("Arial", 15))
         self.start_button.grid(row=0, column=0, padx=(0, 20), ipady=10)
 
         #Stop button
-        self.stop_button = ctk.CTkButton(button_frame, text="STOP", command=self.stop_timer, state=tk.DISABLED,width=120, height=40, corner_radius=10, fg_color="#FF4500", hover_color="#FF6347", font=("Arial", 15))
+        self.stop_button = ctk.CTkButton(button_frame, text="STOP", command=self.stop_timer, state=tk.DISABLED,width=120, height=40, corner_radius=10, fg_color="#152238", hover_color="#FF6347", font=("Arial", 15))
         self.stop_button.grid(row=0, column=1, ipady=10)
 
         #Total breathing cycles
@@ -91,7 +101,7 @@ class Timer:
         #Clear label
         self.timer_label.configure(text="")
         #Reset round                     
-        self.round_label.configure(text="ROUND 0 OF 3", font=("Arial", 20, "bold"))   
+        self.round_label.configure(text="ROUND 0 OF 3", font=("Arial", 20, "bold"),  text_color="#152238")   
         self.start_button.configure(state=tk.NORMAL)          
         #Disable stop
         self.stop_button.configure(state=tk.DISABLED)
@@ -112,7 +122,7 @@ class Timer:
 
         #Show countdown and rounds 
         self.timer_label.configure(text=f"{self.time_remaining:02d}s - {self.phase.capitalize()}")
-        self.round_label.configure(text=f"ROUND {self.rounds_completed + 1} OF {self.total_rounds}", font=("Arial", 20, "bold"))
+        self.round_label.configure(text=f"ROUND {self.rounds_completed + 1} OF {self.total_rounds}", font=("Arial", 20, "bold"),  text_color="#152238")
 
         #Animate the breathing circle based on phase
         self.animate_circle(self.phase)
@@ -168,7 +178,7 @@ class Timer:
 
     def animate_resize(self, start_x0, end_x0, start_x1, end_x1, duration):
         start_time = time.time()
-        steps = 60 
+        fps = 60
 
         def animate():
             #Doesn't animate circle during hold
