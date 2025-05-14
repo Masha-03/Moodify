@@ -19,11 +19,11 @@ def resize_image(image_path, size=(40,40)):
 
 #song dictionary
 song_dict={
-       "Rain sounds":"C:/Users/qinen/project/Moodify/sound/rain.mp3",
-       "Ocean waves sounds":"C:/Users/qinen/project/Moodify/sound/ocean.mp3",
-       "Spring sounds":"C:/Users/qinen/project/Moodify/sound/bird.mp3",
-       "Clicking keyboard sounds":"C:/Users/qinen/project/Moodify/sound/keyboard.mp3",
-       "Waterfall sounds":"C:/Users/qinen/project/Moodify/sound/waterfall.mp3"
+       "Rain sounds":"Moodify/qin en/sound/rain.mp3",
+       "Ocean waves sounds":"Moodify/qin en/sound/ocean.mp3",
+       "Spring sounds":"Moodify/qin en/sound/bird.mp3",
+       "Clicking keyboard sounds":"Moodify/qin en/sound/keyboard.mp3",
+       "Waterfall sounds":"Moodify/qin en/sound/waterfall.mp3"
 }
 
 #----------------------------------------------------------------------------------------------------------------------#
@@ -205,11 +205,11 @@ button_frame=tk.Frame(playlist_button_frame,bg="#e1f5fe")
 button_frame.pack(pady=(10,15))
 
 #image for button
-play_image=resize_image("C:/Users/qinen/project/Moodify/sound/play.png")
-pause_image=resize_image("C:/Users/qinen/project/Moodify/sound/pause.png")
-stop_image=resize_image("C:/Users/qinen/project/Moodify/sound/stop.png")
-next_image=resize_image("C:/Users/qinen/project/Moodify/sound/next.png")
-previous_image=resize_image("C:/Users/qinen/project/Moodify/sound/previous.png")
+play_image=resize_image("Moodify/qin en/sound/play.png")
+pause_image=resize_image("Moodify/qin en/sound/pause.png")
+stop_image=resize_image("Moodify/qin en/sound/stop.png")
+next_image=resize_image("Moodify/qin en/sound/next.png")
+previous_image=resize_image("Moodify/qin en/sound/previous.png")
 
 #store references to all button images.If no,image might get garbage collected by Python, cause them to disappear
 image_references = [previous_image,stop_image,play_image, pause_image, next_image]
