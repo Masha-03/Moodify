@@ -8,13 +8,13 @@ import os
 # Find the folder where the current Python file is
 base_dir = os.path.dirname(os.path.abspath(__file__))
 # Always save database in same folder
-db_path = os.path.join(base_dir, 'Moodify/moodify_database.db')
+db_path = os.path.join(base_dir, 'moodify_database.db')
 connect = sqlite3.connect(db_path)
 
 #Initialise shared database
 def initialise_table(): 
         #Connect to database
-        connect = sqlite3.connect('Moodify/moodify_database.db')
+        connect = sqlite3.connect('moodify_database.db')
         #Create cursor
         cursor = connect.cursor()
         
@@ -99,7 +99,7 @@ def enter_data():
         gender = gender_combobox.get()
         
         #Connect to database
-        connect = sqlite3.connect('Moodify/moodify_database.db')
+        connect = sqlite3.connect('moodify_database.db')
         #Create cursor
         cursor = connect.cursor()
         
