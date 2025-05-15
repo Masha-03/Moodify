@@ -11,16 +11,12 @@ root.configure(bg="#FCF8E8")  #change the background color of entire window
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #title label
-title = tk.Label(root, text="Stress Level Quiz", font=("Segoe UI", 18, "bold"), bg="#FCF8E8", fg="#333")
+title = tk.Label(root, text="Stress Level Survey", font=("Segoe UI", 18, "bold"), bg="#FCF8E8", fg="#333")
 title.pack(pady=10)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-"Hi there! It's great to see you today. I'm ChatMood, and I'll be guiding you through these questions. No need to worry — just take a deep breath and relax. Ready? Let's get started!"
-
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-
-#total 5 quiz questions
+#list of the quiz questions
 quiz_questions = [
     "How often do you feel overwhelmed by your responsibilities?",
     "Do you have trouble sleeping due to racing thoughts?",
@@ -31,7 +27,7 @@ quiz_questions = [
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-#answers options for each question 
+#list of the answers options for each question 
 quiz_options = [
     ["Rarely", "Sometimes", "Frequently", "Always"],
     ["Never", "Sometimes", "Often", "Every night"],
@@ -54,8 +50,8 @@ chat_frame.pack(pady=10, padx=20)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #function to display next question
-def display_next_question(answer=None): #answer=None:parameter that stores the selected answer
-    global current_index
+def display_next_question(answer=None): #answer=None:parameter that stores the selected answer #if users selected a answer it will pass to a function
+    global current_index #used to track which question in the quiz is currently being displayed
 
     #show the user response
     if answer:
@@ -74,13 +70,13 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
         button_frame = tk.Frame(chat_frame, bg="#FCF8E8")
         button_frame.pack(pady=5, anchor="e")
 
-        for option in options:
+        for option in options:                                                         #When clicked, it calls display_next_question(opt), passing the selected option as the answer #button_frame to remove the options after a selection
             button = tk.Button(button_frame, text=option, bg="#ffe0e0", relief="flat", command=lambda opt=option: [display_next_question(opt), button_frame.destroy()], font=("Segoe UI", 12))
             button.pack(side="left", padx=5)
         
-        current_index += 1
+        current_index += 1 #+1 and move to next question
     else:
-        # End message after the last question
+        #end message after the last question
         end_label = tk.Label(chat_frame, text="You have completed the quiz. Thank you!", font=("Segoe UI", 14), bg="#f2f2f2", fg="#333", wraplength=600, justify="left", padx=10, pady=5)
         end_label.pack(pady=5, anchor="w")
 
