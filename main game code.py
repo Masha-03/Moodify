@@ -210,9 +210,8 @@ class dog(pygame.sprite.Sprite):
                 dog.image = dog.idlefacing_right[dog.current_img]
 
 def scale_bg():
-    current_w, current_h = screen.get_size() #must use new one
-    return pygame.transform.scale(background_surface, (current_w, current_h))
-
+    scaled_bg = pygame.transform.scale(background_surface, (screen_width, screen_height))
+    return scaled_bg
 
         
 # Load and play background music
