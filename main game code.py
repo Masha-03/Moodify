@@ -433,8 +433,6 @@ play_background_music()
 font =pygame.font.Font(None,30)
 
 
-
-
 #game main loop
 while True:
     for event in pygame.event.get(): #collects all the events and goes through it one by one
@@ -449,6 +447,8 @@ while True:
                 tkinterradio_process.terminate()
             if breathing_process and breathing_process.poll()is None:
                 breathing_process.terminate()
+
+                
             sys.exit() 
         if event.type == pygame.KEYDOWN:#check if any key is press 
             if event.key == pygame.K_ESCAPE: #if its the ESC key
@@ -468,11 +468,12 @@ while True:
             if show_tv_screen:
                 if TV_quit_button_rect.collidepoint(event.pos):
                     show_tv_screen = False
-                    pygame.mixer.music.unpause()
-                    play_rain_sound()
                 if bubble_icon_rect.collidepoint(event.pos):
                     open_bubble_popper = True
             if show_radio:
+                play_background_music()
+                if rain_or_not:
+                    play_rain_sound()
                 if Radio_quit_button_rect.collidepoint(event.pos):
                     show_radio =False
                 if play_button_rect.collidepoint(event.pos):
@@ -534,7 +535,10 @@ while True:
                 
                 if hourglass_rect.collidepoint(event.pos):
                     if not breathing_process or moodtracker_process.poll() is not None:
+                        pygame.mixer.music.stop() #stop the music
+                        stop_rain_sound()
                         breathing_process = subprocess.Popen(["Python","Moodify/tkinter pages/breathing/timer.py"])
+                        
     
     scaled_surface = pygame.transform.scale(virtual_surface, (screen_width, screen_height))
     screen.blit(scaled_surface,(0,0))
@@ -609,7 +613,7 @@ while True:
         process =subprocess.Popen([sys.executable,"Moodify/bubble popper/buble poper.py"]) #without freezing the main game
         open_bubble_popper =False #avoid open multiple times
 
-
+    
     
 
     
