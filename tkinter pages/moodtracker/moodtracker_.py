@@ -34,7 +34,7 @@ def get_profile():
 #Initialise table
 def initialise_table(): 
         #Connect to database
-        connect = sqlite3.connect('moodify_database.db')
+        connect = sqlite3.connect('Moodify/moodify_database.db')
         #Create cursor
         cursor = connect.cursor()
         
@@ -59,8 +59,6 @@ def initialise_table():
 #Initialise table before GUI starts        
 initialise_table()  
 
-#------------------------------------------------------masha---------------------------------------------------------------------------------------------#
-
 #function to save mood
 def save_mood():
     global selected_mood
@@ -75,11 +73,17 @@ def save_mood():
         current_time = now.strftime("%H:%M:%S") #Get time
 
         # Insert into database
-        conn = sqlite3.connect('Moodify/moodify_database.db')
+        conn = sqlite3.connect('moodify_database.db')
         cursor = conn.cursor()
-
+        
+        #Check for any empty field
+        if not selected_mood: 
+                #Warning box
+                messagebox.showwarning("Incomplete Information", "Please select mood or write about it~")
+                return
+            
         cursor.execute('''
-            INSERT INTO mood_entries (profile, date, time, mood, mood_description)
+            INSERT INTO mood_entries (profile_name, date, time, mood, mood_description)
             VALUES (?, ?, ?, ?, ?)
         ''', (profile, current_date, current_time, selected_mood, mood_desc))
 
@@ -130,14 +134,12 @@ def set_mood(mood):
     title.configure(bg=bg_colour)
     ask_user_label.configure(bg=bg_colour)
     label.configure(bg=bg_colour)
-    text_entry.configure(bg="white", fg="#000")  #keep text box simple
+    text_entry.configure(bg="white", fg="#000")  # keep text box simple
     frame_button.configure(bg=bg_colour)
 
     #update all buttons to match the theme
     for button in emoji_buttons:
         button.configure(bg=btn_colour)
-
-#----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #main window
 root=tk.Tk()
@@ -145,12 +147,8 @@ root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}") #full-s
 root.title("Mood Tracker")
 root.configure(bg="#fdf6f0") 
 
-#----------------------------------------------------------------------------------------------------------------------------------------------------#
-
 title=tk.Label(root,text="Mood Tracker⭐", font=("Helvetica", 18, "bold"),bg="#fdf6f0",fg="#333")
 title.pack(pady=10)
-
-#----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #some sentence to ask about users' current mood
 ask_user=["How are you feeling today?",
@@ -161,10 +159,8 @@ random_ask_user=random.choice(ask_user) #computer will random display the questi
 print(random_ask_user) #print the sentence
 
 #label to display the ask_user sentences
-ask_user_label=tk.Label(root,text=random_ask_user, font=("Comic Sans MS",15),bg="#fdf6f0", fg="#555", wraplength=800) #wraplength=control text wrapping,will break the text into new line once it reaches specific pixel width.
+ask_user_label=tk.Label(root,text=random_ask_user, font=("Times New Roman",15),bg="#fdf6f0", fg="#333", wraplength=600) #wraplength=control text wrapping,will break the text into new line once it reaches specific pixel width.
 ask_user_label.pack(pady=(10,10))
-
-#----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #create frame to hold emoji button and centre them
 frame_button=tk.Frame(root,bg="#FCF8E8")
@@ -174,7 +170,7 @@ frame_button.pack(pady=20)
 emoji_buttons=[]
 
 #load and resize the image using PIL 
-def resize_image(image_path, size=(50,50)):
+def resize_image(image_path, size=(100,50)):
     img=Image.open(image_path)
     img=img.resize(size, Image.Resampling.LANCZOS) #Resampling=process of changing size of an image #LANCZOS=high quality resizing
     return ImageTk.PhotoImage(img)
@@ -189,12 +185,12 @@ relaxed_image=resize_image("Moodify/tkinter pages/moodtracker/relaxed.png")
 
 
 #button to choose the mood
-button_happy=tk.Button(frame_button, image=happy_image, bg="#ffe0e0", relief="flat", command=lambda:set_mood("Happy")) #command=lambda is to bind a function to button/expression 
-button_sad=tk.Button(frame_button, image=sad_image, bg="#ffe0e0", relief="flat", command=lambda:set_mood("Sad"))       #when button clicked lambda calls set_mood("") function
-button_angry=tk.Button(frame_button, image=angry_image, bg="#ffe0e0", relief="flat", command=lambda:set_mood("Angry")) #flat=has no 3D effect
-button_excited=tk.Button(frame_button, image=excited_image, bg="#ffe0e0", relief="flat", command=lambda:set_mood("Excited"))
-button_sleepy=tk.Button(frame_button, image=sleepy_image, bg="#ffe0e0", relief="flat", command=lambda:set_mood("Sleepy"))
-button_relaxed=tk.Button(frame_button, image=relaxed_image, bg="#ffe0e0", relief="flat", command=lambda:set_mood("Relaxed"))
+button_happy=tk.Button(frame_button,text="Happy😊", font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Happy")) #command=lambda is to bind a function to button/expression 
+button_sad=tk.Button(frame_button,text="Sad😢", font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Sad"))       #when button clicked lambda calls set_mood("") function
+button_angry=tk.Button(frame_button,text="Angry😠", font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Angry"))
+button_excited=tk.Button(frame_button,text="Excited😆", font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Excited"))
+button_sleepy=tk.Button(frame_button,text="Sleepy😴", font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Sleepy"))
+button_relaxed=tk.Button(frame_button,text="Relaxed😌", font=("Arial",12), bg="#f8c9c9", relief="groove", command=lambda:set_mood("Relaxed"))
 
 #add all buttons to the list
 emoji_buttons.extend([
@@ -203,37 +199,27 @@ emoji_buttons.extend([
 ])
 
 #place the emoji button to make it align horizontally
-button_happy.pack(side="left", padx=20)
-button_sad.pack(side="left", padx=20)
-button_angry.pack(side="left", padx=20)
-button_excited.pack(side="left", padx=20)
-button_sleepy.pack(side="left", padx=20)
-button_relaxed.pack(side="left", padx=20)
-
-#----------------------------------------------------------------------------------------------------------------------------------------------------#
+button_happy.pack(side="left", padx=10)
+button_sad.pack(side="left", padx=10)
+button_angry.pack(side="left", padx=10)
+button_excited.pack(side="left", padx=10)
+button_sleepy.pack(side="left", padx=10)
+button_relaxed.pack(side="left", padx=10)
 
 #blank text area for user to input something
-text_entry=tk.Text(root,font=("Comic Sans MS",12), height=13, width=70, bd=2, relief="groove", highlightthickness=1, highlightbackground="#ccc")
+text_entry=tk.Text(root,height=20,width=70)
 text_entry.pack()
 
-#----------------------------------------------------------------------------------------------------------------------------------------------------#
-
 #Add a instruction label for users
-label=tk.Label(root,text="Choose a button or describe your mood inside the blank box.",font=("Comic Sans MS",11),bg="#fdf6f0",fg="#777")
-label.pack(pady=(7,5))      
-
-#----------------------------------------------------------------------------------------------------------------------------------------------------#
+label=tk.Label(root,text="Choose a button or describe your mood inside the blank box.",font=("Helvetica",11),bg="#fdf6f0",fg="#777")
+label.pack(pady=(7,5))    
 
 #save Button to save the mood
-save_button = tk.Button(root, text="Save Mood", font=("Comic Sans MS", 12), bg="white", relief="groove", command=save_mood)
+save_button = tk.Button(root, text="Save Mood", font=("Arial", 12), bg="white", relief="groove", command=save_mood)
 save_button.pack(pady=10)
 
-#----------------------------------------------------------------------------------------------------------------------------------------------------#
-
-#global variable to store users' selected mood
+#global variable to store selected mood
 selected_mood = ""
-
-#----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #run the whole program
 root.mainloop()

@@ -34,8 +34,6 @@ def get_profile():
     else:
         profile = None  #Set profile to None if no profile found
 
-#----------------------------------------------------------------------------------------------------------------------------------------------------#
-
 def show_entry(selected_date):
     # Get the profile 
     get_profile() 
@@ -138,11 +136,11 @@ date_label.grid(row=3, column=0, pady=(10, 0), sticky="n")
 
 #History frame
 history_frame = tk.Frame(root, bg="#FFF0D9", bd=2, relief="ridge")
-history_frame.pack(expand=True, fill="both", padx=20, pady=20)
+history_frame.pack(expand=True, fill="both", padx=40,pady=40)
 
-#history title
-history_title=tk.Label(history_frame, text="History📖", font=("Comic Sans MS",13,"bold"),bg="#FFF0D9",fg="#333")
-history_title.pack(pady=(0,4))
+#diary's title history
+history_title=tk.Label(history_frame, text="History", font=("Comic Sans MS",13,"bold"),bg="#FFF0D9")
+history_title.pack()
 
 #Title label and value
 title_label = tk.Label(history_frame, text="Title:", font=("Arial", 12, "bold"), bg="#FFF0D9", fg="#444")
@@ -170,7 +168,7 @@ mooddesc_label.pack(anchor="w", padx=20, pady=(0, 5))
 mooddesc_display = tk.Label(history_frame, text="", font=("Arial", 11), bg="white", fg="#333", bd=1, relief="groove", padx=10, pady=5, anchor="center", justify="left", wraplength=500)
 mooddesc_display.pack(fill="x", padx=20, pady=(0, 10))
 
-#----------------------------------------------------------------------------------------------------------------------------------------------------#
+#---------------------------------------------------------------------------------------------------------`-------------------------------------------#
 
 #run the whole program
 root.mainloop()
