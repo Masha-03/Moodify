@@ -458,10 +458,10 @@ while True:
                     monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
                     screen = pygame.display.set_mode((monitor_size),pygame.FULLSCREEN) 
                 else:
-                    screen = pygame.display.set_mode((VIRTUAL_WIDTH,VIRTUAL_HEIGHT),pygame.RESIZABLE) 
+                    screen = pygame.display.set_mode((VIRTUAL_WIDTH,VIRTUAL_HEIGHT)) 
                 background_surface = scale_bg() #resale bg to new size
         if event.type == pygame.VIDEORESIZE:
-            screen = pygame.display.set_mode((event.w, event.h),pygame.RESIZABLE) 
+            screen = pygame.display.set_mode((event.w, event.h)) 
             background_surface= scale_bg()
         
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -479,7 +479,7 @@ while True:
                     if not tkinterradio_process or tkinterradio_process is not None:
                         pygame.mixer.music.stop() #stop the music
                         stop_rain_sound()
-                        subprocess.Popen(["Python","Moodify/qin en/sound/sound_.py"])
+                        subprocess.Popen(["Python","Moodify/tkinter pages/sound/sound_.py"])
                         
             if show_plant:
                 if plant_quit_button_rect.collidepoint(event.pos):
@@ -521,15 +521,15 @@ while True:
                 
                 if diary_rect.collidepoint(event.pos):
                     if not diary_process or diary_process.poll() is not None:
-                        subprocess.Popen(["python","Moodify/qin en/diary_.py"]) 
+                        subprocess.Popen(["Python","Moodify/tkinter pages/diary_.py"]) 
 
                 if calendar_rect.collidepoint(event.pos):
                     if not calendar_process or calendar_process.poll() is not None:#if its not open yet or close rn poll()is not None = closed
-                        calendar_process = subprocess.Popen(["python", "Moodify/qin en/calendar_.py"])
+                        calendar_process = subprocess.Popen(["Python","Moodify/tkinter pages/calendar_.py"])
 
                 if moodtracker_rect.collidepoint(event.pos):
                     if not moodtracker_process or moodtracker_process.poll() is not None:
-                        calendar_process = subprocess.Popen(["python", "Moodify/qin en/moodtracker/moodtracker_.py"])
+                        calendar_process = subprocess.Popen(["Python","Moodify/tkinter pages/moodtracker_.py"])
     
     scaled_surface = pygame.transform.scale(virtual_surface, (screen_width, screen_height))
     screen.blit(scaled_surface,(0,0))
