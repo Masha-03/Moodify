@@ -31,7 +31,7 @@ MOODS = {
     "Serene Aurora": pygame.image.load("catch_star/aurora.png").convert()
 } #.convert() --> change the pixel format of an image with no arguments, to create a copy that will draw more quickly on the screen
 current_mood = "Calm Night" #sets the initial background mood
-BACKGROUND = pygame.transform.scale(MOODS[current_mood], (screen.get_width(), screen.get_height())) #stretches/shrinks it to match the screen size.
+BACKGROUND = pygame.transform.scale(MOODS[current_mood], (screen.get_width(), screen.get_height())) #stretches/shrinks it to match the screen size. ########################################################
 mood_menu_active = False
 mood_options = list(MOODS.keys()) #create a list of the mood names from the MOODS dictionary above
 mood_index = 0
@@ -49,8 +49,8 @@ pygame.mixer.music.play(-1)  # Play in a loop (-1 means infinite loop)
 PLAYER_WIDTH_RATIO = 225 / WIDTH  # calculate the ratio of the basket original width to the current window width
 PLAYER_HEIGHT_RATIO = 190 / HEIGHT  # calculate the ratio of the basket original height to the current window height
 PLAYER_IMAGE = pygame.image.load("catch_star/catcher.png").convert_alpha() #sincge the image has transparency bg, use alpha to avoid having solid color at the back
-PLAYER_WIDTH = int(PLAYER_WIDTH_RATIO * screen.get_width())  # calculate the player width based on the screen size
-PLAYER_HEIGHT = int(PLAYER_HEIGHT_RATIO * screen.get_height())  # calculate the player height based on the screen size
+PLAYER_WIDTH = int(PLAYER_WIDTH_RATIO * screen.get_width())  # calculate the player width based on the screen size ###############################################################################
+PLAYER_HEIGHT = int(PLAYER_HEIGHT_RATIO * screen.get_height())  # calculate the player height based on the screen size ##############################################################################3
 SCALED_PLAYER = pygame.transform.scale(PLAYER_IMAGE, (PLAYER_WIDTH, PLAYER_HEIGHT))  # scale the player image
 
 player_x = (screen.get_width() - PLAYER_WIDTH // 2)  # set the baskett in the center horizontally
@@ -144,7 +144,7 @@ def draw_window():
     font_size = int(36 / 1080 * screen.get_height())  # scale font size based on height
     score_font = pygame.font.Font(None, font_size)  # create a scaled font
     score_text = score_font.render(f"Resilience: {resilience_points}/{basket_capacity}", True, (0, 0, 0))  # render the score text in black
-    screen.blit(score_text, (int(0.03 * screen.get_width()), int(0.03 * screen.get_height())))  # 3% padding from the top left
+    screen.blit(score_text, (int(0.03 * screen.get_width()), int(0.03 * screen.get_height())))  # 3% padding from the top left jarak from the screen edges ################################################
 
     # draw the message if active
     display_message()
