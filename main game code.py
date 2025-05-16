@@ -372,6 +372,7 @@ hourglass_rect = hourglass_img.get_rect()
 hourglass_rect.x = 130
 hourglass_rect.y = 355
 breathing_process = None
+music_paused_for_tkinter = False
 
 diary_img = pygame.image.load("Moodify/graphics/diary.png")
 diary_rect = diary_img.get_rect()
@@ -475,10 +476,11 @@ while True:
                 if Radio_quit_button_rect.collidepoint(event.pos):
                     show_radio =False
                 if play_button_rect.collidepoint(event.pos):
-                    if not tkinterradio_process or tkinterradio_process is not None:
+                    if not tkinterradio_process or tkinterradio_process is not None: #if its not None (not open ye/ ended)
                         pygame.mixer.music.stop() #stop the music
                         stop_rain_sound()
                         subprocess.Popen(["Python","Moodify/tkinter pages/sound/sound_.py"])
+                        
                         
             if show_plant:
                 if plant_quit_button_rect.collidepoint(event.pos):
@@ -607,7 +609,7 @@ while True:
         process =subprocess.Popen([sys.executable,"Moodify/bubble popper/buble poper.py"]) #without freezing the main game
         open_bubble_popper =False #avoid open multiple times
 
-  
+
     
 
     
