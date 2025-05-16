@@ -18,11 +18,11 @@ def resize_image(image_path, size=(40,40)):
 
 #song dictionary
 song_dict={
-       "Rain sounds":"Moodify/qin en/sound/rain.mp3",
-       "Ocean waves sounds":"Moodify/qin en/sound/ocean.mp3",
-       "Spring sounds":"Moodify/qin en/sound/bird.mp3",
-       "Clicking keyboard sounds":"Moodify/qin en/sound/keyboard.mp3",
-       "Waterfall sounds":"Moodify/qin en/sound/waterfall.mp3"
+       "Rain sounds":"Moodify/tkinter pages/sound/rain.mp3",
+       "Ocean waves sounds":"Moodify/tkinter pages/sound/ocean.mp3",
+       "Spring sounds":"Moodify/tkinter pages/sound/bird.mp3",
+       "Clicking keyboard sounds":"Moodify/tkinter pages/sound/keyboard.mp3",
+       "Waterfall sounds":"Moodify/tkinter pages/sound/waterfall.mp3"
 }
 
 #----------------------------------------------------------------------------------------------------------------------#
@@ -120,11 +120,11 @@ for song_name in song_dict: #each element is temporarily stored in variable "son
 #CONTROL BUTTON
 
 #image for button
-play_image=resize_image("Moodify/qin en/sound/play.png")
-pause_image=resize_image("Moodify/qin en/sound/pause.png")
-stop_image=resize_image("Moodify/qin en/sound/stop.png")
-next_image=resize_image("Moodify/qin en/sound/next.png")
-previous_image=resize_image("Moodify/qin en/sound/previous.png")
+play_image=resize_image("Moodify/tkinter pages/sound/play.png")
+pause_image=resize_image("Moodify/tkinter pages/sound/pause.png")
+stop_image=resize_image("Moodify/tkinter pages/sound/stop.png")
+next_image=resize_image("Moodify/tkinter pages/sound/next.png")
+previous_image=resize_image("Moodify/tkinter pages/sound/previous.png")
 
 #Control buttons for the sound player
 previous_button=tk.Button(button_frame, image=previous_image, command=prev_sound, relief="flat", bg="#4fc3f7", activebackground="#29b6f6",bd=0, highlightthickness=0)

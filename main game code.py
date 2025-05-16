@@ -210,9 +210,8 @@ class dog(pygame.sprite.Sprite):
                 dog.image = dog.idlefacing_right[dog.current_img]
 
 def scale_bg():
-    current_w, current_h = screen.get_size() #must use new one
-    return pygame.transform.scale(background_surface, (current_w, current_h))
-
+    scaled_bg = pygame.transform.scale(background_surface, (screen_width, screen_height))
+    return scaled_bg
 
         
 # Load and play background music
@@ -287,11 +286,11 @@ VIRTUAL_HEIGHT = 720
 #setting up pygame
 pygame.init() # to start the system: sound,graphics etc of pygame module
 
-screen = pygame.display.set_mode((VIRTUAL_WIDTH, VIRTUAL_HEIGHT),pygame.RESIZABLE)
+screen = pygame.display.set_mode((VIRTUAL_WIDTH, VIRTUAL_HEIGHT))
 fullscreen =False
 Time = pygame.time.Clock()
 #set game speed
-#get monitor size info
+#get monitor size info (only accept current_w)
 monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
 screen_width,screen_height = screen.get_size()
 virtual_surface = pygame.Surface((VIRTUAL_WIDTH, VIRTUAL_HEIGHT))
@@ -447,23 +446,23 @@ while True:
                 moodtracker_process.terminate()
             if tkinterradio_process and tkinterradio_process.poll() is None:
                 tkinterradio_process.terminate()
+            if breathing_process and breathing_process.poll()is None:
+                breathing_process.terminate()
             sys.exit() 
         if event.type == pygame.KEYDOWN:#check if any key is press 
             if event.key == pygame.K_ESCAPE: #if its the ESC key
                 pygame.quit() # shut down eveythig u open/ initialized (includes the program that is running in the background)
                 sys.exit() 
             if event.key == pygame.K_f:
-                fullscreen = not fullscreen
-                if fullscreen :
-                    monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
-                    screen = pygame.display.set_mode((monitor_size),pygame.FULLSCREEN) 
-                else:
+                if fullscreen == False:
+                    screen = pygame.display.set_mode((monitor_size),pygame.FULLSCREEN)
+                    fullscreen = True 
+                elif fullscreen == True:
                     screen = pygame.display.set_mode((VIRTUAL_WIDTH,VIRTUAL_HEIGHT)) 
-                background_surface = scale_bg() #resale bg to new size
-        if event.type == pygame.VIDEORESIZE:
-            screen = pygame.display.set_mode((event.w, event.h)) 
-            background_surface= scale_bg()
-        
+                    fullscreen = False
+                #rescale bg to fit the current screen
+                screen_width, screen_height = screen.get_size()
+                scaled_bg = scale_bg()
         if event.type == pygame.MOUSEBUTTONDOWN:
             if show_tv_screen:
                 if TV_quit_button_rect.collidepoint(event.pos):
@@ -529,7 +528,11 @@ while True:
 
                 if moodtracker_rect.collidepoint(event.pos):
                     if not moodtracker_process or moodtracker_process.poll() is not None:
-                        calendar_process = subprocess.Popen(["Python","Moodify/tkinter pages/moodtracker_.py"])
+                        calendar_process = subprocess.Popen(["Python","Moodify/tkinter pages/moodtracker/moodtracker_.py"])
+                
+                if hourglass_rect.collidepoint(event.pos):
+                    if not breathing_process or moodtracker_process.poll() is not None:
+                        breathing_process = subprocess.Popen(["Python","Moodify/tkinter pages/breathing/timer.py"])
     
     scaled_surface = pygame.transform.scale(virtual_surface, (screen_width, screen_height))
     screen.blit(scaled_surface,(0,0))
@@ -602,10 +605,6 @@ while True:
 
     if open_bubble_popper:
         process =subprocess.Popen([sys.executable,"Moodify/bubble popper/buble poper.py"]) #without freezing the main game
-
-        while process.poll() is None: #to check and see wether its finished
-            time.sleep(0.1) #avoid high cpu usage by pausing 100ms each loop
-
         open_bubble_popper =False #avoid open multiple times
 
   
