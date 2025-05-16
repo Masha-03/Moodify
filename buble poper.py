@@ -1,8 +1,7 @@
 import pygame
 import random
 import sys
-import time
-import subprocess
+
 
 calming_words = [
     "Fail", "Weak", "Loser", "Alone", "Broken",
@@ -42,19 +41,11 @@ PARTICLE_COUNT = 50
 pop_sounds = []
 for i in range (1,5):
     try:
-        sound = pygame.mixer.Sound(f"bubble sound/pop{i}.wav") #load sound files
+        sound = pygame.mixer.Sound(f"Moodify/bubble popper/bubble sound/pop{i}.wav") #load sound files
         sound.set_volume(1.0) #setting volume to max
         pop_sounds.append(sound)    #add to the list
     except:
         print(f"not playing pop{i}.wav") # shows if the sound is not playing because file missing
-
-def show_loading_screen():
-    screen.fill(LOADING_COLOR)  # Fill with light blue
-    loading_text = font.render("Returning to Main Game...", True, (0, 0, 0))  # Text to show on loading screen
-    screen.blit(loading_text, (270, 330))  # Position the loading text
-    pygame.display.update()  # Refresh the screen immediately
-    pygame.event.clear() # Prevent needing to click before it responds
-    pygame.time.delay(2000)  # Wait 2 seconds without freezing rendering
 
 #bubble class
 class Bubble:
@@ -222,10 +213,7 @@ while running:
     for event in pygame.event.get(): #collects all the events and goes through it one by one
         if event.type == pygame.KEYDOWN:#check if any key is press 
             if event.key == pygame.K_ESCAPE: #if its the ESC key
-                #loading page
-                show_loading_screen()
                 running = False
-                
                 
                 
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -239,8 +227,6 @@ while running:
                 button.check_click(event.pos)
                 slow_button.check_click(event.pos)
             elif current_page == "other":
-                #loading page
-                show_loading_screen() 
                 running = False
                 
                 

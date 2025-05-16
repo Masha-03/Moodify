@@ -48,7 +48,7 @@ def update_font():
 #Get profile from the database
 def get_profile():
     global profile
-    connect = sqlite3.connect('moodify_database.db')
+    connect = sqlite3.connect('Moodify/moodify_database.db')
     cursor = connect.cursor()
     
     #Fetch the profile
@@ -64,7 +64,7 @@ def get_profile():
 #Initialise table
 def initialise_table(): 
         #Connect to database
-        connect = sqlite3.connect('moodify_database.db')
+        connect = sqlite3.connect('Moodify/moodify_database.db')
         #Create cursor
         cursor = connect.cursor()
         
@@ -104,11 +104,11 @@ def save_entry():
     current_time = datetime.now().strftime("%H:%M:%S")  #Get current time
 
     # Database connection
-    connect = sqlite3.connect('moodify_database.db')
+    connect = sqlite3.connect('Moodify/moodify_database.db')
     cursor = connect.cursor()
 
     #Check for any empty field
-    if not title_text or not diary_text: 
+    if not title_text or diary_text: 
             #Warning box
             messagebox.showwarning("Incomplete Entry", "Please fill in both Title and Diary Content")
             return
