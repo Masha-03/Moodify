@@ -3,6 +3,8 @@ from tkinter import ttk
 import customtkinter as ctk
 import time #Animations
 import pygame  #For background music
+import sqlite3
+from datetime import datetime
 
 #Set default timings
 INHALE = 4
@@ -13,14 +15,60 @@ EXHALE = 4
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
 
+#Get profile from the database
+def get_profile():
+    global profile
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+    
+    #Fetch the profile
+    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
+    result = cursor.fetchone()
+    
+    connect.close() #Close connection
+    if result:
+        profile = result[0]  # Store the profile 
+    else:
+        profile = None  # Set profile to None if no profile found
+
+get_profile()
+
 class Timer:
     def __init__(self):
+        
+        #Profile is fetched and stored
+        self.profile = profile
         
         #Initialize Pygame for music playback
         pygame.mixer.init()
         #Load the background music 
         pygame.mixer.music.load("breathing.mp3")
         pygame.mixer.music.play(loops=-1)  # -1 for infinite loop
+        
+        #Initialise table
+        def initialise_table(): 
+                #Connect to database
+                connect = sqlite3.connect('moodify_database.db')
+                #Create cursor
+                cursor = connect.cursor()
+                
+                #Create the table
+                cursor.execute('''
+                CREATE TABLE IF NOT EXISTS breathing_exercise (
+                id INTEGER PRIMARY KEY,
+                profile TEXT NOT NULL,
+                date TEXT NOT NULL,
+                completed_sessions INTEGER NOT NULL,
+                FOREIGN KEY (profile) REFERENCES user_info(profile)
+                )''')
+                
+                #Save data, update
+                connect.commit()
+                #Close connection
+                connect.close()
+                
+        #Initialise table before GUI starts        
+        initialise_table()
         
         #Window setup
         self.root = tk.Tk()
@@ -107,10 +155,12 @@ class Timer:
         self.stop_button.configure(state=tk.DISABLED)
         #Reset circle
         self.reset_circle()
+        
         #Check if stopped midway or completed
         if self.rounds_completed >= self.total_rounds:
             #Display completion message if all rounds are done
             self.instruction_label.configure(text="You've completed your breathing exercise. Well done!")
+            self.record_breathing_exercise()
         else:
             #Clear the instruction if stopped midway
             self.instruction_label.configure(text="")
@@ -206,5 +256,39 @@ class Timer:
     def reset_circle(self):
         #Return the circle to its default size
         self.canvas.coords(self.circle, 100, 100, 200, 200)
+        
+    def record_breathing_exercise(self):
+        #Get the current date
+        current_date = datetime.now().strftime("%Y-%m-%d")
+
+        #Connect to the database
+        connect = sqlite3.connect('moodify_database.db')
+        cursor = connect.cursor()
+
+       #Check if an entry for the current date and profile already exists
+        cursor.execute('''
+            SELECT completed_sessions FROM breathing_exercise 
+            WHERE profile = ? AND date = ?
+        ''', (self.profile, current_date))
+        
+        result = cursor.fetchone()
+
+        if result:
+            #If entry exists, increment the completed sessions
+            updated_sessions = result[0] + 1
+            cursor.execute('''
+                UPDATE breathing_exercise 
+                SET completed_sessions = ? 
+                WHERE profile = ? AND date = ?
+            ''', (updated_sessions, self.profile, current_date))
+        else:
+            #If no entry exists, insert a new record
+            cursor.execute('''
+                INSERT INTO breathing_exercise (profile, date, completed_sessions) 
+                VALUES (?, ?, ?)
+            ''', (self.profile, current_date, 1))
+
+        connect.commit()
+        connect.close()
             
 Timer()
