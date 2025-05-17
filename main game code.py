@@ -213,7 +213,6 @@ def scale_bg():
     scaled_bg = pygame.transform.scale(background_surface, (screen_width, screen_height))
     return scaled_bg
 
-        
 # Load and play background music
 def play_background_music():
     pygame.mixer.init()
@@ -280,7 +279,7 @@ def sofa_speech():
                         "This sofa has ‘comfort’ written all over it!"]
     speech = random.choice(speech_forsofa)
     return speech 
-#tried to fix the fullscreen alignment problem but failed using a virtual surface
+#using a virtual screen so can do fullscreen
 VIRTUAL_WIDTH = 1280
 VIRTUAL_HEIGHT = 720
 #setting up pygame
@@ -436,11 +435,11 @@ font =pygame.font.Font(None,30)
 #game main loop
 while True:
     for event in pygame.event.get(): #collects all the events and goes through it one by one
-        if event.type == pygame.QUIT:
-            if calendar_process and calendar_process.poll() is None:# if its not open = None for first statement no action taken / open before but closed alr, poll() will check and see if its open if open poll()=None 
+        if event.type == pygame.QUIT:# if pygame is closed before the tkinter page all will be close
+            if calendar_process and calendar_process.poll() is None:# first check exist or not 
                 calendar_process.terminate()
-            if diary_process and diary_process.poll() is None:
-                diary_process.terminate()
+            if diary_process and diary_process.poll() is None:#second is None (still running)
+                diary_process.terminate() #then kill it
             if moodtracker_process and moodtracker_process.poll() is None:
                 moodtracker_process.terminate()
             if tkinterradio_process and tkinterradio_process.poll() is None:
@@ -471,16 +470,14 @@ while True:
                 if bubble_icon_rect.collidepoint(event.pos):
                     open_bubble_popper = True
             if show_radio:
-                play_background_music()
-                if rain_or_not:
-                    play_rain_sound()
                 if Radio_quit_button_rect.collidepoint(event.pos):
                     show_radio =False
-                if play_button_rect.collidepoint(event.pos):
+                if play_button_rect.collidepoint(event.pos): # poll return 0 for finished process (finihed running)
                     if not tkinterradio_process or tkinterradio_process is not None: #if its not None (not open ye/ ended)
                         pygame.mixer.music.stop() #stop the music
                         stop_rain_sound()
-                        subprocess.Popen(["Python","Moodify/tkinter pages/sound/sound_.py"])
+                        tkinterradio_process=subprocess.Popen(["Python","Moodify/tkinter pages/sound/sound_.py"])
+                        music_paused_for_tkinter = True
                         
                         
             if show_plant:
@@ -538,7 +535,7 @@ while True:
                         pygame.mixer.music.stop() #stop the music
                         stop_rain_sound()
                         breathing_process = subprocess.Popen(["Python","Moodify/tkinter pages/breathing/timer.py"])
-                        
+                        music_paused_for_tkinter = True
     
     scaled_surface = pygame.transform.scale(virtual_surface, (screen_width, screen_height))
     screen.blit(scaled_surface,(0,0))
@@ -613,8 +610,17 @@ while True:
         process =subprocess.Popen([sys.executable,"Moodify/bubble popper/buble poper.py"]) #without freezing the main game
         open_bubble_popper =False #avoid open multiple times
 
-    
-    
+    if tkinterradio_process and music_paused_for_tkinter and tkinterradio_process.poll() is not None: 
+        #if the page is exist , music True (not None), the page ended = output 0(not None)
+        play_background_music()
+        rain_or_not()
+        music_paused_for_tkinter = False
+        tkinterradio_process = None  #reset to prevent reuse
+
+    if breathing_process and music_paused_for_tkinter and breathing_process.poll() is not None:
+        play_background_music()
+        rain_or_not()
+        music_paused_for_tkinter = False
 
     
     
