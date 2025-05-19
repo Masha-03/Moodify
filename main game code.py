@@ -357,6 +357,13 @@ watering_button_rect = water_button.get_rect()
 bubble_icon = pygame.image.load("Moodify/bubble popper/1.png").convert_alpha()
 bubble_icon_rect = bubble_icon.get_rect(center=(300, 200)) 
 open_bubble_popper = False
+catch_star_icon = pygame.image.load('Moodify/catch_star/catch star icon.png').convert_alpha()
+catch_star_rect = catch_star_icon.get_rect(center= (500,200))
+open_catch_star = False 
+worrycloud_icon = pygame.image.load('Moodify/Worry cloud game/worry cloud icon.png').convert_alpha()
+worrycloud_rect = worrycloud_icon.get_rect(center=(700,200))
+open_worrycloud = False
+
 
 # speech bar position and img
 Speech_bar =pygame.image.load("Moodify/graphics/speech bar.png")
@@ -469,6 +476,10 @@ while True:
                     show_tv_screen = False
                 if bubble_icon_rect.collidepoint(event.pos):
                     open_bubble_popper = True
+                if catch_star_rect.collidepoint(event.pos):
+                    open_catch_star = True
+                if worrycloud_rect.collidepoint(event.pos):
+                    open_worrycloud = True
             if show_radio:
                 if Radio_quit_button_rect.collidepoint(event.pos):
                     show_radio =False
@@ -572,6 +583,8 @@ while True:
         TV_quit_button_rect.topright =(1145,80) 
         virtual_surface.blit(quit_button_img,TV_quit_button_rect)
         virtual_surface.blit(bubble_icon, bubble_icon_rect)
+        virtual_surface.blit(catch_star_icon,catch_star_rect)
+        virtual_surface.blit(worrycloud_icon,worrycloud_rect)
 
     if show_radio:
         scaled_radio_img = pygame.transform.scale(radio_img,(VIRTUAL_WIDTH,VIRTUAL_HEIGHT))
@@ -606,9 +619,16 @@ while True:
         virtual_surface.blit(Speech_bar,speechbar_rect)
         virtual_surface.blit(text_surface,text_rect)
 
+    #mini games
     if open_bubble_popper:
         process =subprocess.Popen([sys.executable,"Moodify/bubble popper/buble poper.py"]) #without freezing the main game
         open_bubble_popper =False #avoid open multiple times
+    if open_catch_star:
+        process = subprocess.Popen([sys.executable,"Moodify/catch_star/Catch The Falling Stars.py"])
+        open_catch_star = False
+    if open_worrycloud:
+        process = subprocess.Popen([sys.executable,"Moodify/worry cloud game/Worry Cloud.py"])
+        open_worrycloud = False
 
     if tkinterradio_process and music_paused_for_tkinter and tkinterradio_process.poll() is not None: 
         #if the page is exist , music True (not None), the page ended = output 0(not None)
