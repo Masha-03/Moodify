@@ -195,7 +195,7 @@ while running:
     settings_button_rect = draw_icon_button(screen, settings_icon, screen_width - 100, 20)
     
     if settings_open:
-        settings_width = int(screen_width * 0.8)
+        settings_width = int(screen_width * 0.8) #######################################################################################################
         settings_height = int(screen_height * 0.8)
         settings_x = int((screen_width - settings_width) / 2)
         settings_y = int((screen_height - settings_height) / 2)
@@ -205,10 +205,10 @@ while running:
         start_y = settings_y + 100 #move all content below this Y
         draw_text(screen, f"Profile: {profile}", settings_x + 40, start_y + 400, TEXT_COLOR) #Masha added profile name
         draw_text(screen, "Music:", settings_x + 40, start_y + 60, TEXT_COLOR)
-        music_toggle_rect = draw_rounded_button(screen, "Mute" if not music_muted else "Unmute", settings_x + 300, start_y + 50 , 160, 40, BUTTON_COLOR, BUTTON_HOVER_COLOR)
+        music_toggle_rect = draw_rounded_button(screen, "Mute" if not music_muted else "Unmute", settings_x + 300, start_y + 50 , 160, 40, BUTTON_COLOR, BUTTON_HOVER_COLOR) ##################################################
 
         draw_text(screen, "Volume:", settings_x + 40, start_y + 120, TEXT_COLOR)
-        volume_slider_rect = draw_slider(screen, settings_x + 300, start_y + 120, 300, 20, current_volume)
+        volume_slider_rect = draw_slider(screen, settings_x + 300, start_y + 120, 300, 20, current_volume) #################################################################################
 
         draw_text(screen, "Gender:", settings_x + 40, start_y + 180, TEXT_COLOR)
         gender_dropdown_rect = draw_dropdown(screen, settings_x + 300, start_y + 180, 200, 40, genders, selected_gender_index, gender_dropdown_active)
@@ -218,7 +218,7 @@ while running:
         screen.blit(current_frame, (settings_x + settings_width - 450, settings_y + 120))
 
         # Draw nickname input
-        draw_text(screen, "Nickname:", settings_x + 40, start_y + 320, TEXT_COLOR)
+        draw_text(screen, "Nickname:", settings_x + 40, start_y + 320, TEXT_COLOR) ####################################################################
         nickname_input_rect = draw_input_box(screen, nickname, settings_x + 300, start_y + 300, 250, 50, input_active)
         
         # Draw nickname preview only if confirmed
@@ -275,8 +275,8 @@ while running:
                 if not input_active:
                     nickname_confirmed = True
                     
-    pygame.display.flip()
-    clock.tick(60)
+        pygame.display.flip()
+        clock.tick(60)
 
-pygame.quit()
-sys.exit()
+    pygame.quit()
+    sys.exit()
