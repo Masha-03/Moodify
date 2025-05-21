@@ -18,7 +18,7 @@ ctk.set_default_color_theme("blue")
 #Get profile from the database
 def get_profile():
     global profile
-    connect = sqlite3.connect('Moodify/moodify_database.db')
+    connect = sqlite3.connect('moodify_database.db')
     cursor = connect.cursor()
     
     #Fetch the profile
@@ -42,13 +42,13 @@ class Timer:
         #Initialize Pygame for music playback
         pygame.mixer.init()
         #Load the background music 
-        pygame.mixer.music.load("Moodify/tkinter pages/breathing/breathing.mp3")
+        pygame.mixer.music.load("tkinter pages/breathing/breathing.mp3")
         pygame.mixer.music.play(loops=-1)  # -1 for infinite loop
         
         #Initialise table
         def initialise_table(): 
                 #Connect to database
-                connect = sqlite3.connect('Moodify/moodify_database.db')
+                connect = sqlite3.connect('moodify_database.db')
                 #Create cursor
                 cursor = connect.cursor()
                 

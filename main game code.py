@@ -542,7 +542,7 @@ while True:
                         calendar_process = subprocess.Popen(["Python","tkinter pages/moodtracker/moodtracker_.py"])
                 
                 if hourglass_rect.collidepoint(event.pos):
-                    if not breathing_process or moodtracker_process.poll() is not None:
+                    if not breathing_process or breathing_process.poll() is not None:
                         pygame.mixer.music.stop() #stop the music
                         stop_rain_sound()
                         breathing_process = subprocess.Popen(["Python","tkinter pages/breathing/timer.py"])
