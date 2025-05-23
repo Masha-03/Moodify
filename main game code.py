@@ -4,6 +4,8 @@ import random
 import datetime # to get user device time
 import subprocess
 import time
+import settings
+
 
 #create the rain sprite and set up its speed and postion
 class Rain(pygame.sprite.Sprite): 
@@ -87,14 +89,14 @@ class FemaleCharacter(pygame.sprite.Sprite):
 
         moving = False
             
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+        if keys[pygame.K_LEFT] :
             Female.rect.x=Female.rect.x-Female.speedx
             Female.facing_right = False
             Female.walkingfacing_right = False
             moving = True
             
                     
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+        if keys[pygame.K_RIGHT]:
             Female.rect.x = Female.rect.x + Female.speedx
             Female.facing_right = True
             Female.walkingfacing_right = True
@@ -431,7 +433,17 @@ teddy = pygame.Rect(1150,420,80,120)
 cockroach = pygame.Rect(54,550,40,50)
 sofa = pygame.Rect(220,470,530,180)
 
-
+#----------------------------------------------------------------------------taya settings----------------------------------------------
+def draw_icon_button(surface, icon, x, y):
+    rect = pygame.Rect(x, y, icon.get_width(), icon.get_height())
+    virtual_surface.blit(icon, (x, y))
+    return rect
+settings_icon = pygame.image.load("settings/settings_icon.png")
+settings_icon = pygame.transform.scale(settings_icon, (80, 80))
+settings_open = False
+settings.FONT = pygame.font.Font("texts/PressStart2P-Regular.ttf", 20)
+rects=[]
+#--------------------------------------------------------------------------------------------------------------------------------------------------
 #bg music
 play_background_music()
 
@@ -442,6 +454,7 @@ font =pygame.font.Font(None,30)
 #game main loop
 while True:
     for event in pygame.event.get(): #collects all the events and goes through it one by one
+        settings.handle_event(event,rects) #pass all the event to settings
         if event.type == pygame.QUIT:# if pygame is closed before the tkinter page all will be close
             if calendar_process and calendar_process.poll() is None:# first check exist or not 
                 calendar_process.terminate()
@@ -489,8 +502,6 @@ while True:
                         stop_rain_sound()
                         tkinterradio_process=subprocess.Popen(["Python","tkinter pages/sound/sound_.py"])
                         music_paused_for_tkinter = True
-                        
-                        
             if show_plant:
                 if plant_quit_button_rect.collidepoint(event.pos):
                     show_plant =False
@@ -498,9 +509,10 @@ while True:
                     watering = True
                     watering_timer = pygame.time.get_ticks()
                     waterdrop_y =350
-                    
 
-            elif not show_tv_screen and not show_radio and not show_plant:
+            elif not show_tv_screen and not show_radio and not show_plant and not settings.settings_open:
+                if settings_button_rect.collidepoint(event.pos):
+                    settings.settings_open = not settings.settings_open
                 if radio_entry.collidepoint(event.pos): #where it click on and check if its inside the box
                     show_radio =True
                 if TV_entry.collidepoint(event.pos):
@@ -525,7 +537,7 @@ while True:
                     text_rect =text_surface.get_rect(center =speechbar_rect.center)
                 
                     
-                # Only close the speech bar if not clicking on any important object
+                # Only close the speech bar if not clicking on any of object
                 if not (teddy.collidepoint(event.pos) or cockroach.collidepoint(event.pos) or sofa.collidepoint(event.pos) or picture.collidepoint(event.pos)):
                     show_text = False
                 
@@ -562,6 +574,8 @@ while True:
     display_rain(rain_group)
 
     virtual_surface.blit(background_surface,(0,0))
+
+    settings_button_rect = draw_icon_button(virtual_surface, settings_icon, VIRTUAL_WIDTH - 100, 20)
 
     virtual_surface.blit(diary_img,diary_rect)
     virtual_surface.blit(calendar_img,calendar_rect)
@@ -642,8 +656,15 @@ while True:
         rain_or_not()
         music_paused_for_tkinter = False
 
-    
-    
+    if settings.settings_open:
+        # This will update rects and call draw in the settings file and the argument sent to the file 
+        rects = settings.draw(
+        virtual_surface, VIRTUAL_WIDTH,VIRTUAL_HEIGHT,
+        settings.animation_index, settings.profile
+    )
+    settings.update_animation()
+
+        
     
         
 
