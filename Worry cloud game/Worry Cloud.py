@@ -5,7 +5,7 @@ pygame.init()
 
 #paths for my files.
 # Direct paths are used here. Using forward slashes '/' for better cross-platform compatibility
-# with Pygame's loading functions, even on Windows.
+# with Pygame's loading functions, even on Windows
 MUSIC_PATH = "Worry_cloud/calm_music.wav"
 RAIN_SOUND_PATH = "Worry_cloud/rain_sound.wav"
 BACKGROUND_IMG_PATH = "Worry_cloud/star_bg2.jpg"
@@ -63,7 +63,7 @@ white = (255, 255, 255)
 black = (0, 0, 0)
 light_gray = (200, 200, 200)
 #using a slightly different cloud color for drawn background clouds if image fails
-drawn_bg_cloud_color = (220, 220, 240, 150)
+drawn_bg_cloud_color = (220, 220, 240, 150) # Added alpha
 
 #try to load my preferred font, otherwise use a system default.
 font = None # Main font for titles, buttons, released worry text
@@ -557,11 +557,22 @@ while running:
     for bg_cloud_obj in background_clouds: #3. draw the drifting background clouds.
         bg_cloud_obj.draw(screen)
 
-    # Draw Prompt Text at the top
+    # Draw Prompt Text with a subtle shadow
     if show_prompts and not active and not text.strip() and current_prompt:
-        prompt_surf = small_font.render(current_prompt, True, white) # Use small_font for prompts
-        prompt_rect = prompt_surf.get_rect(center=(screen_width // 2, int(300 * scale_y))) # Position at the top
+        prompt_center_x = screen_width // 2
+        prompt_center_y = int(300 * scale_y) # This is where you adjust the vertical position
+
+        # Render shadow text first (dark color, slightly offset)
+        shadow_offset = int(2 * min(scale_x, scale_y)) # Scaled shadow offset
+        shadow_surf = small_font.render(current_prompt, True, black) # Black shadow
+        shadow_rect = shadow_surf.get_rect(center=(prompt_center_x + shadow_offset, prompt_center_y + shadow_offset))
+        screen.blit(shadow_surf, shadow_rect)
+
+        # Render main text on top (white)
+        prompt_surf = small_font.render(current_prompt, True, white)
+        prompt_rect = prompt_surf.get_rect(center=(prompt_center_x, prompt_center_y))
         screen.blit(prompt_surf, prompt_rect)
+
 
     #draw the input box.
     # Draw box border first, then fill, or fill first then border, depending on desired look
@@ -646,7 +657,7 @@ while running:
     current_button_color = button_hover_color if button_rect.collidepoint(mouse_pos) else button_color
     pygame.draw.rect(screen, current_button_color, button_rect, border_radius=int(10 * min(scale_x, scale_y))) #rounded corners look nice
 
-    # Ensure button text is centered even if button color changes
+    # The button text remains black on a light background, so no shadow needed here.
     screen.blit(button_text_render, button_text_render.get_rect(center=button_rect.center))
 
 
