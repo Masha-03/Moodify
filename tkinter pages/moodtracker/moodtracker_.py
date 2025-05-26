@@ -18,7 +18,7 @@ mood_quotes = {
 #Get profile from the database
 def get_profile():
     global profile
-    connect = sqlite3.connect('Moodify/moodify_database.db')
+    connect = sqlite3.connect('moodify_database.db')
     cursor = connect.cursor()
     
     #Fetch the profile
@@ -34,7 +34,7 @@ def get_profile():
 #Initialise table
 def initialise_table(): 
         #Connect to database
-        connect = sqlite3.connect('Moodify/moodify_database.db')
+        connect = sqlite3.connect('moodify_database.db')
         #Create cursor
         cursor = connect.cursor()
         
@@ -176,12 +176,12 @@ def resize_image(image_path, size=(100,50)):
     return ImageTk.PhotoImage(img)
 
 #image for button
-happy_image=resize_image("Moodify/tkinter pages/moodtracker/happy.png")
-sad_image=resize_image("Moodify/tkinter pages/moodtracker/sad.png")
-angry_image=resize_image("Moodify/tkinter pages/moodtracker/angry.png")
-excited_image=resize_image("Moodify/tkinter pages/moodtracker/excited.png")
-sleepy_image=resize_image("Moodify/tkinter pages/moodtracker/sleepy.png")
-relaxed_image=resize_image("Moodify/tkinter pages/moodtracker/relaxed.png")
+happy_image=resize_image("tkinter pages/moodtracker/happy.png")
+sad_image=resize_image("tkinter pages/moodtracker/sad.png")
+angry_image=resize_image("tkinter pages/moodtracker/angry.png")
+excited_image=resize_image("tkinter pages/moodtracker/excited.png")
+sleepy_image=resize_image("tkinter pages/moodtracker/sleepy.png")
+relaxed_image=resize_image("tkinter pages/moodtracker/relaxed.png")
 
 
 #button to choose the mood

@@ -19,7 +19,7 @@ def grab_date():
 #Get profile from the database
 def get_profile():
     global profile
-    connect = sqlite3.connect('Moodify/moodify_database.db')
+    connect = sqlite3.connect('moodify_database.db')
     cursor = connect.cursor()
     
     #Fetch the profile
@@ -37,7 +37,7 @@ def get_profile():
 def show_entry(selected_date):
     # Get the profile 
     get_profile() 
-    connect = sqlite3.connect('Moodify/moodify_database.db')
+    connect = sqlite3.connect('moodify_database.db')
     cursor = connect.cursor()
 
     #Fetch entry for selected date, current profile, and join mood_entries table
