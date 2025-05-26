@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import datetime
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -16,10 +17,26 @@ title = tk.Label(root, text="Stress Level Survey📃", font=("Comic Sans MS", 18
 title.pack(pady=10)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+# Frame to hold instruction label and restart button side by side
+instruction_frame = tk.Frame(root, bg="#FCF8E8")
+instruction_frame.pack(pady=(0, 10))
 
 #instruction label to tell user what to do
-instruction_label = tk.Label(root, text="Hi! Please press one of the buttons below to answer each question.", font=("Segoe UI", 13, "italic"), bg="#FCF8E8", fg="#555", wraplength=600, justify="center")
-instruction_label.pack(pady=(0, 10))
+instruction_label = tk.Label(instruction_frame, text="Hi! Please press one of the buttons below to answer each question.", font=("Segoe UI", 13, "italic"), bg="#FCF8E8", fg="#555", wraplength=500, justify="left")
+instruction_label.pack(side="left",pady=(0, 10),anchor="w")
+
+# Restart button
+def reset_quiz():
+    global current_index, user_scores
+    current_index = 0
+    user_scores = []
+    for widget in chat_frame.winfo_children():
+        widget.destroy()
+    result_label.config(text="[Your stress level and tips will be displayed here.]")
+    display_next_question()
+
+reset_btn = tk.Button(instruction_frame, text="🔁 Restart Survey", font=("Segoe UI", 12, "bold"),bg="#FFECB3", fg="#333", command=reset_quiz, relief="ridge", padx=5, pady=3)
+reset_btn.pack(side="left",anchor="e")
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -63,7 +80,7 @@ user_scores=[] #list to store user's selected scores
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # Outer frame with border acting as the "box"
 chat_box = tk.Frame(root, bg="#FFFFFF", bd=2, relief="flat")
-chat_box.place(relx=0.5, rely=0.43, anchor="center", width=600, height=400) #relx=horizontal,value between 0.0 (left) and 1.0 (right) #rely=vertical.value between 0.0 (top) and 1.0 (bottom)
+chat_box.place(relx=0.5, rely=0.45, anchor="center", width=600, height=400) #relx=horizontal,value between 0.0 (left) and 1.0 (right) #rely=vertical.value between 0.0 (top) and 1.0 (bottom)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -138,6 +155,11 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
         response_label = tk.Label(chat_frame, text=f"🧍 You: {answer}", font=("Calibri", 14), bg="#E1F5FE", fg="#2A3C5B", wraplength=560, justify="right", padx=10, pady=5,anchor="e")
         response_label.pack(pady=5, anchor="e")
 
+    # Inside display_next_question(), after displaying the user response
+    timestamp = datetime.datetime.now().strftime("%I:%M %p")
+    time_label = tk.Label(chat_frame, text=timestamp, font=("Segoe UI", 8), bg="#FFFFFF", fg="#888")
+    time_label.pack(anchor="e", padx=10)
+
     #move to the next question if there's a new answer
     if current_index < len(quiz_questions): #check if there are more question to display
         #display the question as a chat bubble
@@ -160,8 +182,13 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-# Display the first question
-display_next_question()
+# Display an intro message before the first question
+intro_label = tk.Label(chat_frame, text="🤖 Hi! I'm here to check your stress level. Let's begin the survey.", 
+                       font=("Calibri", 13, "bold"), bg="#FFF3E0", fg="#4E342E", wraplength=560, padx=10, pady=5)
+intro_label.pack(pady=10, anchor="w")
+
+# Delay the first question slightly to simulate a chat feel
+root.after(1000, display_next_question)  # delay 1 second before showing the first question
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
