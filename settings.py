@@ -232,8 +232,8 @@ while running:
                 elif event.key == pygame.K_RETURN:
                     input_active = False
                     profile_name_confirmed = True
-                    if update_profile_name_in_db(profile_name, profile):
-                         profile = profile_name #update
+                    #if update_profile_name_in_db(profile_name, profile):
+                         #profile = profile_name #update
                 elif len(profile_name) < 11:  # Limit profile name length to 10 characters
                     profile_name += event.unicode
 
@@ -262,8 +262,8 @@ while running:
                 input_active = profile_name_input_rect.collidepoint(mouse_pos)
                 if not input_active:
                     profile_name_confirmed = True
-                    if update_profile_name_in_db(profile_name, profile):
-                         profile = profile_name #update
+                    #if update_profile_name_in_db(profile_name, profile):
+                        #profile = profile_name #update
 
     pygame.display.flip()
     clock.tick(60)
