@@ -269,7 +269,7 @@ def release_worry(current_worry_text_param):
     global fade_text_surface, fade_pos, text, fade_alpha, fading, active, prompt_display_timer
 
     # Determine the dimensions of the worry cloud being displayed (keeping original size)
-    if use_image_cloud and cloud_img:
+    if use_image_cloud and cloud_img: #if i'm using the worry cloud image and it loaded
         worry_cloud_display_width = cloud_img.get_width()
         worry_cloud_display_height = cloud_img.get_height()
     else: # Drawn worry cloud fallback
@@ -391,6 +391,8 @@ def toggle_fullscreen():
 
 clock = pygame.time.Clock() #my game clock
 running = True #main loop flag
+placeholder_text = "Type your worry here..." # Placeholder text for the input box
+placeholder_color = (150, 150, 150) # Gray color for placeholder text
 
 #this is my main game loop!
 while running:
@@ -443,7 +445,7 @@ while running:
                         # After releasing, if prompts are enabled, immediately get a new one
                         if show_prompts:
                             get_new_prompt()
-                            prompt_display_timer = 0 # Reset timer for new prompt
+                            prompt_display_timer = 0
 
                 else:
                     #add typed character to my text, but limit length
@@ -479,7 +481,6 @@ while running:
                 scale_x = screen_width / original_screen_width
                 scale_y = screen_height / original_screen_height
 
-                # Re-scale elements based on new screen size
                 background = pygame.transform.smoothscale(pygame.image.load(BACKGROUND_IMG_PATH).convert(), (screen_width, screen_height))
                 
                 # Re-scale fonts
@@ -556,11 +557,24 @@ while running:
     for bg_cloud_obj in background_clouds: #3. draw the drifting background clouds.
         bg_cloud_obj.draw(screen)
 
+    # Draw Prompt Text at the top
+    if show_prompts and not active and not text.strip() and current_prompt:
+        prompt_surf = small_font.render(current_prompt, True, white) # Use small_font for prompts
+        prompt_rect = prompt_surf.get_rect(center=(screen_width // 2, int(300 * scale_y))) # Position at the top
+        screen.blit(prompt_surf, prompt_rect)
+
     #draw the input box.
     # Draw box border first, then fill, or fill first then border, depending on desired look
     pygame.draw.rect(screen, black, input_box, int(2 * min(scale_x, scale_y)), border_radius=int(5 * min(scale_x, scale_y))) #the border
     pygame.draw.rect(screen, light_gray if active else white, input_box, 0, border_radius=int(5 * min(scale_x, scale_y))) # Fill
 
+
+    # Render input text or placeholder
+    text_to_render = text
+    color_to_render = black
+    if not active and not text:
+        text_to_render = placeholder_text
+        color_to_render = placeholder_color
 
     # Render input text using the smaller input_text_font.
     text_padding = int(10 * min(scale_x, scale_y))
@@ -573,14 +587,13 @@ while running:
 
     # Multi-line text rendering
     current_y = text_area_rect.top
-    lines = text.splitlines()
-    if not lines and text: # Handle cases where text might end with a newline leading to an empty last line
-        lines = [text]
+    lines = text_to_render.splitlines()
+    if not lines and text_to_render: # Handle cases where text might end with a newline leading to an empty last line
+        lines = [text_to_render]
     elif not lines: # If text is completely empty
         lines = ['']
 
     # Filter lines to only show those that fit
-    visible_lines = []
     line_height = input_text_font.get_height()
     max_visible_lines = int(text_area_rect.height / line_height)
 
@@ -589,7 +602,7 @@ while running:
     
     for i in range(start_line_index, len(lines)):
         line_content = lines[i]
-        line_surface = input_text_font.render(line_content, True, black)
+        line_surface = input_text_font.render(line_content, True, color_to_render)
 
         # Handle horizontal scrolling for each line if it's too wide
         source_x = 0
@@ -599,12 +612,6 @@ while running:
         screen.blit(line_surface, (text_area_rect.left, current_y), pygame.Rect(source_x, 0, text_area_rect.width, line_height))
         current_y += line_height
 
-    # Draw Prompt Text if applicable
-    if show_prompts and not active and not text.strip() and current_prompt:
-        prompt_surf = input_text_font.render(current_prompt, True, black)
-        # Center the prompt text within the input_box
-        prompt_rect = prompt_surf.get_rect(center=input_box.center)
-        screen.blit(prompt_surf, prompt_rect)
 
     #draw blinking cursor if input box is active
     if active and cursor_visible:
