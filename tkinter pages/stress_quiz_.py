@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import datetime
+import sqlite3
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -9,6 +10,64 @@ root = tk.Tk()  #create the main app window
 root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}")  #full-screen size
 root.title("Stress Level Survey")
 root.configure(bg="#FCF8E8")  #change the background color of entire window
+
+#--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
+#Get profile from the database
+def get_profile():
+    global profile
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+    
+    #Fetch the profile
+    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
+    result = cursor.fetchone()
+    
+    connect.close() #Close connection
+    if result:
+        profile = result[0]  # Store the profile 
+    else:
+        profile = None  # Set profile to None if no profile found
+
+get_profile()
+
+#Initialise table
+def initialise_table(): 
+        #Connect to database
+        connect = sqlite3.connect('moodify_database.db')
+        #Create cursor
+        cursor = connect.cursor()
+        
+        #Create table
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS stress_quiz (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            profile TEXT,
+            date DATE,
+            score INTEGER,
+            stress_level TEXT,
+            FOREIGN KEY (profile) REFERENCES user_info(profile)
+        )
+        ''')
+        
+        #Save data, update
+        connect.commit()
+        #Close connection
+        connect.close()
+        
+#Initialise table before GUI starts        
+initialise_table()
+
+def save_stress_result(score, level):
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+
+    date_today = datetime.date.today().isoformat()  #2025-05-20 fromat current date
+
+    cursor.execute("INSERT INTO stress_quiz (profile, date, score, stress_level) VALUES (?, ?, ?, ?)",
+              (profile, date_today, score, level))
+
+    connect.commit()
+    connect.close()  
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -138,6 +197,9 @@ def calculate_stress_level():
     
     # Add result to chat_frame like a message
     result_label.config(text=f"✨ Stress Level: {level}\n💡 Tips: {tips}", font=("Comic Sans MS", 14, "bold"))
+    
+    #Save to database
+    save_stress_result(total_score, level.split()[0])  #Use only "Low", "Moderate", "High"
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
