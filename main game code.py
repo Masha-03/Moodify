@@ -4,6 +4,8 @@ import random
 import datetime # to get user device time
 import subprocess
 import time
+import settings
+
 
 #create the rain sprite and set up its speed and postion
 class Rain(pygame.sprite.Sprite): 
@@ -87,14 +89,14 @@ class FemaleCharacter(pygame.sprite.Sprite):
 
         moving = False
             
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+        if keys[pygame.K_LEFT] :
             Female.rect.x=Female.rect.x-Female.speedx
             Female.facing_right = False
             Female.walkingfacing_right = False
             moving = True
             
                     
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+        if keys[pygame.K_RIGHT]:
             Female.rect.x = Female.rect.x + Female.speedx
             Female.facing_right = True
             Female.walkingfacing_right = True
@@ -216,7 +218,7 @@ def scale_bg():
 # Load and play background music
 def play_background_music():
     pygame.mixer.init()
-    pygame.mixer.music.load("Moodify/sound effect/lofi_music.wav") 
+    pygame.mixer.music.load("sound effect/lofi_music.wav") 
     pygame.mixer.music.set_volume(0.5)      
     pygame.mixer.music.play(-1)  # -1 means loop indefinitely
 
@@ -224,7 +226,7 @@ raining_sound = None
 def play_rain_sound():
     global raining_sound
     if raining_sound is None: 
-        raining_sound = pygame.mixer.Sound("Moodify/sound effect/raining sound.mp3")
+        raining_sound = pygame.mixer.Sound("sound effect/raining sound.mp3")
         raining_sound.set_volume(0.4)
     raining_sound.play(-1) 
     
@@ -301,104 +303,104 @@ current_hour = datetime.datetime.now().hour
 #----------------------------------------------------------------------------
 #images
 #raining image
-raindrops= pygame.image.load("Moodify/graphics/raindrops.png").convert_alpha()
+raindrops= pygame.image.load("graphics/raindrops.png").convert_alpha()
 
 #night time image
-night_background = pygame.image.load("Moodify/graphics/night.png").convert()
+night_background = pygame.image.load("graphics/night.png").convert()
 
 # day time image
-sunny_background = pygame.image.load("Moodify/graphics/sunny day background.png").convert()
+sunny_background = pygame.image.load("graphics/sunny day background.png").convert()
 
 #background image
-background_surface =pygame.image.load("Moodify/graphics/main game page no window.png").convert_alpha()
+background_surface =pygame.image.load("graphics/main game page no window.png").convert_alpha()
 # to scale background image on the virtual surface
 background_surface = scale_bg()
 
 
 #character image (female)
 Fcharacter_image_idle = [
-    pygame.image.load("Moodify/F-right/pixil-frame-0.png"),
-    pygame.image.load("Moodify/F-right/pixil-frame-1.png"),
-    pygame.image.load("Moodify/F-right/pixil-frame-2.png"),
-    pygame.image.load("Moodify/F-right/pixil-frame-3.png"),
+    pygame.image.load("F-right/pixil-frame-0.png"),
+    pygame.image.load("F-right/pixil-frame-1.png"),
+    pygame.image.load("F-right/pixil-frame-2.png"),
+    pygame.image.load("F-right/pixil-frame-3.png"),
 ]
 
 Fcharacter_walking_img =[
-    pygame.image.load("Moodify/F-walking/pixil-frame-0.png"),
-    pygame.image.load("Moodify/F-walking/pixil-frame-1.png"),
-    pygame.image.load("Moodify/F-walking/pixil-frame-2.png"),
-    pygame.image.load("Moodify/F-walking/pixil-frame-3.png"),
+    pygame.image.load("F-walking/pixil-frame-0.png"),
+    pygame.image.load("F-walking/pixil-frame-1.png"),
+    pygame.image.load("F-walking/pixil-frame-2.png"),
+    pygame.image.load("F-walking/pixil-frame-3.png"),
 ]
 
 dog_walking_img =[ 
-    pygame.image.load("Moodify/dog frames/pixil-frame-0.png"),
-    pygame.image.load("Moodify/dog frames/pixil-frame-1.png"),
-    pygame.image.load("Moodify/dog frames/pixil-frame-2.png"),
-    pygame.image.load("Moodify/dog frames/pixil-frame-3.png"),
+    pygame.image.load("dog frames/pixil-frame-0.png"),
+    pygame.image.load("dog frames/pixil-frame-1.png"),
+    pygame.image.load("dog frames/pixil-frame-2.png"),
+    pygame.image.load("dog frames/pixil-frame-3.png"),
 ]
 
 dog_idle_img =[
-    pygame.image.load("Moodify/dog idle frame/pixil-frame-0.png"),
-    pygame.image.load("Moodify/dog idle frame/pixil-frame-1.png"),
-    pygame.image.load("Moodify/dog idle frame/pixil-frame-2.png"),
-    pygame.image.load("Moodify/dog idle frame/pixil-frame-3.png"),
+    pygame.image.load("dog idle frame/pixil-frame-0.png"),
+    pygame.image.load("dog idle frame/pixil-frame-1.png"),
+    pygame.image.load("dog idle frame/pixil-frame-2.png"),
+    pygame.image.load("dog idle frame/pixil-frame-3.png"),
 ]
 #TV and radio img
-TV_mini_games_img =pygame.image.load("Moodify/graphics/mini games interface.png")
-quit_button_img = pygame.image.load("Moodify/graphics/cancel button.png")
-radio_img = pygame.image.load("Moodify/graphics/radio interface.png")
-plant_img =pygame.image.load("Moodify/graphics/plant interface.png")
-watering_pot =pygame.image.load("Moodify/graphics/watering pot.png")
-waterdrops = pygame.image.load("Moodify/graphics/water drops.png")
-water_button = pygame.image.load("Moodify/graphics/water button.png")
+TV_mini_games_img =pygame.image.load("graphics/mini games interface.png")
+quit_button_img = pygame.image.load("graphics/cancel button.png")
+radio_img = pygame.image.load("graphics/radio interface.png")
+plant_img =pygame.image.load("graphics/plant interface.png")
+watering_pot =pygame.image.load("graphics/watering pot.png")
+waterdrops = pygame.image.load("graphics/water drops.png")
+water_button = pygame.image.load("graphics/water button.png")
 watering_button_rect = water_button.get_rect()
 
 #icon in TV
-bubble_icon = pygame.image.load("Moodify/bubble popper/1.png").convert_alpha()
+bubble_icon = pygame.image.load("bubble popper/1.png").convert_alpha()
 bubble_icon_rect = bubble_icon.get_rect(center=(300, 200)) 
 open_bubble_popper = False
-catch_star_icon = pygame.image.load('Moodify/catch_star/catch star icon.png').convert_alpha()
+catch_star_icon = pygame.image.load('catch_star/catch star icon.png').convert_alpha()
 catch_star_rect = catch_star_icon.get_rect(center= (500,200))
 open_catch_star = False 
-worrycloud_icon = pygame.image.load('Moodify/Worry cloud game/worry cloud icon.png').convert_alpha()
+worrycloud_icon = pygame.image.load('Worry cloud game/worry cloud icon.png').convert_alpha()
 worrycloud_rect = worrycloud_icon.get_rect(center=(700,200))
 open_worrycloud = False
 
 
 # speech bar position and img
-Speech_bar =pygame.image.load("Moodify/graphics/speech bar.png")
+Speech_bar =pygame.image.load("graphics/speech bar.png")
 speechbar_rect =Speech_bar.get_rect()
 speechbar_rect.x = 300
 speechbar_rect.y =520
 show_text =False
 
 #to other feature img
-hourglass_img = pygame.image.load("Moodify/graphics/hourglass.png")
+hourglass_img = pygame.image.load("graphics/hourglass.png")
 hourglass_rect = hourglass_img.get_rect()
 hourglass_rect.x = 130
 hourglass_rect.y = 355
 breathing_process = None
 music_paused_for_tkinter = False
 
-diary_img = pygame.image.load("Moodify/graphics/diary.png")
+diary_img = pygame.image.load("graphics/diary.png")
 diary_rect = diary_img.get_rect()
 diary_rect.x = 920
 diary_rect.y = 455
 diary_process = None
 
-moodtracker_img = pygame.image.load("Moodify/graphics/mood tracker.png")
+moodtracker_img = pygame.image.load("graphics/mood tracker.png")
 moodtracker_rect = moodtracker_img.get_rect()
 moodtracker_rect.x= 350
 moodtracker_rect.y= 70
 moodtracker_process = None
 
-play_button_img = pygame.image.load("Moodify/graphics/play button.png")
+play_button_img = pygame.image.load("graphics/play button.png")
 play_button_rect = play_button_img.get_rect()
 play_button_rect.x = 550
 play_button_rect.y = 400
 tkinterradio_process = None
 
-calendar_img = pygame.image.load("Moodify/graphics/calendar.png")
+calendar_img = pygame.image.load("graphics/calendar.png")
 calendar_rect = calendar_img.get_rect()
 calendar_rect.x= 370
 calendar_rect.y= 140
@@ -431,7 +433,17 @@ teddy = pygame.Rect(1150,420,80,120)
 cockroach = pygame.Rect(54,550,40,50)
 sofa = pygame.Rect(220,470,530,180)
 
-
+#----------------------------------------------------------------------------taya settings----------------------------------------------
+def draw_icon_button(surface, icon, x, y):
+    rect = pygame.Rect(x, y, icon.get_width(), icon.get_height())
+    virtual_surface.blit(icon, (x, y))
+    return rect
+settings_icon = pygame.image.load("settings/settings_icon.png")
+settings_icon = pygame.transform.scale(settings_icon, (80, 80))
+settings_open = False
+settings.FONT = pygame.font.Font("texts/PressStart2P-Regular.ttf", 20)
+rects=[]
+#--------------------------------------------------------------------------------------------------------------------------------------------------
 #bg music
 play_background_music()
 
@@ -442,6 +454,7 @@ font =pygame.font.Font(None,30)
 #game main loop
 while True:
     for event in pygame.event.get(): #collects all the events and goes through it one by one
+        settings.handle_event(event,rects) #pass all the event to settings
         if event.type == pygame.QUIT:# if pygame is closed before the tkinter page all will be close
             if calendar_process and calendar_process.poll() is None:# first check exist or not 
                 calendar_process.terminate()
@@ -487,10 +500,8 @@ while True:
                     if not tkinterradio_process or tkinterradio_process is not None: #if its not None (not open ye/ ended)
                         pygame.mixer.music.stop() #stop the music
                         stop_rain_sound()
-                        tkinterradio_process=subprocess.Popen(["Python","Moodify/tkinter pages/sound/sound_.py"])
+                        tkinterradio_process=subprocess.Popen(["Python","tkinter pages/sound/sound_.py"])
                         music_paused_for_tkinter = True
-                        
-                        
             if show_plant:
                 if plant_quit_button_rect.collidepoint(event.pos):
                     show_plant =False
@@ -498,9 +509,10 @@ while True:
                     watering = True
                     watering_timer = pygame.time.get_ticks()
                     waterdrop_y =350
-                    
 
-            elif not show_tv_screen and not show_radio and not show_plant:
+            elif not show_tv_screen and not show_radio and not show_plant and not settings.settings_open:
+                if settings_button_rect.collidepoint(event.pos):
+                    settings.settings_open = not settings.settings_open
                 if radio_entry.collidepoint(event.pos): #where it click on and check if its inside the box
                     show_radio =True
                 if TV_entry.collidepoint(event.pos):
@@ -525,27 +537,27 @@ while True:
                     text_rect =text_surface.get_rect(center =speechbar_rect.center)
                 
                     
-                # Only close the speech bar if not clicking on any important object
+                # Only close the speech bar if not clicking on any of object
                 if not (teddy.collidepoint(event.pos) or cockroach.collidepoint(event.pos) or sofa.collidepoint(event.pos) or picture.collidepoint(event.pos)):
                     show_text = False
                 
                 if diary_rect.collidepoint(event.pos):
                     if not diary_process or diary_process.poll() is not None:
-                        subprocess.Popen(["Python","Moodify/tkinter pages/diary_.py"]) 
+                        subprocess.Popen(["Python","tkinter pages/diary_.py"]) 
 
                 if calendar_rect.collidepoint(event.pos):
                     if not calendar_process or calendar_process.poll() is not None:#if its not open yet or close rn poll()is not None = closed
-                        calendar_process = subprocess.Popen(["Python","Moodify/tkinter pages/calendar_.py"])
+                        calendar_process = subprocess.Popen(["Python","tkinter pages/calendar_.py"])
 
                 if moodtracker_rect.collidepoint(event.pos):
                     if not moodtracker_process or moodtracker_process.poll() is not None:
-                        calendar_process = subprocess.Popen(["Python","Moodify/tkinter pages/moodtracker/moodtracker_.py"])
+                        calendar_process = subprocess.Popen(["Python","tkinter pages/moodtracker/moodtracker_.py"])
                 
                 if hourglass_rect.collidepoint(event.pos):
-                    if not breathing_process or moodtracker_process.poll() is not None:
+                    if not breathing_process or breathing_process.poll() is not None:
                         pygame.mixer.music.stop() #stop the music
                         stop_rain_sound()
-                        breathing_process = subprocess.Popen(["Python","Moodify/tkinter pages/breathing/timer.py"])
+                        breathing_process = subprocess.Popen(["Python","tkinter pages/breathing/timer.py"])
                         music_paused_for_tkinter = True
     
     scaled_surface = pygame.transform.scale(virtual_surface, (screen_width, screen_height))
@@ -562,6 +574,8 @@ while True:
     display_rain(rain_group)
 
     virtual_surface.blit(background_surface,(0,0))
+
+    settings_button_rect = draw_icon_button(virtual_surface, settings_icon, VIRTUAL_WIDTH - 100, 20)
 
     virtual_surface.blit(diary_img,diary_rect)
     virtual_surface.blit(calendar_img,calendar_rect)
@@ -621,13 +635,13 @@ while True:
 
     #mini games
     if open_bubble_popper:
-        process =subprocess.Popen([sys.executable,"Moodify/bubble popper/buble poper.py"]) #without freezing the main game
+        process =subprocess.Popen([sys.executable,"bubble popper/buble poper.py"]) #without freezing the main game
         open_bubble_popper =False #avoid open multiple times
     if open_catch_star:
-        process = subprocess.Popen([sys.executable,"Moodify/catch_star/Catch The Falling Stars.py"])
+        process = subprocess.Popen([sys.executable,"catch_star/Catch The Falling Stars.py"])
         open_catch_star = False
     if open_worrycloud:
-        process = subprocess.Popen([sys.executable,"Moodify/worry cloud game/Worry Cloud.py"])
+        process = subprocess.Popen([sys.executable,"Worry cloud game/Worry Cloud.py"])
         open_worrycloud = False
 
     if tkinterradio_process and music_paused_for_tkinter and tkinterradio_process.poll() is not None: 
@@ -642,8 +656,15 @@ while True:
         rain_or_not()
         music_paused_for_tkinter = False
 
-    
-    
+    if settings.settings_open:
+        # This will update rects and call draw in the settings file and the argument sent to the file 
+        rects = settings.draw(
+        virtual_surface, VIRTUAL_WIDTH,VIRTUAL_HEIGHT,
+        settings.animation_index, settings.profile
+    )
+    settings.update_animation()
+
+        
     
         
 

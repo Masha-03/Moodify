@@ -1,16 +1,17 @@
 import pygame
 import os
 import random
+import sys
 
 pygame.init() #gotta start pygame
 
 #paths for my files. need to make sure 'worry_cloud' folder is there.
-MUSIC_PATH = os.path.join("Worry_cloud", "calm_music.wav")
-RAIN_SOUND_PATH = os.path.join("Worry_cloud", "rain_sound.wav")
+MUSIC_PATH = os.path.join("Worry cloud game","Worry_cloud", "calm_music.wav")
+RAIN_SOUND_PATH = os.path.join("Worry cloud game","Worry_cloud", "rain_sound.wav")
 # Keeping the background as star_bg2.jpg 
-BACKGROUND_IMG_PATH = os.path.join("Worry_cloud", "star_bg2.jpg")
-CLOUD_IMG_PATH = os.path.join("Worry_cloud", "cloud.png") #for the worry cloud
-CLOUD2_IMG_PATH = os.path.join("Worry_cloud", "cloud2.png") #for background clouds
+BACKGROUND_IMG_PATH = os.path.join("Worry cloud game","Worry_cloud", "star_bg2.jpg")
+CLOUD_IMG_PATH = os.path.join("Worry cloud game","Worry_cloud", "cloud.png") #for the worry cloud
+CLOUD2_IMG_PATH = os.path.join("Worry cloud game","Worry_cloud", "cloud2.png") #for background clouds
 
 #play the ambient music.
 #first, check if the music file actually exists.
@@ -294,6 +295,9 @@ while running:
                     release_worry(text) #call the function to handle releasing
 
         elif event.type == pygame.KEYDOWN: #a key was pressed
+            if event.key == pygame.K_ESCAPE: #if its the ESC key
+                pygame.quit() # shut down eveythig u open/ initialized (includes the program that is running in the background)
+                sys.exit() 
             if active: #only if the input box is active
                 if event.key == pygame.K_BACKSPACE:
                     text = text[:-1] #delete last character
