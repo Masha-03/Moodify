@@ -447,7 +447,7 @@ cockroach = pygame.Rect(54,550,40,50)
 sofa = pygame.Rect(220,470,530,180)
 
 #----------------------------------------------------------------------------taya settings----------------------------------------------
-def draw_icon_button(surface, icon, x, y):
+def draw_icon_button(icon, x, y):
     rect = pygame.Rect(x, y, icon.get_width(), icon.get_height())
     virtual_surface.blit(icon, (x, y))
     return rect
@@ -527,7 +527,7 @@ while True:
                     waterdrop_y =350
                 elif scaled_plant_rect.collidepoint(event.pos):
                     show_text = False
-                    text_timer=False # so it wont keep on respawn new text once
+                    text_timer=False # so it wont keep on respawn new 
 
                 
 
@@ -693,7 +693,7 @@ while True:
         play_background_music()
         music_paused_for_tkinter = False
         tkinterradio_process = None  #reset to prevent reuse
-        if rain_group : 
+        if rain_group : #if the sprite exist 
             play_rain_sound()
 
     if breathing_process and music_paused_for_tkinter and breathing_process.poll() is not None:
