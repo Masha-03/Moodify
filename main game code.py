@@ -406,6 +406,17 @@ calendar_rect.x= 370
 calendar_rect.y= 140
 calendar_process = None
 
+graph_img = pygame.image.load("graphics/bar graph.png")
+graph_rect = graph_img.get_rect()
+graph_rect.x= 1150
+graph_rect.y= 615
+graph_process = None
+
+phone_img = pygame.image.load("graphics/phone.png")
+phone_rect = phone_img.get_rect()
+phone_rect.x= 1050
+phone_rect.y= 615
+phone_process = None
 
 #--------------------------------------------------------------------------
 
@@ -466,7 +477,10 @@ while True:
                 tkinterradio_process.terminate()
             if breathing_process and breathing_process.poll()is None:
                 breathing_process.terminate()
-
+            if graph_process and graph_process.poll()is None:
+                graph_process.terminate()
+            if phone_process and phone_process.poll() is None :
+                phone_process.terminate()
                 
             sys.exit() 
         if event.type == pygame.KEYDOWN:#check if any key is press 
@@ -560,6 +574,14 @@ while True:
                         breathing_process = subprocess.Popen(["Python","tkinter pages/breathing/timer.py"])
                         music_paused_for_tkinter = True
     
+                if graph_rect.collidepoint(event.pos):
+                    if not graph_process or graph_process.poll() is not None:
+                        graph_process = subprocess.Popen(["Python","tkinter pages/stress_quiz_.py"])
+
+                if phone_rect.collidepoint(event.pos):
+                    if not phone_process or phone_process.poll() is not None:
+                        phone_process = subprocess.Popen(["Python","tkinter pages/stress_quiz_.py"])
+
     scaled_surface = pygame.transform.scale(virtual_surface, (screen_width, screen_height))
     screen.blit(scaled_surface,(0,0))
 
@@ -577,10 +599,12 @@ while True:
 
     settings_button_rect = draw_icon_button(virtual_surface, settings_icon, VIRTUAL_WIDTH - 100, 20)
 
+    #tkhinter parts
     virtual_surface.blit(diary_img,diary_rect)
     virtual_surface.blit(calendar_img,calendar_rect)
     virtual_surface.blit(moodtracker_img,moodtracker_rect)
     virtual_surface.blit(hourglass_img,hourglass_rect)
+    
 
     dog_character.update_dog()
     virtual_surface.blit(dog_character.image,dog_character.rect)
@@ -588,7 +612,10 @@ while True:
     Female_character.update_character()
     virtual_surface.blit(Female_character.image,Female_character.rect)
 
-    
+    #tkinter pages
+    virtual_surface.blit(graph_img,graph_rect)
+    virtual_surface.blit(phone_img,phone_rect)
+
     #for the Tv mini game interface
     if show_tv_screen:
         scaled_tv_image = pygame.transform.scale(TV_mini_games_img,(VIRTUAL_WIDTH,VIRTUAL_HEIGHT))
