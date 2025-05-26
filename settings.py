@@ -1,3 +1,4 @@
+from numpy import conj
 import pygame
 import sys
 import os
@@ -70,87 +71,48 @@ profile_name_confirmed = False # Added profile_name_confirmed.  Not used.
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 
-#Get profile from the database
-def get_profile():
-    global profile_name
-    connect = sqlite3.connect('moodify_database.db')
-    cursor = connect.cursor()
-
-    #Fetch the profile
-    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
-    result = cursor.fetchone()
-
-    connect.close() #Close connection
-    if result:
-        profile_name = result[0]  #Store the profile
-    else:
-        profile_name = "User"    #Changed default value
-
-#Database connection
+# Database functions
 def connect_db():
-    connect = sqlite3.connect("moodify_database.db")
-    return connect
+    return sqlite3.connect("userdata.db")
+
+def get_profile():
+    global profile
+    connect = connect_db()
+    cursor = connect.cursor()
+    cursor.execute("SELECT profile FROM user_info LIMIT 1")
+    result = cursor.fetchone()
+    if result:
+        profile = result[0]
+    connect.close()
 
 def get_user_data():
-    #Fetch user profile data and return profile and gender
     connect = connect_db()
     cursor = connect.cursor()
-    cursor.execute("SELECT profile, gender FROM user_info WHERE profile = ?", (profile_name,))
-    user_data = cursor.fetchone()
+    cursor.execute("SELECT profile, gender FROM user_info LIMIT 1")
+    result = cursor.fetchone()
     connect.close()
+    return result if result else ("", "")
 
-    #If data exists, return it, else use default values
-    if user_data:
-        return user_data[0], user_data[1]
-    else:
-        return "User", "Male"
-
-def update_gender_in_db(new_gender, current_profile_name):
+#debugggg
+def update_gender_in_db(new_gender):
     #Update the gender in the database when changed in the settings
+    global profile 
     connect = connect_db()
     cursor = connect.cursor()
-    cursor.execute("UPDATE user_info SET gender = ? WHERE profile = ?", (new_gender, current_profile_name))
+    cursor.execute("UPDATE user_info SET gender = ? WHERE profile = ?", (new_gender, profile))
     connect.commit()
     connect.close()
-
-def update_profile_name_in_db(new_profile_name, old_profile_name):
-    """Updates the user's profile name in the database."""
-    connect = connect_db()
-    cursor = connect.cursor()
-    try:
-        # Check if a profile with the new name already exists
-        cursor.execute("SELECT profile FROM user_info WHERE profile = ?", (new_profile_name,))
-        existing_profile = cursor.fetchone()
-
-        if existing_profile and new_profile_name != old_profile_name:
-            print(f"Profile name '{new_profile_name}' already exists.")
-            return False  # Indicate failure
-        elif old_profile_name == "":
-             cursor.execute("INSERT INTO user_info (profile, gender) VALUES (?, ?)", (new_profile_name, "Male"))
-             conn.commit()
-             return True
-        else:
-            # Update the profile name
-            cursor.execute("UPDATE user_info SET profile = ? WHERE profile = ?", (new_profile_name, old_profile_name))
-            connect.commit()
-            return True #Indicate success
-    except sqlite3.Error as e:
-        print(f"Error updating profile name: {e}")
-        connect.rollback()
-        return False  # Indicate failure
-    finally:
-        connect.close()
 
 #Fetch initial data
 get_profile()  #Fetch the latest profile first
 profile, gender = get_user_data()  #Get profile and gender data based on the profile
-profile_name = profile #sync
 
 #Set the selected gender index based on the current gender
 selected_gender_index = genders.index(gender) if gender in genders else 0
 
 print(f"Current Profile: {profile}")
 print(f"Current Gender: {gender}")
+
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 
