@@ -173,7 +173,7 @@ chat_frame.bind("<Configure>", update_scroll_region)
 # Result label (outside and below the chat interface)
 result_label = tk.Label(root, text="[Your stress level and tips will be displayed here.]", font=("Segoe UI", 14), bg="#FCF8E8", fg="#3A3D64", wraplength=800, justify="left")
 # Place result_label just below the chat_box
-result_label.pack(pady=(420, 20))  # Just below the title and chat box
+result_label.place(relx=0.5,rely=0.85,anchor="center")  # Just below the title and chat box
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 

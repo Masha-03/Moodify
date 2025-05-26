@@ -48,6 +48,7 @@ def rain_or_not():
     else:
         return None
 
+
 #make it as a function to call it in the main loop
 def display_rain(rain_group):
     if rain_group : #if there is a sprite
@@ -266,7 +267,7 @@ def plant_speech():
     speech_forplant =["Don't forget to water this one!",
                         "Ah, a little greenery to brighten the room!",
                         "A plant that never complains...",
-                        "This plant's looking a bit thirsty...",
+                        "drink more water plant!",
                         "If only it could talk, what would it say?",
                         "Hmm, should I name it? Maybe 'Leafy'?"]
     speech = random.choice(speech_forplant)
@@ -409,13 +410,13 @@ calendar_process = None
 graph_img = pygame.image.load("graphics/bar graph.png")
 graph_rect = graph_img.get_rect()
 graph_rect.x= 1150
-graph_rect.y= 615
+graph_rect.y= 625
 graph_process = None
 
 phone_img = pygame.image.load("graphics/phone.png")
 phone_rect = phone_img.get_rect()
 phone_rect.x= 1050
-phone_rect.y= 615
+phone_rect.y= 625
 phone_process = None
 
 #--------------------------------------------------------------------------
@@ -436,6 +437,7 @@ show_radio =False
 show_plant = False
 watering = False
 watering_timer =0 
+text_timer = False
 waterdrop_y = 0
 
 #interaction points
@@ -475,9 +477,9 @@ while True:
                 moodtracker_process.terminate()
             if tkinterradio_process and tkinterradio_process.poll() is None:
                 tkinterradio_process.terminate()
-            if breathing_process and breathing_process.poll()is None:
+            if breathing_process and breathing_process.poll() is None:
                 breathing_process.terminate()
-            if graph_process and graph_process.poll()is None:
+            if graph_process and graph_process.poll() is None:
                 graph_process.terminate()
             if phone_process and phone_process.poll() is None :
                 phone_process.terminate()
@@ -519,10 +521,15 @@ while True:
             if show_plant:
                 if plant_quit_button_rect.collidepoint(event.pos):
                     show_plant =False
-                if watering_button_rect.collidepoint(event.pos):
+                elif watering_button_rect.collidepoint(event.pos):
                     watering = True
                     watering_timer = pygame.time.get_ticks()
                     waterdrop_y =350
+                elif scaled_plant_rect.collidepoint(event.pos):
+                    show_text = False
+                    text_timer=False # so it wont keep on respawn new text once
+
+                
 
             elif not show_tv_screen and not show_radio and not show_plant and not settings.settings_open:
                 if settings_button_rect.collidepoint(event.pos):
@@ -576,7 +583,7 @@ while True:
     
                 if graph_rect.collidepoint(event.pos):
                     if not graph_process or graph_process.poll() is not None:
-                        graph_process = subprocess.Popen(["Python","tkinter pages/stress_quiz_.py"])
+                        graph_process = subprocess.Popen(["Python","tkinter pages/dashboard.py"])
 
                 if phone_rect.collidepoint(event.pos):
                     if not phone_process or phone_process.poll() is not None:
@@ -638,6 +645,7 @@ while True:
     
     if show_plant:
         scaled_plant_img =pygame.transform.scale(plant_img,(VIRTUAL_WIDTH,VIRTUAL_HEIGHT))
+        scaled_plant_rect = scaled_plant_img.get_rect()
         virtual_surface.blit(scaled_plant_img,(0,0))
         plant_quit_button_rect = quit_button_img.get_rect()
         plant_quit_button_rect.topright =(1200,40) 
@@ -654,6 +662,15 @@ while True:
 
         if pygame.time.get_ticks() - watering_timer >3000 :
             watering = False
+            text_timer = pygame.time.get_ticks()  # Set time when watering ends
+            show_text = False #so it wont show immediately
+
+    if not watering and text_timer and not show_text:  #fixing buggg it will spawn alot of text once 
+            plant_speech_text = plant_speech()  # Only generate once
+            text_surface = font.render(plant_speech_text, True, (0, 0, 0)) 
+            text_rect = text_surface.get_rect(center=speechbar_rect.center)
+            show_text = True
+            
 
 
     if show_text:
@@ -674,14 +691,16 @@ while True:
     if tkinterradio_process and music_paused_for_tkinter and tkinterradio_process.poll() is not None: 
         #if the page is exist , music True (not None), the page ended = output 0(not None)
         play_background_music()
-        rain_or_not()
         music_paused_for_tkinter = False
         tkinterradio_process = None  #reset to prevent reuse
+        if rain_group : 
+            play_rain_sound()
 
     if breathing_process and music_paused_for_tkinter and breathing_process.poll() is not None:
         play_background_music()
-        rain_or_not()
         music_paused_for_tkinter = False
+        if rain_group:
+            play_rain_sound()
 
     if settings.settings_open:
         # This will update rects and call draw in the settings file and the argument sent to the file 
@@ -691,7 +710,7 @@ while True:
     )
     settings.update_animation()
 
-    #testing 123
+    
     
         
 
