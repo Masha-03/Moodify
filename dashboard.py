@@ -1,6 +1,7 @@
-import matplotlib.pyplot as plt #For grpahs & charts
+import matplotlib.pyplot as plt #For graphs & charts
 import sqlite3
 from datetime import datetime, timedelta #timedelta - difference between dates
+from collections import Counter #Calculate frequency
 
 #Get profile from the database
 def get_profile():
