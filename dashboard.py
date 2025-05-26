@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt #For graphs & charts
 import sqlite3
-from datetime import datetime, timedelta #timedelta - difference between dates
+from datetime import date, datetime, timedelta #timedelta - difference between dates
 from collections import Counter #Calculate frequency
 
 #Get profile from the database
@@ -148,6 +148,43 @@ def plot_diary_line_chart(dates, counts):
 
     plt.tight_layout()
     plt.show()
+    
+def plot_weekly_stress_chart(profile):
+    connect = sqlite3.connect("moodify_database.db")
+    cursor = connect.cursor()
+
+    # Get date range for last 7 days
+    today = date.today()
+    last_7_days = [(today - timedelta(days=i)).isoformat() for i in range(6, -1, -1)]  # YYYY-MM-DD format
+
+    # Prepare the SQL query
+    placeholders = ','.join(['?'] * len(last_7_days))
+    cursor.execute(f'''
+        SELECT date, stress_level FROM stress_quiz 
+        WHERE profile = ? AND date IN ({placeholders})
+    ''', [profile] + last_7_days)
+
+    results = cursor.fetchall()
+    connect.close()
+
+    # Map dates to stress levels
+    stress_levels = {date_: level for date_, level in results}
+
+    # Convert stress level strings to numeric values
+    level_map = {'Low': 1, 'Medium': 2, 'High': 3}
+    values = [level_map.get(stress_levels.get(day), 0) for day in last_7_days]
+
+    # Plot
+    plt.figure(figsize=(10, 6))
+    plt.barh(last_7_days, values, color='purple')
+
+    plt.xlabel("Stress Level Score")
+    plt.ylabel("Date")
+    plt.title("Weekly Stress Level")
+    plt.xlim(0, 4)
+    plt.xticks([1, 2, 3], ['Low', 'Medium', 'High'])
+    plt.tight_layout()
+    plt.show()
 
 #Run everything
 get_profile()
@@ -164,5 +201,6 @@ if profile:
         plot_diary_line_chart(dates, counts)
     else:
         print("No diary entries in the last 7 days.")
+    plot_weekly_stress_chart(profile)
 else:
     print("No profile found.")
