@@ -4,8 +4,6 @@ import random
 import datetime # to get user device time
 import subprocess
 import time
-import settings
-
 
 #create the rain sprite and set up its speed and postion
 class Rain(pygame.sprite.Sprite): 
@@ -90,14 +88,14 @@ class FemaleCharacter(pygame.sprite.Sprite):
 
         moving = False
             
-        if keys[pygame.K_LEFT] :
+        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             Female.rect.x=Female.rect.x-Female.speedx
             Female.facing_right = False
             Female.walkingfacing_right = False
             moving = True
             
                     
-        if keys[pygame.K_RIGHT]:
+        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             Female.rect.x = Female.rect.x + Female.speedx
             Female.facing_right = True
             Female.walkingfacing_right = True
@@ -467,7 +465,6 @@ font =pygame.font.Font(None,30)
 #game main loop
 while True:
     for event in pygame.event.get(): #collects all the events and goes through it one by one
-        settings.handle_event(event,rects) #pass all the event to settings
         if event.type == pygame.QUIT:# if pygame is closed before the tkinter page all will be close
             if calendar_process and calendar_process.poll() is None:# first check exist or not 
                 calendar_process.terminate()
@@ -518,6 +515,8 @@ while True:
                         stop_rain_sound()
                         tkinterradio_process=subprocess.Popen([sys.executable,"tkinter pages/sound/sound_.py"])
                         music_paused_for_tkinter = True
+                        
+                        
             if show_plant:
                 if plant_quit_button_rect.collidepoint(event.pos):
                     show_plant =False
@@ -561,7 +560,7 @@ while True:
                     text_rect =text_surface.get_rect(center =speechbar_rect.center)
                 
                     
-                # Only close the speech bar if not clicking on any of object
+                # Only close the speech bar if not clicking on any important object
                 if not (teddy.collidepoint(event.pos) or cockroach.collidepoint(event.pos) or sofa.collidepoint(event.pos) or picture.collidepoint(event.pos)):
                     show_text = False
                 
@@ -578,7 +577,7 @@ while True:
                         calendar_process = subprocess.Popen([sys.executable,"tkinter pages/moodtracker/moodtracker_.py"])
                 
                 if hourglass_rect.collidepoint(event.pos):
-                    if not breathing_process or breathing_process.poll() is not None:
+                    if not breathing_process or moodtracker_process.poll() is not None:
                         pygame.mixer.music.stop() #stop the music
                         stop_rain_sound()
                         breathing_process = subprocess.Popen([sys.executable,"tkinter pages/breathing/timer.py"])
@@ -688,7 +687,7 @@ while True:
         process = subprocess.Popen([sys.executable,"catch_star/Catch The Falling Stars.py"])
         open_catch_star = False
     if open_worrycloud:
-        process = subprocess.Popen([sys.executable,"Worry cloud game/Worry Cloud.py"])
+        process = subprocess.Popen([sys.executable,"worry cloud game/Worry Cloud.py"])
         open_worrycloud = False
 
     if tkinterradio_process and music_paused_for_tkinter and tkinterradio_process.poll() is not None: 
