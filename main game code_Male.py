@@ -415,8 +415,8 @@ graph_process = None
 
 phone_img = pygame.image.load("graphics/phone.png")
 phone_rect = phone_img.get_rect()
-phone_rect.x= 1170
-phone_rect.y= 625
+phone_rect.x= 1185
+phone_rect.y= 120
 phone_process = None
 
 #--------------------------------------------------------------------------
