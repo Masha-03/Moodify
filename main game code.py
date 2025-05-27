@@ -4,6 +4,8 @@ import random
 import datetime # to get user device time
 import subprocess
 import time
+import settings
+
 
 #create the rain sprite and set up its speed and postion
 class Rain(pygame.sprite.Sprite): 
@@ -46,6 +48,7 @@ def rain_or_not():
     else:
         return None
 
+
 #make it as a function to call it in the main loop
 def display_rain(rain_group):
     if rain_group : #if there is a sprite
@@ -87,14 +90,14 @@ class FemaleCharacter(pygame.sprite.Sprite):
 
         moving = False
             
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+        if keys[pygame.K_LEFT] :
             Female.rect.x=Female.rect.x-Female.speedx
             Female.facing_right = False
             Female.walkingfacing_right = False
             moving = True
             
                     
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+        if keys[pygame.K_RIGHT]:
             Female.rect.x = Female.rect.x + Female.speedx
             Female.facing_right = True
             Female.walkingfacing_right = True
@@ -264,7 +267,7 @@ def plant_speech():
     speech_forplant =["Don't forget to water this one!",
                         "Ah, a little greenery to brighten the room!",
                         "A plant that never complains...",
-                        "This plant's looking a bit thirsty...",
+                        "drink more water plant!",
                         "If only it could talk, what would it say?",
                         "Hmm, should I name it? Maybe 'Leafy'?"]
     speech = random.choice(speech_forplant)
@@ -404,6 +407,17 @@ calendar_rect.x= 370
 calendar_rect.y= 140
 calendar_process = None
 
+graph_img = pygame.image.load("graphics/bar graph.png")
+graph_rect = graph_img.get_rect()
+graph_rect.x= 1150
+graph_rect.y= 625
+graph_process = None
+
+phone_img = pygame.image.load("graphics/phone.png")
+phone_rect = phone_img.get_rect()
+phone_rect.x= 1050
+phone_rect.y= 625
+phone_process = None
 
 #--------------------------------------------------------------------------
 
@@ -423,6 +437,7 @@ show_radio =False
 show_plant = False
 watering = False
 watering_timer =0 
+text_timer = False
 waterdrop_y = 0
 
 #interaction points
@@ -431,7 +446,17 @@ teddy = pygame.Rect(1150,420,80,120)
 cockroach = pygame.Rect(54,550,40,50)
 sofa = pygame.Rect(220,470,530,180)
 
-
+#----------------------------------------------------------------------------taya settings----------------------------------------------
+def draw_icon_button(icon, x, y):
+    rect = pygame.Rect(x, y, icon.get_width(), icon.get_height())
+    virtual_surface.blit(icon, (x, y))
+    return rect
+settings_icon = pygame.image.load("settings/settings_icon.png")
+settings_icon = pygame.transform.scale(settings_icon, (80, 80))
+settings_open = False
+settings.FONT = pygame.font.Font("texts/PressStart2P-Regular.ttf", 20)
+rects=[]
+#--------------------------------------------------------------------------------------------------------------------------------------------------
 #bg music
 play_background_music()
 
@@ -442,6 +467,7 @@ font =pygame.font.Font(None,30)
 #game main loop
 while True:
     for event in pygame.event.get(): #collects all the events and goes through it one by one
+        settings.handle_event(event,rects) #pass all the event to settings
         if event.type == pygame.QUIT:# if pygame is closed before the tkinter page all will be close
             if calendar_process and calendar_process.poll() is None:# first check exist or not 
                 calendar_process.terminate()
@@ -451,9 +477,12 @@ while True:
                 moodtracker_process.terminate()
             if tkinterradio_process and tkinterradio_process.poll() is None:
                 tkinterradio_process.terminate()
-            if breathing_process and breathing_process.poll()is None:
+            if breathing_process and breathing_process.poll() is None:
                 breathing_process.terminate()
-
+            if graph_process and graph_process.poll() is None:
+                graph_process.terminate()
+            if phone_process and phone_process.poll() is None :
+                phone_process.terminate()
                 
             sys.exit() 
         if event.type == pygame.KEYDOWN:#check if any key is press 
@@ -489,18 +518,22 @@ while True:
                         stop_rain_sound()
                         tkinterradio_process=subprocess.Popen(["Python","tkinter pages/sound/sound_.py"])
                         music_paused_for_tkinter = True
-                        
-                        
             if show_plant:
                 if plant_quit_button_rect.collidepoint(event.pos):
                     show_plant =False
-                if watering_button_rect.collidepoint(event.pos):
+                elif watering_button_rect.collidepoint(event.pos):
                     watering = True
                     watering_timer = pygame.time.get_ticks()
                     waterdrop_y =350
-                    
+                elif scaled_plant_rect.collidepoint(event.pos):
+                    show_text = False
+                    text_timer=False # so it wont keep on respawn new 
 
-            elif not show_tv_screen and not show_radio and not show_plant:
+                
+
+            elif not show_tv_screen and not show_radio and not show_plant and not settings.settings_open:
+                if settings_button_rect.collidepoint(event.pos):
+                    settings.settings_open = not settings.settings_open
                 if radio_entry.collidepoint(event.pos): #where it click on and check if its inside the box
                     show_radio =True
                 if TV_entry.collidepoint(event.pos):
@@ -525,7 +558,7 @@ while True:
                     text_rect =text_surface.get_rect(center =speechbar_rect.center)
                 
                     
-                # Only close the speech bar if not clicking on any important object
+                # Only close the speech bar if not clicking on any of object
                 if not (teddy.collidepoint(event.pos) or cockroach.collidepoint(event.pos) or sofa.collidepoint(event.pos) or picture.collidepoint(event.pos)):
                     show_text = False
                 
@@ -542,12 +575,20 @@ while True:
                         calendar_process = subprocess.Popen(["Python","tkinter pages/moodtracker/moodtracker_.py"])
                 
                 if hourglass_rect.collidepoint(event.pos):
-                    if not breathing_process or moodtracker_process.poll() is not None:
+                    if not breathing_process or breathing_process.poll() is not None:
                         pygame.mixer.music.stop() #stop the music
                         stop_rain_sound()
                         breathing_process = subprocess.Popen(["Python","tkinter pages/breathing/timer.py"])
                         music_paused_for_tkinter = True
     
+                if graph_rect.collidepoint(event.pos):
+                    if not graph_process or graph_process.poll() is not None:
+                        graph_process = subprocess.Popen(["Python","tkinter pages/dashboard.py"])
+
+                if phone_rect.collidepoint(event.pos):
+                    if not phone_process or phone_process.poll() is not None:
+                        phone_process = subprocess.Popen(["Python","tkinter pages/stress_quiz_.py"])
+
     scaled_surface = pygame.transform.scale(virtual_surface, (screen_width, screen_height))
     screen.blit(scaled_surface,(0,0))
 
@@ -563,10 +604,14 @@ while True:
 
     virtual_surface.blit(background_surface,(0,0))
 
+    settings_button_rect = draw_icon_button(virtual_surface, settings_icon, VIRTUAL_WIDTH - 100, 20)
+
+    #tkhinter parts
     virtual_surface.blit(diary_img,diary_rect)
     virtual_surface.blit(calendar_img,calendar_rect)
     virtual_surface.blit(moodtracker_img,moodtracker_rect)
     virtual_surface.blit(hourglass_img,hourglass_rect)
+    
 
     dog_character.update_dog()
     virtual_surface.blit(dog_character.image,dog_character.rect)
@@ -574,7 +619,10 @@ while True:
     Female_character.update_character()
     virtual_surface.blit(Female_character.image,Female_character.rect)
 
-    
+    #tkinter pages
+    virtual_surface.blit(graph_img,graph_rect)
+    virtual_surface.blit(phone_img,phone_rect)
+
     #for the Tv mini game interface
     if show_tv_screen:
         scaled_tv_image = pygame.transform.scale(TV_mini_games_img,(VIRTUAL_WIDTH,VIRTUAL_HEIGHT))
@@ -597,6 +645,7 @@ while True:
     
     if show_plant:
         scaled_plant_img =pygame.transform.scale(plant_img,(VIRTUAL_WIDTH,VIRTUAL_HEIGHT))
+        scaled_plant_rect = scaled_plant_img.get_rect()
         virtual_surface.blit(scaled_plant_img,(0,0))
         plant_quit_button_rect = quit_button_img.get_rect()
         plant_quit_button_rect.topright =(1200,40) 
@@ -613,6 +662,15 @@ while True:
 
         if pygame.time.get_ticks() - watering_timer >3000 :
             watering = False
+            text_timer = pygame.time.get_ticks()  # Set time when watering ends
+            show_text = False #so it wont show immediately
+
+    if not watering and text_timer and not show_text:  #fixing buggg it will spawn alot of text once 
+            plant_speech_text = plant_speech()  # Only generate once
+            text_surface = font.render(plant_speech_text, True, (0, 0, 0)) 
+            text_rect = text_surface.get_rect(center=speechbar_rect.center)
+            show_text = True
+            
 
 
     if show_text:
@@ -627,25 +685,30 @@ while True:
         process = subprocess.Popen([sys.executable,"catch_star/Catch The Falling Stars.py"])
         open_catch_star = False
     if open_worrycloud:
-        process = subprocess.Popen([sys.executable,"worry cloud game/Worry Cloud.py"])
+        process = subprocess.Popen([sys.executable,"Worry cloud game/Worry Cloud.py"])
         open_worrycloud = False
 
     if tkinterradio_process and music_paused_for_tkinter and tkinterradio_process.poll() is not None: 
         #if the page is exist , music True (not None), the page ended = output 0(not None)
         play_background_music()
-        rain_or_not()
         music_paused_for_tkinter = False
         tkinterradio_process = None  #reset to prevent reuse
+        if rain_group : #if the sprite exist 
+            play_rain_sound()
 
     if breathing_process and music_paused_for_tkinter and breathing_process.poll() is not None:
         play_background_music()
-        rain_or_not()
         music_paused_for_tkinter = False
+        if rain_group:
+            play_rain_sound()
 
-    
-    
-    
-        
+    if settings.settings_open:
+        # This will update rects and call draw in the settings file and the argument sent to the file 
+        rects = settings.draw(
+        virtual_surface, VIRTUAL_WIDTH,VIRTUAL_HEIGHT,
+        settings.animation_index, settings.profile
+    )
+    settings.update_animation()
 
     pygame.display.update() #update the display of the screen 
     Time.tick(60)# tells loop dont just faster then 60 fps
