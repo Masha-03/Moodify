@@ -264,7 +264,7 @@ def cockroach_speech():
     return speech 
 
 def plant_speech():
-    speech_forplant =["Don't forget to water this one!",
+    speech_forplant =["Don't forget to water it tmr!",
                         "Ah, a little greenery to brighten the room!",
                         "A plant that never complains...",
                         "drink more water plant!",
@@ -447,7 +447,7 @@ cockroach = pygame.Rect(54,550,40,50)
 sofa = pygame.Rect(220,470,530,180)
 
 #----------------------------------------------------------------------------taya settings----------------------------------------------
-def draw_icon_button(surface,icon, x, y):
+def draw_icon_button(virtual_surface,icon, x, y):
     rect = pygame.Rect(x, y, icon.get_width(), icon.get_height())
     virtual_surface.blit(icon, (x, y))
     return rect
@@ -715,12 +715,7 @@ while True:
     if settings.settings_open:
         settings.draw(virtual_surface, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, settings.animation_index, settings.profile)
         settings.update_animation()
-        # This will update rects and call draw in the settings file and the argument sent to the file 
-        #rects = settings.draw(
-        #virtual_surface, VIRTUAL_WIDTH,VIRTUAL_HEIGHT,
-        #settings.animation_index, settings.profile
-   # ) # will become a dictionary
-    #settings.handle_event(event, rects) 
+        
 
     pygame.display.update() #update the display of the screen 
     Time.tick(60)# tells loop dont just faster then 60 fps
