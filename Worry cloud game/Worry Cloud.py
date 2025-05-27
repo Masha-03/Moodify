@@ -16,10 +16,11 @@ def setup_database():
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         cursor.execute('''
-            CREATE TABLE IF NOT EXISTS worries (
-                id INTEGER,
-                worry_text TEXT,
-                timestamp DATETIME
+           CREATE TABLE IF NOT EXISTS worries (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        worry_text TEXT,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
         ''')
         conn.commit()
         conn.close()
@@ -553,16 +554,6 @@ while running:
                 # Toggle fullscreen with 'f' key, but only if input box is not active
                 if event.key == pygame.K_f and not active:
                     toggle_fullscreen()
-                    
-                # Toggle prompts with 'p' key
-                elif event.key == pygame.K_p:
-                    show_prompts = not show_prompts
-                    if show_prompts:
-                        if not active and not text.strip(): # If enabling and box is empty
-                            get_new_prompt()
-                            prompt_display_timer = 0
-                    else:
-                        current_prompt = ""
 
             elif GAME_STATE == "HISTORY_SCREEN":
                 # Allow 'Escape' or 'Backspace' to go back from history
