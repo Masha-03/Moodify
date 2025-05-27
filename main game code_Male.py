@@ -320,17 +320,17 @@ background_surface = scale_bg()
 
 #character image (female)
 Fcharacter_image_idle = [
-    pygame.image.load("F-right/pixil-frame-0.png"),
-    pygame.image.load("F-right/pixil-frame-1.png"),
-    pygame.image.load("F-right/pixil-frame-2.png"),
-    pygame.image.load("F-right/pixil-frame-3.png"),
+    pygame.image.load("male/pixil_frame_0.png"),
+    pygame.image.load("male/pixil_frame_1.png"),
+    pygame.image.load("male/pixil_frame_2.png"),
+    pygame.image.load("male/pixil_frame_3.png"),
 ]
 
 Fcharacter_walking_img =[
-    pygame.image.load("F-walking/pixil-frame-0.png"),
-    pygame.image.load("F-walking/pixil-frame-1.png"),
-    pygame.image.load("F-walking/pixil-frame-2.png"),
-    pygame.image.load("F-walking/pixil-frame-3.png"),
+    pygame.image.load("pixilart- boy walking left to right/pixil-frame-1.png"),
+    pygame.image.load("pixilart- boy walking left to right/pixil-frame-2.png"),
+    pygame.image.load("pixilart- boy walking left to right/pixil-frame-3.png"),
+    pygame.image.load("pixilart- boy walking left to right/pixil-frame-4.png"),
 ]
 
 dog_walking_img =[ 

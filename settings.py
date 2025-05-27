@@ -203,7 +203,7 @@ def draw(screen, screen_width, screen_height, animation_index, profile):
             draw_text(screen, nickname, settings_x + settings_width - 400
             , settings_y + 500, TEXT_COLOR)
 
-        #here i added a bit become a string so it can pass to the handle_event function
+        #here i added a bit become a string so it can pass to the handle_event function (if not will be undefine)
         return {
         "music_toggle_rect": music_toggle_rect,
         "volume_slider_rect": volume_slider_rect,
@@ -220,7 +220,7 @@ def handle_event(event, rects):
             if rects.get("music_toggle_rect") and rects["music_toggle_rect"].collidepoint(mouse_pos):
                 music_muted = not music_muted
                 pygame.mixer.music.pause() if music_muted else pygame.mixer.music.unpause()
-
+                        #it will check from rects(dictionary) see it exits or not, then check the collidepoint
             if rects.get("volume_slider_rect") and rects["volume_slider_rect"].collidepoint(mouse_pos):
                 rel_x = mouse_pos[0] - rects["volume_slider_rect"].x
                 current_volume = max(0, min(1, rel_x / rects["volume_slider_rect"].width))
