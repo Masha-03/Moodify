@@ -92,6 +92,7 @@ def reset_quiz():
     for widget in chat_frame.winfo_children():
         widget.destroy()
     result_label.config(text="[Your stress level and tips will be displayed here.]")
+    chat_canvas.yview_moveto(0)  # Scroll to top when restarting
     display_next_question()
 
 reset_btn = tk.Button(instruction_frame, text="🔁 Restart Survey", font=("Segoe UI", 12, "bold"),bg="#FFECB3", fg="#333", command=reset_quiz, relief="ridge", padx=5, pady=3)
