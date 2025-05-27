@@ -489,7 +489,7 @@ while True:
             if event.key == pygame.K_ESCAPE: #if its the ESC key
                 pygame.quit() # shut down eveythig u open/ initialized (includes the program that is running in the background)
                 sys.exit() 
-            if event.key == pygame.K_f:
+            if event.key == pygame.K_f and pygame.key.get_mods() & pygame.KMOD_CTRL: #ctrl + F
                 if fullscreen == False:
                     screen = pygame.display.set_mode((monitor_size),pygame.FULLSCREEN)
                     fullscreen = True 
