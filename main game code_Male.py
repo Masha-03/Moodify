@@ -56,84 +56,84 @@ def display_rain(rain_group):
         rain_group.draw(virtual_surface) #a screen blit for the rain group loops it one by one
 
 
-class FemaleCharacter(pygame.sprite.Sprite):
-    def __init__(Female):
-        pygame.sprite.Sprite.__init__(Female)
-        Female.idle = Fcharacter_image_idle
-        Female.walking = Fcharacter_walking_img
-        Female.current_image = 0 #showing index 0 img
-        Female.image = Female.idle[Female.current_image] #link the idle sprite to the list
-        Female.rect=Female.image.get_rect()
-        Female.speedx =5
-        Female.rect.x=-1
-        Female.rect.y=screen_height -Female.rect.height +25 #place the character bottom of the user screen
+class MaleCharacter(pygame.sprite.Sprite):
+    def __init__(Male):
+        pygame.sprite.Sprite.__init__(Male)
+        Male.idle = Mcharacter_image_idle
+        Male.walking = Fcharacter_walking_img
+        Male.current_image = 0 #showing index 0 img
+        Male.image = Male.idle[Male.current_image] #link the idle sprite to the list
+        Male.rect=Male.image.get_rect()
+        Male.speedx =5
+        Male.rect.x=-1
+        Male.rect.y=screen_height -Male.rect.height +25 #place the character bottom of the user screen
 
         #where the character facing for idle
-        Female.facing_right = True
-        Female.facing_left = []
-        for i in Female.idle:
+        Male.facing_left = True
+        Male.facing_right = []
+        for i in Male.idle:
             flipped_img = pygame.transform.flip(i,True,False)
-            Female.facing_left.append(flipped_img)
+            Male.facing_right.append(flipped_img)
 
         #facing walking image 
-        Female.walkingfacing_right = True
-        Female.walkingfacing_left = []
-        for i in Female.walking:
+        Male.walkingfacing_right = True
+        Male.walkingfacing_left = []
+        for i in Male.walking:
             flipped_img = pygame.transform.flip(i,True,False)
-            Female.walkingfacing_left.append(flipped_img)
+            Male.walkingfacing_left.append(flipped_img)
 
-        Female.animation_timer =0
-        Female.animation_delay =150 
+        Male.animation_timer =0
+        Male.animation_delay =150 
 
-    def update_character(Female):
+    def update_character(Male):
         keys = pygame.key.get_pressed() #user press key
 
         moving = False
             
         if keys[pygame.K_LEFT] :
-            Female.rect.x=Female.rect.x-Female.speedx
-            Female.facing_right = False
-            Female.walkingfacing_right = False
+            Male.rect.x=Male.rect.x-Male.speedx
+            Male.facing_left = True
+            Male.walkingfacing_right = False
             moving = True
             
                     
         if keys[pygame.K_RIGHT]:
-            Female.rect.x = Female.rect.x + Female.speedx
-            Female.facing_right = True
-            Female.walkingfacing_right = True
+            Male.rect.x = Male.rect.x + Male.speedx
+            Male.facing_left = False
+            Male.walkingfacing_right = True
             moving =True
                     
         #spawn right side of the screen if cross the left side
-        if Female.rect.right < 0:
-            Female.rect.x = screen_width
+        if Male.rect.right < 0:
+            Male.rect.x = screen_width
         #spawn at left side if cross the right
-        if Female.rect.left > screen_width:
-            Female.rect.right= 0 
+        if Male.rect.left > screen_width:
+            Male.rect.right= 0 
             #fixed the jumping issue here before: rect.x=0
 
         #check if its moving or idle
         current_time = pygame.time.get_ticks()
         if moving: #animation timing
-            if current_time - Female.animation_timer > Female.animation_delay +50:
-                Female.animation_timer = current_time
-                Female.current_image += 1
-                if Female.current_image >= len(Female.walking):
-                    Female.current_image = 0
-            if Female.walkingfacing_right : #decides which one to show left or right
-                Female.image = Female.walking[Female.current_image]
+            if current_time - Male.animation_timer > Male.animation_delay +50:
+                Male.animation_timer = current_time
+                Male.current_image += 1
+                if Male.current_image >= len(Male.walking):
+                    Male.current_image = 0
+            if Male.walkingfacing_right : #decides which one to show left or right
+                Male.image = Male.walking[Male.current_image]
             else:
-                Female.image = Female.walkingfacing_left[Female.current_image]
+                Male.image = Male.walkingfacing_left[Male.current_image]
         #idle
         else:
-            if current_time - Female.animation_timer > Female.animation_delay: #check if it alr 150ms
-                Female.animation_timer =current_time 
-                Female.current_image += 1 
-                if Female.current_image >=len(Female.idle):
-                    Female.current_image =0
-            if Female.facing_right:
-                Female.image = Female.idle[Female.current_image]
+            if current_time - Male.animation_timer > Male.animation_delay: #check if it alr 150ms
+                Male.animation_timer =current_time 
+                Male.current_image += 1 
+                if Male.current_image >=len(Male.idle):
+                    Male.current_image =0
+            if Male.facing_left:
+                Male.image = Male.idle[Male.current_image]
             else:
-                Female.image =Female.facing_left[Female.current_image]
+                Male.image =Male.facing_right[Male.current_image]
 
 
 class dog(pygame.sprite.Sprite):
@@ -313,17 +313,17 @@ night_background = pygame.image.load("graphics/night.png").convert()
 sunny_background = pygame.image.load("graphics/sunny day background.png").convert()
 
 #background image
-background_surface =pygame.image.load("graphics/main game page no window.png").convert_alpha()
+background_surface =pygame.image.load("graphics/bg for boy.png").convert_alpha()
 # to scale background image on the virtual surface
 background_surface = scale_bg()
 
 
-#character image (female)
-Fcharacter_image_idle = [
-    pygame.image.load("male/pixil_frame_0.png"),
-    pygame.image.load("male/pixil_frame_1.png"),
-    pygame.image.load("male/pixil_frame_2.png"),
-    pygame.image.load("male/pixil_frame_3.png"),
+#character image (Male)
+Mcharacter_image_idle = [
+    pygame.image.load("male/boy_pixil_frame_0.png"),
+    pygame.image.load("male/boy_pixil_frame_1.png"),
+    pygame.image.load("male/boy_pixil_frame_2.png"),
+    pygame.image.load("male/boy_pixil_frame_3.png"),
 ]
 
 Fcharacter_walking_img =[
@@ -423,8 +423,8 @@ phone_process = None
 
 #determine will rain or not
 rain_group = rain_or_not()
-#the female character 
-Female_character=FemaleCharacter()
+#the Male character 
+Male_character=MaleCharacter()
 dog_character=dog()
 
 #Tv plant and radio entry
@@ -619,8 +619,8 @@ while True:
     dog_character.update_dog()
     virtual_surface.blit(dog_character.image,dog_character.rect)
 
-    Female_character.update_character()
-    virtual_surface.blit(Female_character.image,Female_character.rect)
+    Male_character.update_character()
+    virtual_surface.blit(Male_character.image,Male_character.rect)
 
     #tkinter pages
     virtual_surface.blit(graph_img,graph_rect)
