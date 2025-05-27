@@ -5,11 +5,6 @@ import os
 import sqlite3
 from tkinter import messagebox 
 
-# Get the current monitor size for fullscreen support
-monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
-screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
-fullscreen = False
-
 # Constants for screen dimension and colors
 BG_COLOR = (245, 235, 220)
 SETTINGS_BG = (210, 180, 140)
