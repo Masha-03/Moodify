@@ -72,7 +72,7 @@ profile_name_confirmed = False # Added profile_name_confirmed.  Not used.
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 
 def connect_db():
-    return sqlite3.connect("userdata.db")
+    return sqlite3.connect("moodify_database.db")
 
 def get_profile():
     global profile
