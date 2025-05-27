@@ -158,6 +158,15 @@ def draw_rounded_button(surface, text, x, y, width, height, color, hover_color=N
     surface.blit(text_surface, text_rect)
     return rect
 
+<<<<<<< HEAD
+=======
+def draw_icon_button(surface, icon, x, y):
+    rect = pygame.Rect(x, y, icon.get_width(), icon.get_height())
+    screen.blit(icon, (x, y))
+    return rect
+
+
+>>>>>>> cd56cdbd216d1f574946cac5f8fc2323350dd505
 def draw_slider(surface, x, y, width, height, value):
     pygame.draw.rect(surface, SLIDER_COLOR, (x, y, width, height), border_radius=6)
     handle_x = x + (value * width) - (height / 2)
