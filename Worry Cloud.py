@@ -1,7 +1,6 @@
 import pygame
 import os
 import random
-
 pygame.init() #gotta start pygame
 
 #paths for my files. need to make sure 'worry_cloud' folder is there.
@@ -458,28 +457,4 @@ while running:
             text_rect = fade_text_surface.get_rect(center=(cloud_center_x, cloud_center_y))
             screen.blit(fade_text_surface, text_rect)
 
-        #update parameters for the next frame of the fade.
-        fade_pos = (fade_pos[0], fade_pos[1] - 0.7)  #move it up slowly
-        fade_alpha -= 1.5   #fade it out slowly
-        if fade_alpha <= 0: #if it's fully faded
-            fading = False #stop fading
-            fade_text_surface = None #clear the pre-rendered surface, don't need it now
-            # Removed rain sound stop on fade out, as it wasn't in the original code
-
-
-    #display any messages (like "music on/off").
-    if message_alpha > 0: #if there's a message to show
-        # Use small_font for messages
-        msg_surf = small_font.render(message_text, True, white)
-        msg_surf.set_alpha(message_alpha)
-        msg_rect = msg_surf.get_rect(center=(screen_width // 2, screen_height - 50)) #position at bottom-center
-        screen.blit(msg_surf, msg_rect)
-        message_timer -= 1 #count down
-        if message_timer <= 0: #timer's up
-            message_alpha = 0 #make it disappear
-
-
-    pygame.display.flip() #this updates the whole screen to show what i've drawn.
-    clock.tick(60) #try to keep it at 60 fps.
-
-pygame.quit() #clean up pygame when the loop ends.
+pygame.quit()

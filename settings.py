@@ -1,7 +1,17 @@
+from numpy import conj
 import pygame
 import sys
 import os
 import sqlite3
+
+# Initialize Pygame and mixer module
+pygame.init()
+pygame.mixer.init()
+
+# Get the current monitor size for fullscreen support
+monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
+screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
+fullscreen = False
 
 # Constants for screen dimension and colors
 BG_COLOR = (245, 235, 220)
@@ -17,34 +27,29 @@ DROPDOWN_OPTION_COLOR = (220, 200, 180)
 DROPDOWN_OPTION_HOVER_COLOR = (200, 180, 160)
 INPUT_BG_COLOR = (255, 255, 255)
 INPUT_BORDER_COLOR = (180, 140, 100)
-FONT = None #dont initialize here first initialize in my main code
+FONT = pygame.font.Font("texts/PressStart2P-Regular.ttf", 20)
+
+# Load music
+pygame.mixer.music.load("lofi_music.wav")
+pygame.mixer.music.set_volume(0.5)
+pygame.mixer.music.play(-1)
+
+# Load settings icon
+settings_icon = pygame.image.load("settings/settings_icon.png")
+settings_icon = pygame.transform.scale(settings_icon, (80, 80))
 
 # Load character animations (4 frames)
 scale_size = 0.75
 
-#i flipped the facing direction to make it consistent
-male_frames_F_right= []
-male_img = [
-    pygame.image.load("male/boy_pixil_frame_0.png"),
-    pygame.image.load("male/boy_pixil_frame_1.png"),
-    pygame.image.load("male/boy_pixil_frame_2.png"),
-    pygame.image.load("male/boy_pixil_frame_3.png")
-]
-male_flipped_img = []
-for i in male_img :
-    flipped_img = pygame.transform.flip(i,True,False)
-    male_flipped_img.append(flipped_img)
-
 male_frames = [
     pygame.transform.scale_by(
-        male_flipped_img[i], scale_size
+        pygame.image.load(f"male/boy_pixil_frame_{i}.png"), scale_size
     )
-    for i in range(4)
-]
+    for i in range(4)]
 
 female_frames = [
     pygame.transform.scale_by(
-        pygame.image.load(f"F-right/pixil-frame-{i}.png"), scale_size
+        pygame.image.load(f"female/girl_pixil_frame_{i}.png"), scale_size
     )
     for i in range(4)]
 
@@ -60,57 +65,43 @@ genders = ["Male", "Female"]
 selected_gender_index = 0
 gender_dropdown_active = False
 settings_open = False
-nickname = ""
+profile_name = ""  # Renamed from nickname to profile_name
 input_active = False
-nickname_confirmed = False
+profile_name_confirmed = False # Added profile_name_confirmed.  Not used.
 
-#--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
+#--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 
-#Get profile from the database
+def connect_db():
+    return sqlite3.connect("userdata.db")
+
 def get_profile():
     global profile
-    connect = sqlite3.connect('moodify_database.db')
-    cursor = connect.cursor()
-    
-    #Fetch the profile
-    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
-    result = cursor.fetchone()
-    
-    connect.close() #Close connection
-    if result:
-        profile = result[0]  #Store the profile 
-    else:
-        profile = None  #Set profile to None if no profile found
-        
-#Database connection 
-def connect_db():
-    connect = sqlite3.connect("moodify_database.db")
-    return connect
-
-def get_user_data():
-    #Fetch user profile data and return profile and gender
     connect = connect_db()
     cursor = connect.cursor()
-    cursor.execute("SELECT profile, gender FROM user_info WHERE profile = ?", (profile,))
-    user_data = cursor.fetchone()
+    cursor.execute("SELECT profile FROM user_info LIMIT 1")
+    result = cursor.fetchone()
+    if result:
+        profile = result[0]
     connect.close()
 
-    #If data exists, return it, else use default values
-    if user_data:
-        return user_data[0], user_data[1]
-    else:
-        return "User", "Male"
+def get_user_data():
+    connect = connect_db()
+    cursor = connect.cursor()
+    cursor.execute("SELECT profile, gender FROM user_info LIMIT 1")
+    result = cursor.fetchone()
+    connect.close()
+    return result if result else ("", "")
 
 #debugggg
 def update_gender_in_db(new_gender):
     #Update the gender in the database when changed in the settings
-    global profile 
+    global profile
     connect = connect_db()
     cursor = connect.cursor()
     cursor.execute("UPDATE user_info SET gender = ? WHERE profile = ?", (new_gender, profile))
     connect.commit()
     connect.close()
-    
+
 #Fetch initial data
 get_profile()  #Fetch the latest profile first
 profile, gender = get_user_data()  #Get profile and gender data based on the profile
@@ -121,7 +112,10 @@ selected_gender_index = genders.index(gender) if gender in genders else 0
 print(f"Current Profile: {profile}")
 print(f"Current Gender: {gender}")
 
+
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
+
+
 # Utility functions
 def draw_text(surface, text, x, y, color):
     text_surface = FONT.render(text, True, color)
@@ -135,6 +129,11 @@ def draw_rounded_button(surface, text, x, y, width, height, color, hover_color=N
     text_surface = FONT.render(text, True, TEXT_COLOR)
     text_rect = text_surface.get_rect(center=rect.center)
     surface.blit(text_surface, text_rect)
+    return rect
+
+def draw_icon_button(surface, icon, x, y):
+    rect = pygame.Rect(x, y, icon.get_width(), icon.get_height())
+    screen.blit(icon, (x, y))
     return rect
 
 
