@@ -4,6 +4,7 @@ from tkinter import messagebox #for show pop-up message
 from PIL import Image,ImageTk #import pillow for image resizing
 import datetime
 import sqlite3
+import os
 
 mood_quotes = {
     "Happy": "Keep shining, the world needs your light!",
@@ -137,6 +138,19 @@ def set_mood(mood):
     for button in emoji_buttons:
         button.configure(bg=btn_colour)
 
+# Get current file directory
+base_dir = os.path.dirname(__file__)
+
+# Build image paths safely
+def get_image_path(filename):
+    return os.path.join(base_dir, filename)
+
+# Resize image using PIL
+def resize_image(image_path, size=(50, 50)):
+    img = Image.open(image_path)
+    img = img.resize(size, Image.Resampling.LANCZOS)
+    return ImageTk.PhotoImage(img)
+
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #main window
@@ -173,19 +187,13 @@ frame_button.pack(pady=20)
 #list of emoji buttons
 emoji_buttons=[]
 
-#load and resize the image using PIL 
-def resize_image(image_path, size=(50,50)):
-    img=Image.open(image_path)
-    img=img.resize(size, Image.Resampling.LANCZOS) #Resampling=process of changing size of an image #LANCZOS=high quality resizing
-    return ImageTk.PhotoImage(img)
-
-#image for button
-happy_image=resize_image("C:/Users/qinen/project/moodify/happy.png")
-sad_image=resize_image("C:/Users/qinen/project/moodify/sad.png")
-angry_image=resize_image("C:/Users/qinen/project/moodify/angry.png")
-excited_image=resize_image("C:/Users/qinen/project/moodify/excited.png")
-sleepy_image=resize_image("C:/Users/qinen/project/moodify/sleepy.png")
-relaxed_image=resize_image("C:/Users/qinen/project/moodify/relaxed.png")
+# Load images using relative paths
+happy_image = resize_image(get_image_path("happy.png"))
+sad_image = resize_image(get_image_path("sad.png"))
+angry_image = resize_image(get_image_path("angry.png"))
+excited_image = resize_image(get_image_path("excited.png"))
+sleepy_image = resize_image(get_image_path("sleepy.png"))
+relaxed_image = resize_image(get_image_path("relaxed.png"))
 
 
 #button to choose the mood
