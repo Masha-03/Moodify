@@ -4,6 +4,8 @@ import random
 import datetime # to get user device time
 import subprocess
 import time
+import settings
+
 
 #create the rain sprite and set up its speed and postion
 class Rain(pygame.sprite.Sprite): 
