@@ -65,9 +65,9 @@ genders = ["Male", "Female"]
 selected_gender_index = 0
 gender_dropdown_active = False
 settings_open = False
-profile_name = ""  # Renamed from nickname to profile_name
+profile_name = ""  # renamed from nickname to profile_name masha look here
 input_active = False
-profile_name_confirmed = False # Added profile_name_confirmed.  Not used.
+profile_name_confirmed = False # added profile_name_confirmed.  not used until db update
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 
@@ -179,6 +179,10 @@ def draw(screen, screen_width, screen_height, animation_index, profile):
         draw_text(screen, "Settings", settings_x + 20, settings_y + 20, TEXT_COLOR)
         
         start_y = settings_y + 100 #move all content below this Y
+        # draw profile name input
+        draw_text(screen, "Profile Name:", settings_x + 40, start_y + 320, TEXT_COLOR)
+        profile_name_input_rect = draw_input_box(screen, profile_name, settings_x + 300, start_y + 300, 250, 50, input_active)
+
         draw_text(screen, f"Profile: {profile}", settings_x + 40, start_y + 400, TEXT_COLOR) #Masha added profile name
         draw_text(screen, "Music:", settings_x + 40, start_y + 60, TEXT_COLOR)
         music_toggle_rect = draw_rounded_button(screen, "Mute" if not music_muted else "Unmute", settings_x + 300, start_y + 50 , 160, 40, BUTTON_COLOR, BUTTON_HOVER_COLOR) ##################################################
@@ -193,25 +197,16 @@ def draw(screen, screen_width, screen_height, animation_index, profile):
         current_frame = male_frames[animation_index] if genders[selected_gender_index] == "Male" else female_frames[animation_index]
         screen.blit(current_frame, (settings_x + settings_width - 450, settings_y + 120))
 
-        # Draw nickname input
-        draw_text(screen, "Nickname:", settings_x + 40, start_y + 320, TEXT_COLOR) ####################################################################
-        nickname_input_rect = draw_input_box(screen, nickname, settings_x + 300, start_y + 300, 250, 50, input_active)
-        
-        # Draw nickname preview only if confirmed
-        if nickname_confirmed:
-            draw_text(screen, nickname, settings_x + settings_width - 400
-            , settings_y + 500, TEXT_COLOR)
-
         #here i added a bit become a string so it can pass to the handle_event function (if not will be undefine)
         return {
         "music_toggle_rect": music_toggle_rect,
         "volume_slider_rect": volume_slider_rect,
         "gender_dropdown_rect": gender_dropdown_rect,
-        "nickname_input_rect": nickname_input_rect
+        "profile_name_input_rect": profile_name_input_rect
         }
 
 def handle_event(event, rects):
-    global music_muted, input_active, nickname, nickname_confirmed, selected_gender_index, gender_dropdown_active, current_volume
+    global music_muted, input_active, profile_name, profile_name_confirmed, selected_gender_index, gender_dropdown_active, current_volume
 
     if event.type == pygame.MOUSEBUTTONDOWN:
         mouse_pos = pygame.mouse.get_pos()
@@ -241,20 +236,22 @@ def handle_event(event, rects):
                         # Update gender in DB here if needed
                         break
 
-            if rects.get("nickname_input_rect"):
-                input_active = rects["nickname_input_rect"].collidepoint(mouse_pos)
-                if not input_active:
-                    nickname_confirmed = True
-
-    if event.type == pygame.KEYDOWN:
-        if input_active:
-            if event.key == pygame.K_BACKSPACE:
-                nickname = nickname[:-1]
-            elif event.key == pygame.K_RETURN:
+            if rects.get("profile_name_input_rect") and rects["profile_name_input_rect"].collidepoint(mouse_pos):
+                input_active = True
+            else:
                 input_active = False
-                nickname_confirmed = True
-            elif len(nickname) < 11:  # Limit nickname length to 10 characters
-                nickname += event.unicode
+                profile_name_confirmed = True #set to True when input is confirmed
+    if event.type == pygame.KEYDOWN:
+            if input_active:
+                if event.key == pygame.K_BACKSPACE:
+                    profile_name = profile_name[:-1]
+                elif event.key == pygame.K_RETURN:
+                    input_active = False
+                    profile_name_confirmed = True
+                else:
+                    if event.unicode.isprintable(): 
+                        if len(profile_name) < 11:  
+                            profile_name += event.unicode
 
 
 def update_animation():

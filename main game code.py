@@ -455,7 +455,6 @@ settings_icon = pygame.image.load("settings/settings_icon.png")
 settings_icon = pygame.transform.scale(settings_icon, (80, 80))
 settings_open = False
 settings.FONT = pygame.font.Font("texts/PressStart2P-Regular.ttf", 20)
-rects=[]
 #--------------------------------------------------------------------------------------------------------------------------------------------------
 #bg music
 play_background_music()
@@ -498,6 +497,8 @@ while True:
                 #rescale bg to fit the current screen
                 screen_width, screen_height = screen.get_size()
                 scaled_bg = scale_bg()
+            if settings.settings_open:
+                settings.handle_event(event, None) #if settings is open then handle the event in the settings file
         if event.type == pygame.MOUSEBUTTONDOWN:
             if show_tv_screen:
                 if TV_quit_button_rect.collidepoint(event.pos):
@@ -530,14 +531,18 @@ while True:
                     show_text = False
                     text_timer=False # so it wont keep on respawn new 
 
-                
-
-            elif not show_tv_screen and not show_radio and not show_plant and not settings.settings_open:
-                if settings_button_rect.collidepoint(event.pos):
-                    if settings.settings_open == False:
+            if settings_button_rect.collidepoint(event.pos):
+                    if not settings.settings_open:
                         settings.settings_open = True
-                    elif settings.settings_open == True:
+                    else:
                         settings.settings_open = False
+
+            if settings.settings_open:
+                rects = settings.draw(virtual_surface, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, settings.animation_index, settings.profile)
+                settings.handle_event(event, rects)
+
+                
+            elif not show_tv_screen and not show_radio and not show_plant and not settings.settings_open:
                 if radio_entry.collidepoint(event.pos): #where it click on and check if its inside the box
                     show_radio =True
                 if TV_entry.collidepoint(event.pos):
@@ -592,6 +597,8 @@ while True:
                 if phone_rect.collidepoint(event.pos):
                     if not phone_process or phone_process.poll() is not None:
                         phone_process = subprocess.Popen([sys.executable,"tkinter pages/stress_quiz_.py"])
+
+                
 
     scaled_surface = pygame.transform.scale(virtual_surface, (screen_width, screen_height))
     screen.blit(scaled_surface,(0,0))
@@ -707,12 +714,14 @@ while True:
             play_rain_sound()
 
     if settings.settings_open:
+        settings.draw(virtual_surface, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, settings.animation_index, settings.profile)
+        settings.update_animation()
         # This will update rects and call draw in the settings file and the argument sent to the file 
-        rects = settings.draw(
-        virtual_surface, VIRTUAL_WIDTH,VIRTUAL_HEIGHT,
-        settings.animation_index, settings.profile
-    ) # will become a dictionary 
-    settings.update_animation()
+        #rects = settings.draw(
+        #virtual_surface, VIRTUAL_WIDTH,VIRTUAL_HEIGHT,
+        #settings.animation_index, settings.profile
+   # ) # will become a dictionary
+    #settings.handle_event(event, rects) 
 
     pygame.display.update() #update the display of the screen 
     Time.tick(60)# tells loop dont just faster then 60 fps
