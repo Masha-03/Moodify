@@ -19,11 +19,11 @@ def resize_image(image_path, size=(40,40)):
 
 #song dictionary
 song_dict={
-       "Rain sounds":"tkinter pages/sound/rain.mp3",
-       "Ocean waves sounds":"tkinter pages/sound/ocean.mp3",
-       "Spring sounds":"tkinter pages/sound/bird.mp3",
-       "Clicking keyboard sounds":"tkinter pages/sound/keyboard.mp3",
-       "Waterfall sounds":"tkinter pages/sound/waterfall.mp3"
+       "Rain sounds":"Moodify/tkinter pages/sound/rain.mp3",
+       "Ocean waves sounds":"Moodify/tkinter pages/sound/ocean.mp3",
+       "Spring sounds":"Moodify/tkinter pages/sound/bird.mp3",
+       "Clicking keyboard sounds":"Moodify/tkinter pages/sound/keyboard.mp3",
+       "Waterfall sounds":"Moodify/tkinter pages/sound/waterfall.mp3"
 }
 
 #----------------------------------------------------------------------------------------------------------------------#
@@ -205,11 +205,11 @@ button_frame=tk.Frame(playlist_button_frame,bg="#e1f5fe")
 button_frame.pack(pady=(10,15))
 
 #image for button
-play_image=resize_image("tkinter pages/sound/play.png")
-pause_image=resize_image("tkinter pages/sound/pause.png")
-stop_image=resize_image("tkinter pages/sound/stop.png")
-next_image=resize_image("tkinter pages/sound/next.png")
-previous_image=resize_image("tkinter pages/sound/previous.png")
+play_image=resize_image("Moodify/tkinter pages/sound/play.png")
+pause_image=resize_image("Moodify/tkinter pages/sound/pause.png")
+stop_image=resize_image("Moodify/tkinter pages/sound/stop.png")
+next_image=resize_image("Moodify/tkinter pages/sound/next.png")
+previous_image=resize_image("Moodify/tkinter pages/sound/previous.png")
 
 #store references to all button images.If no,image might get garbage collected by Python, cause them to disappear
 image_references = [previous_image,stop_image,play_image, pause_image, next_image]
