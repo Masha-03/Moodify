@@ -3,6 +3,15 @@ import sys
 import os
 import sqlite3
 
+# Initialize Pygame and mixer module
+pygame.init()
+pygame.mixer.init()
+
+# Get the current monitor size for fullscreen support
+monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
+screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
+fullscreen = False
+
 # Constants for screen dimension and colors
 BG_COLOR = (245, 235, 220)
 SETTINGS_BG = (210, 180, 140)
@@ -17,34 +26,29 @@ DROPDOWN_OPTION_COLOR = (220, 200, 180)
 DROPDOWN_OPTION_HOVER_COLOR = (200, 180, 160)
 INPUT_BG_COLOR = (255, 255, 255)
 INPUT_BORDER_COLOR = (180, 140, 100)
-FONT = None #dont initialize here first initialize in my main code
+FONT = pygame.font.Font("texts/PressStart2P-Regular.ttf", 20)
+
+# Load music
+pygame.mixer.music.load("lofi_music.wav")
+pygame.mixer.music.set_volume(0.5)
+pygame.mixer.music.play(-1)
+
+# Load settings icon
+settings_icon = pygame.image.load("settings/settings_icon.png")
+settings_icon = pygame.transform.scale(settings_icon, (80, 80))
 
 # Load character animations (4 frames)
 scale_size = 0.75
 
-#i flipped the facing direction to make it consistent
-male_frames_F_right= []
-male_img = [
-    pygame.image.load("male/boy_pixil_frame_0.png"),
-    pygame.image.load("male/boy_pixil_frame_1.png"),
-    pygame.image.load("male/boy_pixil_frame_2.png"),
-    pygame.image.load("male/boy_pixil_frame_3.png")
-]
-male_flipped_img = []
-for i in male_img :
-    flipped_img = pygame.transform.flip(i,True,False)
-    male_flipped_img.append(flipped_img)
-
 male_frames = [
     pygame.transform.scale_by(
-        male_flipped_img[i], scale_size
+        pygame.image.load(f"male/boy_pixil_frame_{i}.png"), scale_size
     )
-    for i in range(4)
-]
+    for i in range(4)]
 
 female_frames = [
     pygame.transform.scale_by(
-        pygame.image.load(f"F-right/pixil-frame-{i}.png"), scale_size
+        pygame.image.load(f"female/girl_pixil_frame_{i}.png"), scale_size
     )
     for i in range(4)]
 
@@ -60,29 +64,29 @@ genders = ["Male", "Female"]
 selected_gender_index = 0
 gender_dropdown_active = False
 settings_open = False
-nickname = ""
+profile_name = ""  # Renamed from nickname to profile_name
 input_active = False
-nickname_confirmed = False
+profile_name_confirmed = False # Added profile_name_confirmed.  Not used.
 
-#--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
+#--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 
 #Get profile from the database
 def get_profile():
-    global profile
+    global profile_name
     connect = sqlite3.connect('moodify_database.db')
     cursor = connect.cursor()
-    
+
     #Fetch the profile
     cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
     result = cursor.fetchone()
-    
+
     connect.close() #Close connection
     if result:
-        profile = result[0]  #Store the profile 
+        profile_name = result[0]  #Store the profile
     else:
-        profile = None  #Set profile to None if no profile found
-        
-#Database connection 
+        profile_name = "User"    #Changed default value
+
+#Database connection
 def connect_db():
     connect = sqlite3.connect("moodify_database.db")
     return connect
@@ -91,7 +95,7 @@ def get_user_data():
     #Fetch user profile data and return profile and gender
     connect = connect_db()
     cursor = connect.cursor()
-    cursor.execute("SELECT profile, gender FROM user_info WHERE profile = ?", (profile,))
+    cursor.execute("SELECT profile, gender FROM user_info WHERE profile = ?", (profile_name,))
     user_data = cursor.fetchone()
     connect.close()
 
@@ -101,19 +105,46 @@ def get_user_data():
     else:
         return "User", "Male"
 
-#debugggg
-def update_gender_in_db(new_gender):
+def update_gender_in_db(new_gender, current_profile_name):
     #Update the gender in the database when changed in the settings
-    global profile 
     connect = connect_db()
     cursor = connect.cursor()
-    cursor.execute("UPDATE user_info SET gender = ? WHERE profile = ?", (new_gender, profile))
+    cursor.execute("UPDATE user_info SET gender = ? WHERE profile = ?", (new_gender, current_profile_name))
     connect.commit()
     connect.close()
-    
+
+def update_profile_name_in_db(new_profile_name, old_profile_name):
+    """Updates the user's profile name in the database."""
+    connect = connect_db()
+    cursor = connect.cursor()
+    try:
+        # Check if a profile with the new name already exists
+        cursor.execute("SELECT profile FROM user_info WHERE profile = ?", (new_profile_name,))
+        existing_profile = cursor.fetchone()
+
+        if existing_profile and new_profile_name != old_profile_name:
+            print(f"Profile name '{new_profile_name}' already exists.")
+            return False  # Indicate failure
+        elif old_profile_name == "":
+             cursor.execute("INSERT INTO user_info (profile, gender) VALUES (?, ?)", (new_profile_name, "Male"))
+             conn.commit()
+             return True
+        else:
+            # Update the profile name
+            cursor.execute("UPDATE user_info SET profile = ? WHERE profile = ?", (new_profile_name, old_profile_name))
+            connect.commit()
+            return True #Indicate success
+    except sqlite3.Error as e:
+        print(f"Error updating profile name: {e}")
+        connect.rollback()
+        return False  # Indicate failure
+    finally:
+        connect.close()
+
 #Fetch initial data
 get_profile()  #Fetch the latest profile first
 profile, gender = get_user_data()  #Get profile and gender data based on the profile
+profile_name = profile #sync
 
 #Set the selected gender index based on the current gender
 selected_gender_index = genders.index(gender) if gender in genders else 0
@@ -122,6 +153,8 @@ print(f"Current Profile: {profile}")
 print(f"Current Gender: {gender}")
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
+
+
 # Utility functions
 def draw_text(surface, text, x, y, color):
     text_surface = FONT.render(text, True, color)
@@ -135,6 +168,11 @@ def draw_rounded_button(surface, text, x, y, width, height, color, hover_color=N
     text_surface = FONT.render(text, True, TEXT_COLOR)
     text_rect = text_surface.get_rect(center=rect.center)
     surface.blit(text_surface, text_rect)
+    return rect
+
+def draw_icon_button(surface, icon, x, y):
+    rect = pygame.Rect(x, y, icon.get_width(), icon.get_height())
+    screen.blit(icon, (x, y))
     return rect
 
 
@@ -169,100 +207,104 @@ def draw_input_box(surface, text, x, y, width, height, active):
     surface.blit(text_surface, (x + 10, y + 10))
     return pygame.Rect(x, y, width, height)
 
-
-#from the main loop i bring to here 
-def draw(screen, screen_width, screen_height, animation_index, profile):
-        settings_width = int(screen_width * 0.8) #######################################################################################################
-        settings_height = int(screen_height * 0.8)
-        settings_x = int((screen_width - settings_width) / 2)
-        settings_y = int((screen_height - settings_height) / 2)
-        pygame.draw.rect(screen, SETTINGS_BG, (settings_x, settings_y, settings_width, settings_height), border_radius=16)
-        draw_text(screen, "Settings", settings_x + 20, settings_y + 20, TEXT_COLOR)
-        
-        start_y = settings_y + 100 #move all content below this Y
-        draw_text(screen, f"Profile: {profile}", settings_x + 40, start_y + 400, TEXT_COLOR) #Masha added profile name
-        draw_text(screen, "Music:", settings_x + 40, start_y + 60, TEXT_COLOR)
-        music_toggle_rect = draw_rounded_button(screen, "Mute" if not music_muted else "Unmute", settings_x + 300, start_y + 50 , 160, 40, BUTTON_COLOR, BUTTON_HOVER_COLOR) ##################################################
-
-        draw_text(screen, "Volume:", settings_x + 40, start_y + 120, TEXT_COLOR)
-        volume_slider_rect = draw_slider(screen, settings_x + 300, start_y + 120, 300, 20, current_volume) #################################################################################
-
-        draw_text(screen, "Gender:", settings_x + 40, start_y + 180, TEXT_COLOR)
-        gender_dropdown_rect = draw_dropdown(screen, settings_x + 300, start_y + 180, 200, 40, genders, selected_gender_index, gender_dropdown_active)
-        
-        draw_text(screen, "Character Preview:", settings_x + settings_width - 450, settings_y + 80, TEXT_COLOR)
-        current_frame = male_frames[animation_index] if genders[selected_gender_index] == "Male" else female_frames[animation_index]
-        screen.blit(current_frame, (settings_x + settings_width - 450, settings_y + 120))
-
-        # Draw nickname input
-        draw_text(screen, "Nickname:", settings_x + 40, start_y + 320, TEXT_COLOR) ####################################################################
-        nickname_input_rect = draw_input_box(screen, nickname, settings_x + 300, start_y + 300, 250, 50, input_active)
-        
-        # Draw nickname preview only if confirmed
-        if nickname_confirmed:
-            draw_text(screen, nickname, settings_x + settings_width - 400
-            , settings_y + 500, TEXT_COLOR)
-
-        #here i added a bit become a string so it can pass to the handle_event function
-        return {
-        "music_toggle_rect": music_toggle_rect,
-        "volume_slider_rect": volume_slider_rect,
-        "gender_dropdown_rect": gender_dropdown_rect,
-        "nickname_input_rect": nickname_input_rect
-        }
-
-def handle_event(event, rects):
-    global music_muted, input_active, nickname, nickname_confirmed, selected_gender_index, gender_dropdown_active, current_volume
-
-    if event.type == pygame.MOUSEBUTTONDOWN:
-        mouse_pos = pygame.mouse.get_pos()
-        if settings_open: #all i change to string if not will be undefine the word "rects" is from my main game code
-            if rects.get("music_toggle_rect") and rects["music_toggle_rect"].collidepoint(mouse_pos):
-                music_muted = not music_muted
-                pygame.mixer.music.pause() if music_muted else pygame.mixer.music.unpause()
-
-            if rects.get("volume_slider_rect") and rects["volume_slider_rect"].collidepoint(mouse_pos):
-                rel_x = mouse_pos[0] - rects["volume_slider_rect"].x
-                current_volume = max(0, min(1, rel_x / rects["volume_slider_rect"].width))
-                pygame.mixer.music.set_volume(current_volume)
-
-            if rects.get("gender_dropdown_rect") and rects["gender_dropdown_rect"].collidepoint(mouse_pos):
-                gender_dropdown_active = not gender_dropdown_active
-            elif gender_dropdown_active:
-                for i in range(len(genders)):
-                    option_rect = pygame.Rect(
-                        rects["gender_dropdown_rect"].x,
-                        rects["gender_dropdown_rect"].y + rects["gender_dropdown_rect"].height * (i + 1),
-                        rects["gender_dropdown_rect"].width,
-                        rects["gender_dropdown_rect"].height,
-                    )
-                    if option_rect.collidepoint(mouse_pos):
-                        selected_gender_index = i
-                        gender_dropdown_active = False
-                        # Update gender in DB here if needed
-                        break
-
-            if rects.get("nickname_input_rect"):
-                input_active = rects["nickname_input_rect"].collidepoint(mouse_pos)
-                if not input_active:
-                    nickname_confirmed = True
-
-    if event.type == pygame.KEYDOWN:
-        if input_active:
-            if event.key == pygame.K_BACKSPACE:
-                nickname = nickname[:-1]
-            elif event.key == pygame.K_RETURN:
-                input_active = False
-                nickname_confirmed = True
-            elif len(nickname) < 11:  # Limit nickname length to 10 characters
-                nickname += event.unicode
-
-
-def update_animation():
-    global animation_index, animation_timer
-
+# Main loop
+running = True
+clock = pygame.time.Clock()
+while running:
+    screen.fill(BG_COLOR)
     animation_timer += 1
     if animation_timer >= animation_speed:
         animation_index = (animation_index + 1) % 4
         animation_timer = 0
 
+    # Get dynamic positions based on current screen size
+    screen_width, screen_height = screen.get_size()
+    settings_button_rect = draw_icon_button(screen, settings_icon, screen_width - 100, 20)
+
+    if settings_open:
+        settings_width = int(screen_width * 0.8)
+        settings_height = int(screen_height * 0.8)
+        settings_x = int((screen_width - settings_width) / 2)
+        settings_y = int((screen_height - settings_height) / 2)
+        pygame.draw.rect(screen, SETTINGS_BG, (settings_x, settings_y, settings_width, settings_height), border_radius=16)
+        draw_text(screen, "Settings", settings_x + 20, settings_y + 20, TEXT_COLOR)
+
+        start_y = settings_y + 100 #move all content below this Y
+        # Draw profile name input
+        draw_text(screen, "Profile Name:", settings_x + 40, start_y + 320, TEXT_COLOR)
+        profile_name_input_rect = draw_input_box(screen, profile_name, settings_x + 300, start_y + 300, 250, 50, input_active)
+
+        draw_text(screen, f"Profile: {profile_name}", settings_x + 40, start_y + 400, TEXT_COLOR) #Masha added profile name
+        draw_text(screen, "Music:", settings_x + 40, start_y + 60, TEXT_COLOR)
+        music_toggle_rect = draw_rounded_button(screen, "Mute" if not music_muted else "Unmute", settings_x + 300, start_y + 50 , 160, 40, BUTTON_COLOR, BUTTON_HOVER_COLOR)
+
+        draw_text(screen, "Volume:", settings_x + 40, start_y + 120, TEXT_COLOR)
+        volume_slider_rect = draw_slider(screen, settings_x + 300, start_y + 120, 300, 20, current_volume)
+
+        draw_text(screen, "Gender:", settings_x + 40, start_y + 180, TEXT_COLOR)
+        gender_dropdown_rect = draw_dropdown(screen, settings_x + 300, start_y + 180, 200, 40, genders, selected_gender_index, gender_dropdown_active)
+
+        draw_text(screen, "Character Preview:", settings_x + settings_width - 450, settings_y + 80, TEXT_COLOR)
+        current_frame = male_frames[animation_index] if genders[selected_gender_index] == "Male" else female_frames[animation_index]
+        screen.blit(current_frame, (settings_x + settings_width - 450, settings_y + 120))
+
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.VIDEORESIZE:
+            if not fullscreen:
+                screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                running = False
+            if event.key == pygame.K_f:
+                fullscreen = not fullscreen
+                if fullscreen:
+                    screen = pygame.display.set_mode(monitor_size, pygame.FULLSCREEN)
+                else:
+                    screen = pygame.display.set_mode((screen.get_width(), screen.get_height()), pygame.RESIZABLE)
+            if input_active:
+                if event.key == pygame.K_BACKSPACE:
+                    profile_name = profile_name[:-1]
+                elif event.key == pygame.K_RETURN:
+                    input_active = False
+                    profile_name_confirmed = True
+                    if update_profile_name_in_db(profile_name, profile):
+                         profile = profile_name #update
+                elif len(profile_name) < 11:  # Limit profile name length to 10 characters
+                    profile_name += event.unicode
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = pygame.mouse.get_pos()
+            if settings_button_rect.collidepoint(mouse_pos):
+                settings_open = not settings_open
+            elif settings_open:
+                if music_toggle_rect.collidepoint(mouse_pos):
+                    music_muted = not music_muted
+                    pygame.mixer.music.pause() if music_muted else pygame.mixer.music.unpause()
+                if volume_slider_rect.collidepoint(mouse_pos):
+                    rel_x = mouse_pos[0] - volume_slider_rect.x
+                    current_volume = max(0, min(1, rel_x / volume_slider_rect.width))
+                    pygame.mixer.music.set_volume(current_volume)
+                if gender_dropdown_rect.collidepoint(mouse_pos):
+                    gender_dropdown_active = not gender_dropdown_active
+                elif gender_dropdown_active:
+                    for i in range(len(genders)):
+                        option_rect = pygame.Rect(gender_dropdown_rect.x, gender_dropdown_rect.y + gender_dropdown_rect.height * (i + 1), gender_dropdown_rect.width, gender_dropdown_rect.height)
+                        if option_rect.collidepoint(mouse_pos):
+                            selected_gender_index = i
+                            gender_dropdown_active = False
+                            update_gender_in_db(genders[selected_gender_index], profile)
+                            break
+                input_active = profile_name_input_rect.collidepoint(mouse_pos)
+                if not input_active:
+                    profile_name_confirmed = True
+                    if update_profile_name_in_db(profile_name, profile):
+                         profile = profile_name #update
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+sys.exit()
