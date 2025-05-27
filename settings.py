@@ -265,4 +265,3 @@ def update_animation():
     if animation_timer >= animation_speed:
         animation_index = (animation_index + 1) % 4
         animation_timer = 0
-

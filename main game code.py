@@ -713,9 +713,5 @@ while True:
     ) # will become a dictionary 
     settings.update_animation()
 
-    
-    
-        
-
     pygame.display.update() #update the display of the screen 
     Time.tick(60)# tells loop dont just faster then 60 fps
