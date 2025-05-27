@@ -2,14 +2,23 @@ import tkinter as tk #hover effect-event binding
 from tkinter import ttk #provide theme widgets #for the layout of progress bar
 from PIL import Image,ImageTk
 import pygame #for pygame.mixer and inside the progress bar(handle audio playback and get current position of the song)
+import os
 
 #initialize pygame mixer
 pygame.mixer.init()
 
+# Base directory of the script
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Paths for assets
+AUDIO_DIR = BASE_DIR
+IMAGE_DIR = BASE_DIR
+
 #----------------------------------------------------------------------------------------------------------------------#
 
 #load and resize the image using PIL 
-def resize_image(image_path, size=(40,40)):
+def resize_image(image_name, size=(40,40)):
+    image_path = os.path.join(IMAGE_DIR, image_name)
     img=Image.open(image_path)
     img=img.resize(size, Image.Resampling.LANCZOS) #Resampling=process of changing size of an image #LANCZOS=high quality resizing
     return ImageTk.PhotoImage(img)
@@ -19,11 +28,11 @@ def resize_image(image_path, size=(40,40)):
 
 #song dictionary
 song_dict={
-       "Rain sounds":"Moodify/tkinter pages/sound/rain.mp3",
-       "Ocean waves sounds":"Moodify/tkinter pages/sound/ocean.mp3",
-       "Spring sounds":"Moodify/tkinter pages/sound/bird.mp3",
-       "Clicking keyboard sounds":"Moodify/tkinter pages/sound/keyboard.mp3",
-       "Waterfall sounds":"Moodify/tkinter pages/sound/waterfall.mp3"
+    "Rain sounds": os.path.join(AUDIO_DIR, "rain.mp3"),
+    "Ocean waves sounds": os.path.join(AUDIO_DIR, "ocean.mp3"),
+    "Spring sounds": os.path.join(AUDIO_DIR, "bird.mp3"),
+    "Clicking keyboard sounds": os.path.join(AUDIO_DIR, "keyboard.mp3"),
+    "Waterfall sounds": os.path.join(AUDIO_DIR, "waterfall.mp3")
 }
 
 #----------------------------------------------------------------------------------------------------------------------#
@@ -205,11 +214,11 @@ button_frame=tk.Frame(playlist_button_frame,bg="#e1f5fe")
 button_frame.pack(pady=(10,15))
 
 #image for button
-play_image=resize_image("Moodify/tkinter pages/sound/play.png")
-pause_image=resize_image("Moodify/tkinter pages/sound/pause.png")
-stop_image=resize_image("Moodify/tkinter pages/sound/stop.png")
-next_image=resize_image("Moodify/tkinter pages/sound/next.png")
-previous_image=resize_image("Moodify/tkinter pages/sound/previous.png")
+play_image = resize_image("play.png")
+pause_image = resize_image("pause.png")
+stop_image = resize_image("stop.png")
+next_image = resize_image("next.png")
+previous_image = resize_image("previous.png")
 
 #store references to all button images.If no,image might get garbage collected by Python, cause them to disappear
 image_references = [previous_image,stop_image,play_image, pause_image, next_image]
