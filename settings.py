@@ -18,12 +18,7 @@ DROPDOWN_OPTION_COLOR = (220, 200, 180)
 DROPDOWN_OPTION_HOVER_COLOR = (200, 180, 160)
 INPUT_BG_COLOR = (255, 255, 255)
 INPUT_BORDER_COLOR = (180, 140, 100)
-FONT = pygame.font.Font("texts/PressStart2P-Regular.ttf", 20)
-
-# Load music
-pygame.mixer.music.load("lofi_music.wav")
-pygame.mixer.music.set_volume(0.5)
-pygame.mixer.music.play(-1)
+FONT = None
 
 # Load settings icon
 settings_icon = pygame.image.load("settings/settings_icon.png")
@@ -119,11 +114,6 @@ def draw_rounded_button(surface, text, x, y, width, height, color, hover_color=N
     text_surface = FONT.render(text, True, TEXT_COLOR)
     text_rect = text_surface.get_rect(center=rect.center)
     surface.blit(text_surface, text_rect)
-    return rect
-
-def draw_icon_button(surface, icon, x, y):
-    rect = pygame.Rect(x, y, icon.get_width(), icon.get_height())
-    screen.blit(icon, (x, y))
     return rect
 
 
