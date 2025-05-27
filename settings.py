@@ -71,7 +71,6 @@ profile_name_confirmed = False # Added profile_name_confirmed.  Not used.
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 
-# Database functions
 def connect_db():
     return sqlite3.connect("userdata.db")
 
@@ -96,7 +95,7 @@ def get_user_data():
 #debugggg
 def update_gender_in_db(new_gender):
     #Update the gender in the database when changed in the settings
-    global profile 
+    global profile
     connect = connect_db()
     cursor = connect.cursor()
     cursor.execute("UPDATE user_info SET gender = ? WHERE profile = ?", (new_gender, profile))
