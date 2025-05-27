@@ -33,6 +33,7 @@ def reset_quiz():
     for widget in chat_frame.winfo_children():
         widget.destroy()
     result_label.config(text="[Your stress level and tips will be displayed here.]")
+    chat_canvas.yview_moveto(0)  # Scroll to top when restarting
     display_next_question()
 
 reset_btn = tk.Button(instruction_frame, text="🔁 Restart Survey", font=("Segoe UI", 12, "bold"),bg="#FFECB3", fg="#333", command=reset_quiz, relief="ridge", padx=5, pady=3)
@@ -46,7 +47,12 @@ quiz_questions=[
     "Do you have trouble sleeping due to racing thoughts?",
     "How often do you feel anxious or worried?",
     "Do you experience physical symptoms like headaches or stomachaches when stressed?",
-    "How often do you feel like you can't handle things?"
+    "How often do you feel like you can't handle things?",
+    "Do you find it hard to relax even during your free time?",
+    "Do you feel emotionally drained at the end of the day?",
+    "How often do you feel irritable or short-tempered?",
+    "Do you feel a lack of motivation or energy?",
+    "How often do you procrastinate tasks due to feeling overwhelmed?"
 ]
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -57,13 +63,23 @@ quiz_options=[
     ["Never", "Sometimes", "Often", "Every night"],
     ["Seldom", "Occasionally", "Often", "Constantly"],
     ["Rarely", "Sometimes", "Frequently", "Always"],
-    ["Never", "Sometimes", "Often", "Always"]
+    ["Never", "Sometimes", "Often", "Always"],
+    ["Rarely", "Sometimes", "Frequently", "Always"],
+    ["Rarely", "Sometimes", "Frequently", "Always"],
+    ["Never", "Occasionally", "Often", "Always"],
+    ["Rarely", "Sometimes", "Often", "Always"],
+    ["Never", "Occasionally", "Often", "Always"]
 ]
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #assign scores to options
 quiz_options_score=[
+    [0,1,2,3],
+    [0,1,2,3],
+    [0,1,2,3],
+    [0,1,2,3],
+    [0,1,2,3],
     [0,1,2,3],
     [0,1,2,3],
     [0,1,2,3],
@@ -109,6 +125,18 @@ def update_scroll_region(event=None): #event=None:allow function to be called au
                                                                 #chat_canvas.bbox("all"): Gets the bounding box (min and max x/y coordinates) of everything inside the canvas.
 chat_frame.bind("<Configure>", update_scroll_region)
 
+# Enable scrolling with the mouse wheel
+def on_mousewheel(event):
+    chat_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+# Bind mouse wheel to canvas (Windows and Linux)
+chat_canvas.bind_all("<MouseWheel>", on_mousewheel) #everytime the mouse wheel scrolled,call on_mousewheel event
+
+# Bind mouse wheel for macOS (uses different event name)
+chat_canvas.bind_all("<Button-4>", lambda event: chat_canvas.yview_scroll(-1, "units"))
+chat_canvas.bind_all("<Button-5>", lambda event: chat_canvas.yview_scroll(1, "units"))
+
+
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Result label (outside and below the chat interface)
@@ -123,13 +151,13 @@ def calculate_stress_level():
     total_score = sum(user_scores)
     
     # Determine stress level and tips
-    if total_score <= 4:
+    if total_score <= 7:
         level = "Low Stress😊"
         tips = "You're managing your stress well. Keep up the good work!"
-    elif 5 <= total_score <= 8:
+    elif 8 <= total_score <= 15:
         level = "Moderate Stress🤔"
         tips = "Take some time to relax. Practice deep breathing and mindfulness."
-    elif 9 <= total_score <= 12:
+    elif 16 <= total_score <= 22:
         level = "High Stress😵‍💫"
         tips = "Your stress levels are getting high. Consider talking to a trusted friend or engaging in a calming activity."
     else:
@@ -183,7 +211,7 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Display an intro message before the first question
-intro_label = tk.Label(chat_frame, text="🤖 Hi! I'm here to check your stress level. Let's begin the survey.", 
+intro_label = tk.Label(chat_frame, text="🤖 Hi! I'm here to check your stress level. Let's begin the survey!", 
                        font=("Calibri", 13, "bold"), bg="#FFF3E0", fg="#4E342E", wraplength=560, padx=10, pady=5)
 intro_label.pack(pady=10, anchor="w")
 
