@@ -4,15 +4,6 @@ import sys
 import os
 import sqlite3
 
-# Initialize Pygame and mixer module
-pygame.init()
-pygame.mixer.init()
-
-# Get the current monitor size for fullscreen support
-monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
-screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
-fullscreen = False
-
 # Constants for screen dimension and colors
 BG_COLOR = (245, 235, 220)
 SETTINGS_BG = (210, 180, 140)
@@ -92,8 +83,7 @@ def get_user_data():
     connect.close()
     return result if result else ("", "")
 
-#debugggg
-def update_gender_in_db(new_gender):
+def update_gender(new_gender):
     #Update the gender in the database when changed in the settings
     global profile
     connect = connect_db()
@@ -101,7 +91,7 @@ def update_gender_in_db(new_gender):
     cursor.execute("UPDATE user_info SET gender = ? WHERE profile = ?", (new_gender, profile))
     connect.commit()
     connect.close()
-
+    
 #Fetch initial data
 get_profile()  #Fetch the latest profile first
 profile, gender = get_user_data()  #Get profile and gender data based on the profile
@@ -233,7 +223,8 @@ def handle_event(event, rects):
                     if option_rect.collidepoint(mouse_pos):
                         selected_gender_index = i
                         gender_dropdown_active = False
-                        # Update gender in DB here if needed
+                        #Update in database
+                        update_gender(genders[selected_gender_index]) 
                         break
 
             if rects.get("profile_name_input_rect") and rects["profile_name_input_rect"].collidepoint(mouse_pos):
@@ -242,16 +233,14 @@ def handle_event(event, rects):
                 input_active = False
                 profile_name_confirmed = True #set to True when input is confirmed
     if event.type == pygame.KEYDOWN:
-            if input_active:
-                if event.key == pygame.K_BACKSPACE:
-                    profile_name = profile_name[:-1]
-                elif event.key == pygame.K_RETURN:
-                    input_active = False
-                    profile_name_confirmed = True
-                else:
-                    if event.unicode.isprintable(): 
-                        if len(profile_name) < 11:  
-                            profile_name += event.unicode
+        if input_active:
+            if event.key == pygame.K_BACKSPACE:
+                nickname = nickname[:-1]
+            elif event.key == pygame.K_RETURN:
+                input_active = False
+                nickname_confirmed = True
+            elif len(nickname) < 11:  # Limit nickname length to 10 characters
+                nickname += event.unicode
 
 
 def update_animation():

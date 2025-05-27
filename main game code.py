@@ -683,7 +683,6 @@ while True:
             show_text = True
             
 
-
     if show_text:
         virtual_surface.blit(Speech_bar,speechbar_rect)
         virtual_surface.blit(text_surface,text_rect)
