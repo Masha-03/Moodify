@@ -3,6 +3,16 @@ import pygame
 import sys
 import os
 import sqlite3
+from tkinter import messagebox 
+
+# Initialize Pygame and mixer module
+pygame.init()
+pygame.mixer.init()
+
+# Get the current monitor size for fullscreen support
+monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
+screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
+fullscreen = False
 
 # Constants for screen dimension and colors
 BG_COLOR = (245, 235, 220)
@@ -19,10 +29,6 @@ DROPDOWN_OPTION_HOVER_COLOR = (200, 180, 160)
 INPUT_BG_COLOR = (255, 255, 255)
 INPUT_BORDER_COLOR = (180, 140, 100)
 FONT = None
-
-# Load settings icon
-settings_icon = pygame.image.load("settings/settings_icon.png")
-settings_icon = pygame.transform.scale(settings_icon, (80, 80))
 
 # Load character animations (4 frames)
 scale_size = 0.75
@@ -57,26 +63,40 @@ profile_name_confirmed = False # added profile_name_confirmed.  not used until d
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 
-def connect_db():
-    return sqlite3.connect("moodify_database.db")
-
+#Get profile from the database
 def get_profile():
     global profile
-    connect = connect_db()
+    connect = sqlite3.connect('moodify_database.db')
     cursor = connect.cursor()
-    cursor.execute("SELECT profile FROM user_info LIMIT 1")
+    
+    #Fetch the profile
+    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
     result = cursor.fetchone()
+    
+    connect.close() #Close connection
     if result:
-        profile = result[0]
-    connect.close()
+        profile = result[0]  #Store the profile 
+    else:
+        profile = None  #Set profile to None if no profile found
+        
+#Database connection 
+def connect_db():
+    connect = sqlite3.connect("moodify_database.db")
+    return connect
 
 def get_user_data():
+    #Fetch user profile data and return profile and gender
     connect = connect_db()
     cursor = connect.cursor()
-    cursor.execute("SELECT profile, gender FROM user_info LIMIT 1")
-    result = cursor.fetchone()
+    cursor.execute("SELECT profile, gender FROM user_info WHERE profile = ?", (profile,))
+    user_data = cursor.fetchone()
     connect.close()
-    return result if result else ("", "")
+
+    #If data exists, return it, else use default values
+    if user_data:
+        return user_data[0], user_data[1]
+    else:
+        return "User", "Male"
 
 def update_gender(new_gender):
     #Update the gender in the database when changed in the settings
@@ -87,6 +107,28 @@ def update_gender(new_gender):
     connect.commit()
     connect.close()
     
+def update_profile(new_name):
+    global profile
+    connect = connect_db()
+    cursor = connect.cursor()
+
+    #Check if name is taken
+    cursor.execute("SELECT profile FROM user_info WHERE profile = ?", (new_name,))
+    exists = cursor.fetchone()
+
+    if exists:
+        result = messagebox.askretrycancel("Name Taken", f"The profile name '{new_name}' is already taken.\nPlease choose another name.")
+        connect.close()
+        return False if not result else None  #Cancel -> return False, Retry -> return None
+    else:
+        #Update profile name
+        cursor.execute("UPDATE user_info SET profile = ? WHERE profile = ?", (new_name, profile))
+        connect.commit()
+        connect.close()
+        profile = new_name  #Update the global profile variable
+        messagebox.showinfo("Success", f"Profile name changed to '{new_name}'")
+        return True
+
 #Fetch initial data
 get_profile()  #Fetch the latest profile first
 profile, gender = get_user_data()  #Get profile and gender data based on the profile
@@ -115,7 +157,6 @@ def draw_rounded_button(surface, text, x, y, width, height, color, hover_color=N
     text_rect = text_surface.get_rect(center=rect.center)
     surface.blit(text_surface, text_rect)
     return rect
-
 
 def draw_slider(surface, x, y, width, height, value):
     pygame.draw.rect(surface, SLIDER_COLOR, (x, y, width, height), border_radius=6)
@@ -223,14 +264,25 @@ def handle_event(event, rects):
                 input_active = False
                 profile_name_confirmed = True #set to True when input is confirmed
     if event.type == pygame.KEYDOWN:
-        if input_active:
-            if event.key == pygame.K_BACKSPACE:
-                nickname = nickname[:-1]
-            elif event.key == pygame.K_RETURN:
-                input_active = False
-                nickname_confirmed = True
-            elif len(nickname) < 11:  # Limit nickname length to 10 characters
-                nickname += event.unicode
+            if input_active:
+                if event.key == pygame.K_BACKSPACE:
+                    profile_name = profile_name[:-1]
+                elif event.key == pygame.K_RETURN:
+                    input_active = False
+                    profile_name_confirmed = True
+                    result = update_profile(profile_name.strip())
+
+                    if result is False:  #User clicked Cancel
+                        profile_name_confirmed = False
+                        profile_name = ""  #Reset the input box
+                    elif result is None:  #User clicked Retry
+                        profile_name = ""  #Reset the input box
+                        input_active = True  #Allow retyping
+                        profile_name_confirmed = False
+                else:
+                    if event.unicode.isprintable(): 
+                        if len(profile_name) < 11:  
+                            profile_name += event.unicode
 
 
 def update_animation():
