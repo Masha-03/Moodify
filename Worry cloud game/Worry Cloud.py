@@ -29,7 +29,7 @@ def setup_database():
 
 def save_worry_to_db(worry_text):
     """Saves a worry text to the database."""
-    if not worry_text.strip(): # Don't save empty worries
+    if not worry_text.strip(): #dont save empty worries
         return
 
     try:
