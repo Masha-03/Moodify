@@ -264,7 +264,7 @@ def cockroach_speech():
     return speech 
 
 def plant_speech():
-    speech_forplant =["Don't forget to water this one!",
+    speech_forplant =["Don't forget to water it tmr!",
                         "Ah, a little greenery to brighten the room!",
                         "A plant that never complains...",
                         "drink more water plant!",
@@ -447,7 +447,7 @@ cockroach = pygame.Rect(54,550,40,50)
 sofa = pygame.Rect(220,470,530,180)
 
 #----------------------------------------------------------------------------taya settings----------------------------------------------
-def draw_icon_button(surface,icon, x, y):
+def draw_icon_button(virtual_surface,icon, x, y):
     rect = pygame.Rect(x, y, icon.get_width(), icon.get_height())
     virtual_surface.blit(icon, (x, y))
     return rect
@@ -467,7 +467,6 @@ font =pygame.font.Font(None,30)
 #game main loop
 while True:
     for event in pygame.event.get(): #collects all the events and goes through it one by one
-        settings.handle_event(event,rects) #pass all the event to settings
         if event.type == pygame.QUIT:# if pygame is closed before the tkinter page all will be close
             if calendar_process and calendar_process.poll() is None:# first check exist or not 
                 calendar_process.terminate()
@@ -499,6 +498,8 @@ while True:
                 #rescale bg to fit the current screen
                 screen_width, screen_height = screen.get_size()
                 scaled_bg = scale_bg()
+            if settings.settings_open:
+                settings.handle_event(event, None) #if settings is open then handle the event in the settings file
         if event.type == pygame.MOUSEBUTTONDOWN:
             if show_tv_screen:
                 if TV_quit_button_rect.collidepoint(event.pos):
@@ -529,14 +530,18 @@ while True:
                     show_text = False
                     text_timer=False # so it wont keep on respawn new 
 
+            if settings_button_rect.collidepoint(event.pos):
+                    if not settings.settings_open:
+                        settings.settings_open = True
+                    else:
+                        settings.settings_open = False
+
+            if settings.settings_open:
+                rects = settings.draw(virtual_surface, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, settings.animation_index, settings.profile)
+                settings.handle_event(event, rects)
                 
 
             elif not show_tv_screen and not show_radio and not show_plant and not settings.settings_open:
-                if settings_button_rect.collidepoint(event.pos):
-                    if settings.settings_open == False:
-                        settings.settings_open = True
-                    elif settings.settings_open == True:
-                        settings.settings_open = False
                 if radio_entry.collidepoint(event.pos): #where it click on and check if its inside the box
                     show_radio =True
                 if TV_entry.collidepoint(event.pos):
@@ -706,12 +711,8 @@ while True:
             play_rain_sound()
 
     if settings.settings_open:
-        # This will update rects and call draw in the settings file and the argument sent to the file 
-        rects = settings.draw(
-        virtual_surface, VIRTUAL_WIDTH,VIRTUAL_HEIGHT,
-        settings.animation_index, settings.profile
-    ) # will become a dictionary 
-    settings.update_animation()
+        settings.draw(virtual_surface, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, settings.animation_index, settings.profile)
+        settings.update_animation()
 
     
     

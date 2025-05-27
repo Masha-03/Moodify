@@ -715,12 +715,7 @@ while True:
     if settings.settings_open:
         settings.draw(virtual_surface, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, settings.animation_index, settings.profile)
         settings.update_animation()
-        # This will update rects and call draw in the settings file and the argument sent to the file 
-        #rects = settings.draw(
-        #virtual_surface, VIRTUAL_WIDTH,VIRTUAL_HEIGHT,
-        #settings.animation_index, settings.profile
-   # ) # will become a dictionary
-    #settings.handle_event(event, rects) 
+        
 
     pygame.display.update() #update the display of the screen 
     Time.tick(60)# tells loop dont just faster then 60 fps
