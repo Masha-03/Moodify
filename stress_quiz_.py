@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import datetime
+import sqlite3
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -9,6 +10,64 @@ root = tk.Tk()  #create the main app window
 root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}")  #full-screen size
 root.title("Stress Level Survey")
 root.configure(bg="#FCF8E8")  #change the background color of entire window
+
+#--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
+#Get profile from the database
+def get_profile():
+    global profile
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+    
+    #Fetch the profile
+    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
+    result = cursor.fetchone()
+    
+    connect.close() #Close connection
+    if result:
+        profile = result[0]  # Store the profile 
+    else:
+        profile = None  # Set profile to None if no profile found
+
+get_profile()
+
+#Initialise table
+def initialise_table(): 
+        #Connect to database
+        connect = sqlite3.connect('moodify_database.db')
+        #Create cursor
+        cursor = connect.cursor()
+        
+        #Create table
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS stress_quiz (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            profile TEXT,
+            date DATE,
+            score INTEGER,
+            stress_level TEXT,
+            FOREIGN KEY (profile) REFERENCES user_info(profile)
+        )
+        ''')
+        
+        #Save data, update
+        connect.commit()
+        #Close connection
+        connect.close()
+        
+#Initialise table before GUI starts        
+initialise_table()
+
+def save_stress_result(score, level):
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+
+    date_today = datetime.date.today().isoformat()  #2025-05-20 fromat current date
+
+    cursor.execute("INSERT INTO stress_quiz (profile, date, score, stress_level) VALUES (?, ?, ?, ?)",
+              (profile, date_today, score, level))
+
+    connect.commit()
+    connect.close()  
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -25,14 +84,21 @@ instruction_frame.pack(pady=(0, 10))
 instruction_label = tk.Label(instruction_frame, text="Hi! Please press one of the buttons below to answer each question.", font=("Segoe UI", 13, "italic"), bg="#FCF8E8", fg="#555", wraplength=500, justify="left")
 instruction_label.pack(side="left",pady=(0, 10),anchor="w")
 
+# Progress bar
+progress = ttk.Progressbar(root, orient="horizontal", length=600, mode="determinate")
+progress.place(relx=0.532, rely=0.19, anchor="e")
+progress["maximum"] = 10
+
 # Restart button
 def reset_quiz():
     global current_index, user_scores
     current_index = 0
     user_scores = []
+    progress["value"] = 0
     for widget in chat_frame.winfo_children():
         widget.destroy()
     result_label.config(text="[Your stress level and tips will be displayed here.]")
+    chat_canvas.yview_moveto(0)  # Scroll to top when restarting
     display_next_question()
 
 reset_btn = tk.Button(instruction_frame, text="🔁 Restart Survey", font=("Segoe UI", 12, "bold"),bg="#FFECB3", fg="#333", command=reset_quiz, relief="ridge", padx=5, pady=3)
@@ -46,7 +112,12 @@ quiz_questions=[
     "Do you have trouble sleeping due to racing thoughts?",
     "How often do you feel anxious or worried?",
     "Do you experience physical symptoms like headaches or stomachaches when stressed?",
-    "How often do you feel like you can't handle things?"
+    "How often do you feel like you can't handle things?",
+    "Do you find it hard to relax even during your free time?",
+    "Do you feel emotionally drained at the end of the day?",
+    "How often do you feel irritable or short-tempered?",
+    "Do you feel a lack of motivation or energy?",
+    "How often do you procrastinate tasks due to feeling overwhelmed?"
 ]
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -57,13 +128,23 @@ quiz_options=[
     ["Never", "Sometimes", "Often", "Every night"],
     ["Seldom", "Occasionally", "Often", "Constantly"],
     ["Rarely", "Sometimes", "Frequently", "Always"],
-    ["Never", "Sometimes", "Often", "Always"]
+    ["Never", "Sometimes", "Often", "Always"],
+    ["Rarely", "Sometimes", "Frequently", "Always"],
+    ["Rarely", "Sometimes", "Frequently", "Always"],
+    ["Never", "Occasionally", "Often", "Always"],
+    ["Rarely", "Sometimes", "Often", "Always"],
+    ["Never", "Occasionally", "Often", "Always"]
 ]
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #assign scores to options
 quiz_options_score=[
+    [0,1,2,3],
+    [0,1,2,3],
+    [0,1,2,3],
+    [0,1,2,3],
+    [0,1,2,3],
     [0,1,2,3],
     [0,1,2,3],
     [0,1,2,3],
@@ -78,20 +159,33 @@ current_index = 0 #set 0 to display the first question first
 user_scores=[] #list to store user's selected scores
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+# Container frame to hold chat on the left and result/tips on the right
+main_frame = tk.Frame(root, bg="#FCF8E8")
+main_frame.place(relx=0.5, rely=0.55, anchor="center", relwidth=0.9, relheight=0.6)
+
+# Left frame for chat box
+left_frame = tk.Frame(main_frame, bg="#FFFFFF", bd=2, relief="flat")
+left_frame.place(relx=0, rely=0, relwidth=0.55, relheight=1)
+
+# Right frame for result tips
+right_frame = tk.Frame(main_frame, bg="#FCF8E8")
+right_frame.place(relx=0.56, rely=0, relwidth=0.43, relheight=1)
+
 # Outer frame with border acting as the "box"
-chat_box = tk.Frame(root, bg="#FFFFFF", bd=2, relief="flat")
+chat_box = tk.Frame(left_frame, bg="#FFFFFF", bd=2, relief="flat")
 chat_box.place(relx=0.5, rely=0.45, anchor="center", width=600, height=400) #relx=horizontal,value between 0.0 (left) and 1.0 (right) #rely=vertical.value between 0.0 (top) and 1.0 (bottom)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
+
 # Scrollbar inside the chat box
-scrollbar = ttk.Scrollbar(chat_box, orient="vertical")
+scrollbar = ttk.Scrollbar(left_frame, orient="vertical")
 scrollbar.pack(side="right", fill="y")
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Canvas for scrollable area
-chat_canvas = tk.Canvas(chat_box, bg="#FFFFFF", yscrollcommand=scrollbar.set, highlightthickness=0) #yscrollcommand=scrollbar.set:connects the canvas's vertical scrolling to the scrollbar
+chat_canvas = tk.Canvas(left_frame, bg="#FFFFFF", yscrollcommand=scrollbar.set, highlightthickness=0) #yscrollcommand=scrollbar.set:connects the canvas's vertical scrolling to the scrollbar
 chat_canvas.pack(side="left", fill="both", expand=True)
 scrollbar.config(command=chat_canvas.yview) #when move the scrollbar, it scrolls the canvas vertically using .yview()
 
@@ -109,35 +203,75 @@ def update_scroll_region(event=None): #event=None:allow function to be called au
                                                                 #chat_canvas.bbox("all"): Gets the bounding box (min and max x/y coordinates) of everything inside the canvas.
 chat_frame.bind("<Configure>", update_scroll_region)
 
+# Enable scrolling with the mouse wheel
+def on_mousewheel(event):
+    chat_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+# Bind mouse wheel to canvas (Windows and Linux)
+chat_canvas.bind_all("<MouseWheel>", on_mousewheel) #everytime the mouse wheel scrolled,call on_mousewheel event
+
+# Bind mouse wheel for macOS (uses different event name)
+chat_canvas.bind_all("<Button-4>", lambda event: chat_canvas.yview_scroll(-1, "units"))
+chat_canvas.bind_all("<Button-5>", lambda event: chat_canvas.yview_scroll(1, "units"))
+
+
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Result label (outside and below the chat interface)
-result_label = tk.Label(root, text="[Your stress level and tips will be displayed here.]", font=("Segoe UI", 14), bg="#FCF8E8", fg="#3A3D64", wraplength=800, justify="left")
+result_label = tk.Label(right_frame, text="[Your stress level and tips will be displayed here.]", font=("Segoe UI", 14), bg="#FCF8E8", fg="#3A3D64", wraplength=480, justify="left")
 # Place result_label just below the chat_box
-result_label.pack(pady=(420, 20))  # Just below the title and chat box
+result_label.place(relx=0.5,rely=0.30,anchor="center")  # Just below the title and chat box
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 
 # Function to calculate stress level and update the result label
 def calculate_stress_level():
     total_score = sum(user_scores)
     
     # Determine stress level and tips
-    if total_score <= 4:
+    if total_score <= 7:
         level = "Low Stress😊"
-        tips = "You're managing your stress well. Keep up the good work!"
-    elif 5 <= total_score <= 8:
+        tips = (
+            "You're managing your stress well. Keep up the good work!\n"
+            "• Maintain a balanced lifestyle\n"
+            "• Exercise regularly to boost mood\n"
+            "• Practice gratitude journaling daily\n"
+            "• Ensure good sleep hygiene"
+        )
+    elif 8 <= total_score <= 15:
         level = "Moderate Stress🤔"
-        tips = "Take some time to relax. Practice deep breathing and mindfulness."
-    elif 9 <= total_score <= 12:
+        tips = (
+            "Take some time to relax. Practice deep breathing and mindfulness.\n"
+            "• Take short breaks during work or study\n"
+            "• Engage in hobbies you enjoy\n"
+            "• Avoid caffeine and sugar close to bedtime\n"
+            "• Try progressive muscle relaxation"
+        )
+    elif 16 <= total_score <= 22:
         level = "High Stress😵‍💫"
-        tips = "Your stress levels are getting high. Consider talking to a trusted friend or engaging in a calming activity."
+        tips = (
+            "Your stress levels are getting high. Consider talking to a trusted friend or engaging in a calming activity.\n"
+            "• Schedule regular 'me-time' to unwind\n"
+            "• Practice deep breathing exercises or guided imagery\n"
+            "• Limit exposure to stress triggers\n"
+            "• Talk to supportive friends or counselors"
+        )
     else:
         level = "Severe Stress🤒"
-        tips = "Your stress levels are quite high. It might be helpful to seek support from a mental health professional."
+        tips = (
+            "Your stress levels are quite high. It might be helpful to seek support from a mental health professional.\n"
+            "• Consider professional counseling or therapy\n"
+            "• Explore mindfulness-based stress reduction\n"
+            "• Keep a stress diary to track triggers\n"
+            "• Prioritize self-care routines and set boundaries"
+        )
     
     # Add result to chat_frame like a message
     result_label.config(text=f"✨ Stress Level: {level}\n💡 Tips: {tips}", font=("Comic Sans MS", 14, "bold"))
+    
+    #Save to database
+    save_stress_result(total_score, level.split()[0])  #Use only "Low", "Moderate", "High"
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -177,13 +311,14 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
             button.pack(side="left", padx=5)
         
         current_index += 1 #+1 and move to next question
+        progress["value"] = current_index
     else:
         calculate_stress_level()
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Display an intro message before the first question
-intro_label = tk.Label(chat_frame, text="🤖 Hi! I'm here to check your stress level. Let's begin the survey.", 
+intro_label = tk.Label(chat_frame, text="🤖 Hi! I'm here to check your stress level. Let's begin the survey!", 
                        font=("Calibri", 13, "bold"), bg="#FFF3E0", fg="#4E342E", wraplength=560, padx=10, pady=5)
 intro_label.pack(pady=10, anchor="w")
 
