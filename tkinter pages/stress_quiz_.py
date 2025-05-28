@@ -84,11 +84,17 @@ instruction_frame.pack(pady=(0, 10))
 instruction_label = tk.Label(instruction_frame, text="Hi! Please press one of the buttons below to answer each question.", font=("Segoe UI", 13, "italic"), bg="#FCF8E8", fg="#555", wraplength=500, justify="left")
 instruction_label.pack(side="left",pady=(0, 10),anchor="w")
 
+# Progress bar
+progress = ttk.Progressbar(root, orient="horizontal", length=600, mode="determinate")
+progress.place(relx=0.532, rely=0.19, anchor="e")
+progress["maximum"] = 10
+
 # Restart button
 def reset_quiz():
     global current_index, user_scores
     current_index = 0
     user_scores = []
+    progress["value"] = 0
     for widget in chat_frame.winfo_children():
         widget.destroy()
     result_label.config(text="[Your stress level and tips will be displayed here.]")
@@ -153,20 +159,33 @@ current_index = 0 #set 0 to display the first question first
 user_scores=[] #list to store user's selected scores
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+# Container frame to hold chat on the left and result/tips on the right
+main_frame = tk.Frame(root, bg="#FCF8E8")
+main_frame.place(relx=0.5, rely=0.55, anchor="center", relwidth=0.9, relheight=0.6)
+
+# Left frame for chat box
+left_frame = tk.Frame(main_frame, bg="#FFFFFF", bd=2, relief="flat")
+left_frame.place(relx=0, rely=0, relwidth=0.55, relheight=1)
+
+# Right frame for result tips
+right_frame = tk.Frame(main_frame, bg="#FCF8E8")
+right_frame.place(relx=0.56, rely=0, relwidth=0.43, relheight=1)
+
 # Outer frame with border acting as the "box"
-chat_box = tk.Frame(root, bg="#FFFFFF", bd=2, relief="flat")
+chat_box = tk.Frame(left_frame, bg="#FFFFFF", bd=2, relief="flat")
 chat_box.place(relx=0.5, rely=0.45, anchor="center", width=600, height=400) #relx=horizontal,value between 0.0 (left) and 1.0 (right) #rely=vertical.value between 0.0 (top) and 1.0 (bottom)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
+
 # Scrollbar inside the chat box
-scrollbar = ttk.Scrollbar(chat_box, orient="vertical")
+scrollbar = ttk.Scrollbar(left_frame, orient="vertical")
 scrollbar.pack(side="right", fill="y")
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Canvas for scrollable area
-chat_canvas = tk.Canvas(chat_box, bg="#FFFFFF", yscrollcommand=scrollbar.set, highlightthickness=0) #yscrollcommand=scrollbar.set:connects the canvas's vertical scrolling to the scrollbar
+chat_canvas = tk.Canvas(left_frame, bg="#FFFFFF", yscrollcommand=scrollbar.set, highlightthickness=0) #yscrollcommand=scrollbar.set:connects the canvas's vertical scrolling to the scrollbar
 chat_canvas.pack(side="left", fill="both", expand=True)
 scrollbar.config(command=chat_canvas.yview) #when move the scrollbar, it scrolls the canvas vertically using .yview()
 
@@ -199,9 +218,9 @@ chat_canvas.bind_all("<Button-5>", lambda event: chat_canvas.yview_scroll(1, "un
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Result label (outside and below the chat interface)
-result_label = tk.Label(root, text="[Your stress level and tips will be displayed here.]", font=("Segoe UI", 14), bg="#FCF8E8", fg="#3A3D64", wraplength=800, justify="left")
+result_label = tk.Label(right_frame, text="[Your stress level and tips will be displayed here.]", font=("Segoe UI", 14), bg="#FCF8E8", fg="#3A3D64", wraplength=500, justify="left")
 # Place result_label just below the chat_box
-result_label.place(relx=0.5,rely=0.85,anchor="center")  # Just below the title and chat box
+result_label.place(relx=0.5,rely=0.30,anchor="center")  # Just below the title and chat box
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -212,16 +231,40 @@ def calculate_stress_level():
     # Determine stress level and tips
     if total_score <= 7:
         level = "Low Stress😊"
-        tips = "You're managing your stress well. Keep up the good work!"
+        tips = (
+            "You're managing your stress well. Keep up the good work!\n"
+            "• Maintain a balanced lifestyle\n"
+            "• Exercise regularly to boost mood\n"
+            "• Practice gratitude journaling daily\n"
+            "• Ensure good sleep hygiene"
+        )
     elif 8 <= total_score <= 15:
         level = "Moderate Stress🤔"
-        tips = "Take some time to relax. Practice deep breathing and mindfulness."
+        tips = (
+            "Take some time to relax. Practice deep breathing and mindfulness.\n"
+            "• Take short breaks during work or study\n"
+            "• Engage in hobbies you enjoy\n"
+            "• Avoid caffeine and sugar close to bedtime\n"
+            "• Try progressive muscle relaxation"
+        )
     elif 16 <= total_score <= 22:
         level = "High Stress😵‍💫"
-        tips = "Your stress levels are getting high. Consider talking to a trusted friend or engaging in a calming activity."
+        tips = (
+            "Your stress levels are getting high. Consider talking to a trusted friend or engaging in a calming activity.\n"
+            "• Schedule regular 'me-time' to unwind\n"
+            "• Practice deep breathing exercises or guided imagery\n"
+            "• Limit exposure to stress triggers\n"
+            "• Talk to supportive friends or counselors"
+        )
     else:
         level = "Severe Stress🤒"
-        tips = "Your stress levels are quite high. It might be helpful to seek support from a mental health professional."
+        tips = (
+            "Your stress levels are quite high. It might be helpful to seek support from a mental health professional.\n"
+            "• Consider professional counseling or therapy\n"
+            "• Explore mindfulness-based stress reduction\n"
+            "• Keep a stress diary to track triggers\n"
+            "• Prioritize self-care routines and set boundaries"
+        )
     
     # Add result to chat_frame like a message
     result_label.config(text=f"✨ Stress Level: {level}\n💡 Tips: {tips}", font=("Comic Sans MS", 14, "bold"))
@@ -267,6 +310,7 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
             button.pack(side="left", padx=5)
         
         current_index += 1 #+1 and move to next question
+        progress["value"] = current_index
     else:
         calculate_stress_level()
 
