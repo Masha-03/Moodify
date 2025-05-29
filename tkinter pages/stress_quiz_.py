@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import datetime
 import sqlite3
+import customtkinter as ctk
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -85,24 +86,30 @@ instruction_label = tk.Label(instruction_frame, text="Hi! Please press one of th
 instruction_label.pack(side="left",pady=(0, 10),anchor="w")
 
 # Progress bar
-progress = ttk.Progressbar(root, orient="horizontal", length=600, mode="determinate")
-progress.place(relx=0.532, rely=0.19, anchor="e")
-progress["maximum"] = 10
+progress = ctk.CTkProgressBar(root, orientation="horizontal", width=700, height=15, corner_radius=10, fg_color="#E0E0E0", progress_color="#60ACE3")
+progress.set(0)
+progress.pack(pady=(5, 10))
 
 # Restart button
 def reset_quiz():
     global current_index, user_scores
     current_index = 0
     user_scores = []
-    progress["value"] = 0
+    progress.set(0)
     for widget in chat_frame.winfo_children():
         widget.destroy()
     result_label.config(text="[Your stress level and tips will be displayed here.]")
     chat_canvas.yview_moveto(0)  # Scroll to top when restarting
     display_next_question()
 
-reset_btn = tk.Button(instruction_frame, text="🔁 Restart Survey", font=("Segoe UI", 12, "bold"),bg="#FFECB3", fg="#333", command=reset_quiz, relief="ridge", padx=5, pady=3)
-reset_btn.pack(side="left",anchor="e")
+reset_btn = ctk.CTkButton(instruction_frame, text="🔁 Restart Survey", 
+                           font=ctk.CTkFont("Segoe UI", 16, "bold"),
+                           fg_color="#FFECB3", 
+                           text_color="#333", 
+                           command=reset_quiz, 
+                           hover_color="#FFD700", # Darker yellow on hover
+                           corner_radius=14) # Adding CustomTkinter styling
+reset_btn.pack(side="left",anchor="e",pady=(3,10))
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -119,6 +126,9 @@ quiz_questions=[
     "Do you feel a lack of motivation or energy?",
     "How often do you procrastinate tasks due to feeling overwhelmed?"
 ]
+
+# Define total number of questions for progress bar calculation
+TOTAL_QUESTIONS = len(quiz_questions)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -307,11 +317,17 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
         button_frame.pack(pady=5, anchor="center")
 
         for option in options:                                                         #When clicked, it calls display_next_question(opt), passing the selected option as the answer #button_frame to remove the options after a selection
-            button = tk.Button(button_frame, text=option, bg="#D1C4E9",fg="#222222", relief="flat", command=lambda opt=option: [display_next_question(opt), button_frame.destroy()],activebackground="#B39DDB",activeforeground="white",font=("Segoe UI", 12))
+            button = ctk.CTkButton(button_frame, text=option, 
+                                   fg_color="#D1C4E9", # Light purple for options
+                                   text_color="#222222", 
+                                   command=lambda opt=option: [display_next_question(opt), button_frame.destroy()],
+                                   hover_color="#B39DDB", # Darker purple on hover
+                                   corner_radius=6,
+                                   font=ctk.CTkFont("Segoe UI", 15, "bold"),
+                                   width=120, height=35)
             button.pack(side="left", padx=5)
-        
         current_index += 1 #+1 and move to next question
-        progress["value"] = current_index
+        progress.set(current_index / TOTAL_QUESTIONS)
     else:
         calculate_stress_level()
 
