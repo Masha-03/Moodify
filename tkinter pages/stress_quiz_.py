@@ -10,7 +10,7 @@ import customtkinter as ctk
 root = tk.Tk()  #create the main app window
 root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}")  #full-screen size
 root.title("Stress Level Survey")
-root.configure(bg="#FCF8E8")  #change the background color of entire window
+root.configure(bg="#FFF8E1")  #change the background color of entire window
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
 #Get profile from the database
@@ -73,20 +73,20 @@ def save_stress_result(score, level):
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #title label
-title = tk.Label(root, text="Stress Level Survey📃", font=("Comic Sans MS", 18, "bold"), bg="#FCF8E8", fg="#333")
+title = tk.Label(root, text="Stress Level Survey📃", font=("Arial", 20, "bold"), bg="#FCF8E8", fg="#333")
 title.pack(pady=10)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # Frame to hold instruction label and restart button side by side
-instruction_frame = tk.Frame(root, bg="#FCF8E8")
+instruction_frame = tk.Frame(root, bg="#FFF8E1")
 instruction_frame.pack(pady=(0, 10))
 
 #instruction label to tell user what to do
-instruction_label = tk.Label(instruction_frame, text="Hi! Please press one of the buttons below to answer each question.", font=("Segoe UI", 13, "italic"), bg="#FCF8E8", fg="#555", wraplength=500, justify="left")
+instruction_label = tk.Label(instruction_frame, text="Hi! Please press one of the buttons below to answer each question.", font=("Segoe UI", 13, "italic"), bg="#FFF8E1", fg="#555", wraplength=500, justify="left")
 instruction_label.pack(side="left",pady=(0, 10),anchor="w")
 
 # Progress bar
-progress = ctk.CTkProgressBar(root, orientation="horizontal", width=700, height=15, corner_radius=10, fg_color="#E0E0E0", progress_color="#60ACE3")
+progress = ctk.CTkProgressBar(root, orientation="horizontal", width=700, height=15, corner_radius=10, fg_color="#FFE0B2", progress_color="#FFB74D")
 progress.set(0)
 progress.pack(pady=(5, 10))
 
@@ -104,10 +104,10 @@ def reset_quiz():
 
 reset_btn = ctk.CTkButton(instruction_frame, text="🔁 Restart Survey", 
                            font=ctk.CTkFont("Segoe UI", 16, "bold"),
-                           fg_color="#FFECB3", 
-                           text_color="#333", 
+                           fg_color="#FFCC80", 
+                           text_color="#6D4C41", 
                            command=reset_quiz, 
-                           hover_color="#FFD700", # Darker yellow on hover
+                           hover_color="#FFB380", # Darker yellow on hover
                            corner_radius=14) # Adding CustomTkinter styling
 reset_btn.pack(side="left",anchor="e",pady=(3,10))
 
@@ -170,7 +170,7 @@ user_scores=[] #list to store user's selected scores
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # Container frame to hold chat on the left and result/tips on the right
-main_frame = tk.Frame(root, bg="#FCF8E8")
+main_frame = tk.Frame(root, bg="#FFF8E1")
 main_frame.place(relx=0.5, rely=0.55, anchor="center", relwidth=0.9, relheight=0.6)
 
 # Left frame for chat box
@@ -178,7 +178,7 @@ left_frame = tk.Frame(main_frame, bg="#FFFFFF", bd=2, relief="flat")
 left_frame.place(relx=0, rely=0, relwidth=0.55, relheight=1)
 
 # Right frame for result tips
-right_frame = tk.Frame(main_frame, bg="#FCF8E8")
+right_frame = tk.Frame(main_frame, bg="#FFFDE7")
 right_frame.place(relx=0.56, rely=0, relwidth=0.43, relheight=1)
 
 # Outer frame with border acting as the "box"
@@ -297,12 +297,12 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
         score = quiz_options_score[question_index][option_idx]
         user_scores.append(score)
         #user response bubble
-        user_bubble_frame = ctk.CTkFrame(chat_frame, fg_color="#64B5F6", corner_radius=15) # Light blue bubble
+        user_bubble_frame = ctk.CTkFrame(chat_frame, fg_color="#FFD54F", corner_radius=15) # Light blue bubble
         user_bubble_frame.pack(pady=(5, 2), padx=(100,25), anchor="e", ipadx=5, ipady=3) # Anchor right
         
         response_label = ctk.CTkLabel(user_bubble_frame, text=f"🧍 You: {answer}", 
                                       font=ctk.CTkFont("Calibri", 17, "bold"), 
-                                      text_color="white", 
+                                      text_color="#6D4C41", 
                                       wraplength=380, justify="left")
         response_label.pack(padx=10, pady=5, anchor="e")
 
@@ -316,12 +316,12 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
     if current_index < len(quiz_questions): #check if there are more question to display
         #display the question as a chat bubble
         #label to display the question
-        bot_bubble_frame = ctk.CTkFrame(chat_frame, fg_color="#E0E0E0", corner_radius=15) # Light grey bubble
+        bot_bubble_frame = ctk.CTkFrame(chat_frame, fg_color="#FBE9E7", corner_radius=15) # Light grey bubble
         bot_bubble_frame.pack(pady=(5, 2), padx=10, anchor="w", fill="x", ipadx=5, ipady=3) # Anchor left
 
         question_label = ctk.CTkLabel(bot_bubble_frame, text=f"🤖 Q{current_index+1}: {quiz_questions[current_index]}", 
                                       font=ctk.CTkFont("Calibri", 17, "bold"), 
-                                      text_color="#3D3D3D", 
+                                      text_color="#3E2723", 
                                       wraplength=560, justify="left")
         question_label.pack(padx=10, pady=5, anchor="w")
 
@@ -337,10 +337,10 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
 
         for option in options:                                                         #When clicked, it calls display_next_question(opt), passing the selected option as the answer #button_frame to remove the options after a selection
             button = ctk.CTkButton(button_frame, text=option, 
-                                   fg_color="#D1C4E9", # Light purple for options
-                                   text_color="#222222", 
+                                   fg_color="#FFAB91", # Light purple for options
+                                   text_color="#4E342E", 
                                    command=lambda opt=option: [display_next_question(opt), button_frame.destroy()],
-                                   hover_color="#B39DDB", # Darker purple on hover
+                                   hover_color="#FF8A65", # Darker purple on hover
                                    corner_radius=6,
                                    font=ctk.CTkFont("Segoe UI", 15, "bold"),
                                    width=120, height=35)
@@ -353,12 +353,12 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Display an intro message before the first question
-intro_bubble_frame = ctk.CTkFrame(chat_frame, fg_color="#F3E5F5", corner_radius=15) # Light purple intro bubble
+intro_bubble_frame = ctk.CTkFrame(chat_frame, fg_color="#FFE0B2", corner_radius=15) # Light purple intro bubble
 intro_bubble_frame.pack(pady=10, padx=(10, 100), anchor="w", ipadx=5, ipady=3)
 
-intro_label = ctk.CTkLabel(intro_bubble_frame, text="🤖 Hi! I'm here to check your stress level. Let's begin the survey!", 
+intro_label = ctk.CTkLabel(intro_bubble_frame, text="👋 Hi! I'm here to check your stress level. Let's begin the survey!", 
                            font=ctk.CTkFont("Calibri", 18, "bold"), 
-                           text_color="#4E342E", 
+                           text_color="#795548", 
                            wraplength=560, justify="left") # Reduced wraplength
 intro_label.pack(padx=10, pady=5, anchor="w")
 
