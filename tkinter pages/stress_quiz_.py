@@ -296,25 +296,44 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
         option_idx = quiz_options[question_index].index(answer)
         score = quiz_options_score[question_index][option_idx]
         user_scores.append(score)
-        response_label = tk.Label(chat_frame, text=f"🧍 You: {answer}", font=("Calibri", 14), bg="#E1F5FE", fg="#2A3C5B", wraplength=560, justify="right", padx=10, pady=5,anchor="e")
-        response_label.pack(pady=5, anchor="e")
+        #user response bubble
+        user_bubble_frame = ctk.CTkFrame(chat_frame, fg_color="#64B5F6", corner_radius=15) # Light blue bubble
+        user_bubble_frame.pack(pady=(5, 2), padx=(100,25), anchor="e", ipadx=5, ipady=3) # Anchor right
+        
+        response_label = ctk.CTkLabel(user_bubble_frame, text=f"🧍 You: {answer}", 
+                                      font=ctk.CTkFont("Calibri", 17, "bold"), 
+                                      text_color="white", 
+                                      wraplength=380, justify="left")
+        response_label.pack(padx=10, pady=5, anchor="e")
 
     # Inside display_next_question(), after displaying the user response
+    # Timestamp for user message
     timestamp = datetime.datetime.now().strftime("%I:%M %p")
-    time_label = tk.Label(chat_frame, text=timestamp, font=("Segoe UI", 8), bg="#FFFFFF", fg="#888")
-    time_label.pack(anchor="e", padx=10)
+    time_label = ctk.CTkLabel(chat_frame, text=timestamp, font=ctk.CTkFont("Segoe UI", 11), text_color="#888888")
+    time_label.pack(anchor="e", padx=15, pady=(0, 5))
 
     #move to the next question if there's a new answer
     if current_index < len(quiz_questions): #check if there are more question to display
         #display the question as a chat bubble
         #label to display the question
-        question_label = tk.Label(chat_frame, text=f"🤖 Q{current_index+1}: {quiz_questions[current_index]}", font=("Calibri", 13,"bold"), bg="#F3E5F5", fg="#3D3D3D", wraplength=560,  padx=10, pady=5)
-        question_label.pack(pady=10, anchor="w")
+        bot_bubble_frame = ctk.CTkFrame(chat_frame, fg_color="#E0E0E0", corner_radius=15) # Light grey bubble
+        bot_bubble_frame.pack(pady=(5, 2), padx=10, anchor="w", fill="x", ipadx=5, ipady=3) # Anchor left
+
+        question_label = ctk.CTkLabel(bot_bubble_frame, text=f"🤖 Q{current_index+1}: {quiz_questions[current_index]}", 
+                                      font=ctk.CTkFont("Calibri", 17, "bold"), 
+                                      text_color="#3D3D3D", 
+                                      wraplength=560, justify="left")
+        question_label.pack(padx=10, pady=5, anchor="w")
+
+        # Timestamp for bot message
+        timestamp = datetime.datetime.now().strftime("%I:%M %p")
+        time_label = ctk.CTkLabel(chat_frame, text=timestamp, font=ctk.CTkFont("Segoe UI", 11), text_color="#888888")
+        time_label.pack(anchor="w", padx=15, pady=(0, 5))
 
         #display options as buttons
         options = quiz_options[current_index]
-        button_frame = tk.Frame(chat_frame, bg="white")
-        button_frame.pack(pady=5, anchor="center")
+        button_frame = ctk.CTkFrame(chat_frame, fg_color="transparent") # Transparent background
+        button_frame.pack(pady=10, anchor="w", padx=10)
 
         for option in options:                                                         #When clicked, it calls display_next_question(opt), passing the selected option as the answer #button_frame to remove the options after a selection
             button = ctk.CTkButton(button_frame, text=option, 
@@ -334,9 +353,19 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Display an intro message before the first question
-intro_label = tk.Label(chat_frame, text="🤖 Hi! I'm here to check your stress level. Let's begin the survey!", 
-                       font=("Calibri", 13, "bold"), bg="#FFF3E0", fg="#4E342E", wraplength=560, padx=10, pady=5)
-intro_label.pack(pady=10, anchor="w")
+intro_bubble_frame = ctk.CTkFrame(chat_frame, fg_color="#F3E5F5", corner_radius=15) # Light purple intro bubble
+intro_bubble_frame.pack(pady=10, padx=(10, 100), anchor="w", ipadx=5, ipady=3)
+
+intro_label = ctk.CTkLabel(intro_bubble_frame, text="🤖 Hi! I'm here to check your stress level. Let's begin the survey!", 
+                           font=ctk.CTkFont("Calibri", 18, "bold"), 
+                           text_color="#4E342E", 
+                           wraplength=560, justify="left") # Reduced wraplength
+intro_label.pack(padx=10, pady=5, anchor="w")
+
+# Timestamp for intro message
+timestamp = datetime.datetime.now().strftime("%I:%M %p")
+time_label = ctk.CTkLabel(chat_frame, text=timestamp, font=ctk.CTkFont("Segoe UI", 11), text_color="#757575")
+time_label.pack(anchor="w", padx=10, pady=(0, 5))
 
 # Delay the first question slightly to simulate a chat feel
 root.after(1000, display_next_question)  # delay 1 second before showing the first question
