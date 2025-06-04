@@ -6,6 +6,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import sqlite3
 from datetime import datetime, timedelta
 import matplotlib.dates as mdates
+from collections import defaultdict, Counter
 
 plt.style.use('fivethirtyeight') 
 
@@ -120,7 +121,7 @@ def create_weekly_charts(profile, container):
         
     charts = []
 
-    #Chart 1: Breathing Exercise - Bar Chart
+    # Chart 1: Breathing Exercise - Bar Chart
     plt.style.use('fivethirtyeight')
     fig1, ax1 = plt.subplots(figsize=(5, 4))
     bars = ax1.bar(dates, sessions, color="#c3b091")
@@ -210,16 +211,21 @@ def create_monthly_charts(profile, container):
     else:
         dates, sessions = [], []
 
-    # Plot same style as weekly
+    #Chart 1: Breathing Exercise - Bar Chart
     charts = []
     fig1, ax1 = plt.subplots(figsize=(5, 4))
     ax1.bar(dates, sessions, color="#c3b091")
-    ax1.set_title("Breathing Sessions - Monthly")
+    first_date = datetime.strptime(dates[0], '%Y-%m-%d')  # convert string to datetime
+    month_year = first_date.strftime('%B %Y')  #month and year rn
+    ax1.set_title(f"Breathing Sessions - {month_year}", fontsize=18)
     ax1.set_xticks(range(len(dates)))
-    ax1.set_xticklabels(dates, rotation=45)
+     #Only show the day
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%d'))
+    plt.setp(ax1.get_xticklabels(), rotation=0, fontsize=14)
     fig1.tight_layout()
     charts.append(fig1)
 
+    # Chart 2: Mood Tracker - Pie Chart
     fig2, ax2 = plt.subplots(figsize=(5, 4))
     color_map = {
         "Happy": '#FFD700', "Sad": '#87CEEB', "Angry": '#FF6347',
@@ -227,21 +233,34 @@ def create_monthly_charts(profile, container):
     }
     pie_colors = [color_map[mood] for mood in moods]
     ax2.pie(mood_counts, labels=moods, autopct='%1.1f%%', colors=pie_colors, startangle=140)
-    ax2.set_title("Mood Distribution - Monthly")
+    first_date = datetime.strptime(dates[0], '%Y-%m-%d')  # convert string to datetime
+    month_year = first_date.strftime('%B %Y')  #month and year rn
+    ax2.set_title(f"Mood Distribution - {month_year}", fontsize=18)
     fig2.tight_layout()
     charts.append(fig2)
 
+    # Chart 3: Diary Entry - Line Chart
     fig3, ax3 = plt.subplots(figsize=(5, 4))
     ax3.plot(dates_diary, diary_counts, marker='o', color='#6a5acd')
-    ax3.set_title("Diary Entries - Monthly")
+    first_date = datetime.strptime(dates[0], '%Y-%m-%d')  # convert string to datetime
+    month_year = first_date.strftime('%B %Y')  #month and year rn
+    ax3.set_title(f"Diary Entries - {month_year}", fontsize=18)
     ax3.set_xticks(range(len(dates_diary)))
-    ax3.set_xticklabels(dates_diary, rotation=45)
+     #Only show the day
+    ax3.xaxis.set_major_formatter(mdates.DateFormatter('%d'))
+    plt.setp(ax3.get_xticklabels(), rotation=0, fontsize=8)
     fig3.tight_layout()
     charts.append(fig3)
 
+    # Chart 4: Stress Quiz - Horizontal Bar Chart
     fig4, ax4 = plt.subplots(figsize=(5, 4))
     ax4.barh(dates_stress, stress_levels, color='purple')
-    ax4.set_title("Stress Levels - Monthly")
+    #Only show the day
+    ax4.yaxis.set_major_formatter(mdates.DateFormatter('%d'))
+    ax4.tick_params(axis='y', labelsize=6)
+    first_date = datetime.strptime(dates[0], '%Y-%m-%d')  # convert string to datetime
+    month_year = first_date.strftime('%B %Y')  #month and year rn
+    ax4.set_title(f"Stress Levels - {month_year}", fontsize=18)
     ax4.set_xlim(0, 4)
     ax4.set_xticks([1, 2, 3])
     ax4.set_xticklabels(['Low', 'Medium', 'High'])
@@ -254,7 +273,48 @@ def create_monthly_charts(profile, container):
         container.grid_rowconfigure(i // 2, weight=1)
         container.grid_columnconfigure(i % 2, weight=1)
         embed_chart(fig, frame)
-        
+
+# Get mood entries for annual average calculation
+def get_annual_mood_data(profile, date_list):
+    connect = sqlite3.connect("moodify_database.db")
+    cursor = connect.cursor()
+    placeholders = ','.join('?' * len(date_list))
+    cursor.execute(f'''
+        SELECT date, mood FROM mood_entries
+        WHERE profile = ? AND date IN ({placeholders})
+    ''', [profile] + date_list)
+    results = cursor.fetchall()
+    connect.close()
+    dates = [row[0] for row in results]
+    mood_levels = [row[1] for row in results]  # numeric mood level assumed
+    return dates, mood_levels
+
+def calculate_mood_frequencies(mood_names):
+    freq = Counter(mood_names)
+    labels = list(freq.keys())
+    counts = list(freq.values())
+    return labels, counts
+
+def calculate_monthly_average(dates, values):
+    monthly_totals = defaultdict(list)
+
+    for date_str, value in zip(dates, values):
+        date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+        month_label = date_obj.strftime('%b')  # e.g., Jan, Feb, etc.
+        monthly_totals[month_label].append(value)
+
+    # Ensure months appear in calendar order
+    months_order = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    
+    monthly_averages = []
+    for month in months_order:
+        values = monthly_totals.get(month, [])
+        avg = sum(values) / len(values) if values else 0
+        monthly_averages.append(avg)
+    
+    return months_order, monthly_averages
+
 def create_annual_charts(profile, container):
     for widget in container.winfo_children():
         widget.destroy()
@@ -264,18 +324,22 @@ def create_annual_charts(profile, container):
     dates, sessions = get_breathing_data(profile, range_list)
     dates_diary, diary_counts = get_diary_data(profile, range_list)
     dates_stress, stress_levels = get_stress_data(profile, range_list)
+    mood_dates, mood_levels = get_annual_mood_data(profile, range_list)
     moods, mood_counts = get_mood_data(profile, range_list)
 
-    # Plot same style as weekly
     charts = []
+    
+    # Chart 1: Breathing Sessions - Bar Chart
+    months, avg_sessions = calculate_monthly_average(dates, sessions)
     fig1, ax1 = plt.subplots(figsize=(5, 4))
-    ax1.bar(dates, sessions, color="#c3b091")
+    ax1.bar(months, avg_sessions, color="#c3b091")
     ax1.set_title("Breathing Sessions - Annual")
     ax1.set_xticks(range(len(dates)))
     ax1.set_xticklabels(dates, rotation=45)
     fig1.tight_layout()
     charts.append(fig1)
 
+    # Chart 2: Mood Distribution - Pie Chart
     fig2, ax2 = plt.subplots(figsize=(5, 4))
     color_map = {
         "Happy": '#FFD700', "Sad": '#87CEEB', "Angry": '#FF6347',
@@ -287,16 +351,20 @@ def create_annual_charts(profile, container):
     fig2.tight_layout()
     charts.append(fig2)
 
+    # Chart 3: Diary Entries - Line Chart
+    _, diary_avg = calculate_monthly_average(dates_diary, diary_counts)
     fig3, ax3 = plt.subplots(figsize=(5, 4))
-    ax3.plot(dates_diary, diary_counts, marker='o', color='#6a5acd')
+    ax3.plot(months, diary_avg, color='#6a5acd', linestyle='--', marker='s')
     ax3.set_title("Diary Entries - Annual")
     ax3.set_xticks(range(len(dates_diary)))
     ax3.set_xticklabels(dates_diary, rotation=45)
     fig3.tight_layout()
     charts.append(fig3)
-
+    
+    # Chart 4: Stress Quiz - Horizontal Bar Chart
+    _, stress_avg = calculate_monthly_average(dates_stress, stress_levels)
     fig4, ax4 = plt.subplots(figsize=(5, 4))
-    ax4.barh(dates_stress, stress_levels, color='purple')
+    ax4.barh(months, stress_avg, color='purple')
     ax4.set_title("Stress Levels - Annual")
     ax4.set_xlim(0, 4)
     ax4.set_xticks([1, 2, 3])
