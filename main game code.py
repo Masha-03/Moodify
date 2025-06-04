@@ -416,8 +416,14 @@ graph_process = None
 phone_img = pygame.image.load("graphics/phone.png")
 phone_rect = phone_img.get_rect()
 phone_rect.x= 1185
-phone_rect.y= 120
+phone_rect.y= 190
 phone_process = None
+
+instruction_img = pygame.image.load("graphics/question_mark.png")
+instruction_rect = instruction_img.get_rect()
+instruction_rect.x= 1189
+instruction_rect.y= 100
+instruction_process = None
 
 #--------------------------------------------------------------------------
 
@@ -481,7 +487,9 @@ while True:
                 graph_process.terminate()
             if phone_process and phone_process.poll() is None :
                 phone_process.terminate()
-                
+            if instruction_process and instruction_process.poll() is None :
+                instruction_process.terminate()
+
             sys.exit() 
         if event.type == pygame.KEYDOWN:#check if any key is press 
             if event.key == pygame.K_ESCAPE: #if its the ESC key
@@ -598,7 +606,9 @@ while True:
                     if not phone_process or phone_process.poll() is not None:
                         phone_process = subprocess.Popen([sys.executable,"tkinter pages/stress_quiz_.py"])
 
-                
+                if instruction_rect.collidepoint(event.pos):
+                    if not instruction_process or instruction_process.poll() is not None:
+                        instruction_process = subprocess.Popen([sys.executable,"instruction_page_.py"])
 
     scaled_surface = pygame.transform.scale(virtual_surface, (screen_width, screen_height))
     screen.blit(scaled_surface,(0,0))
@@ -633,6 +643,7 @@ while True:
     #tkinter pages
     virtual_surface.blit(graph_img,graph_rect)
     virtual_surface.blit(phone_img,phone_rect)
+    virtual_surface.blit(instruction_img,instruction_rect)
 
     #for the Tv mini game interface
     if show_tv_screen:

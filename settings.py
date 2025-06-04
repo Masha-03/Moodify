@@ -5,15 +5,6 @@ import os
 import sqlite3
 from tkinter import messagebox 
 
-# Initialize Pygame and mixer module
-pygame.init()
-pygame.mixer.init()
-
-# Get the current monitor size for fullscreen support
-monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
-screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
-fullscreen = False
-
 # Constants for screen dimension and colors
 BG_COLOR = (245, 235, 220)
 SETTINGS_BG = (210, 180, 140)
@@ -157,12 +148,6 @@ def draw_rounded_button(surface, text, x, y, width, height, color, hover_color=N
     text_rect = text_surface.get_rect(center=rect.center)
     surface.blit(text_surface, text_rect)
     return rect
-
-def draw_icon_button(surface, icon, x, y):
-    rect = pygame.Rect(x, y, icon.get_width(), icon.get_height())
-    screen.blit(icon, (x, y))
-    return rect
-
 
 def draw_slider(surface, x, y, width, height, value):
     pygame.draw.rect(surface, SLIDER_COLOR, (x, y, width, height), border_radius=6)

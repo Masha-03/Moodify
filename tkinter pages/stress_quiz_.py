@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 import datetime
+import sqlite3
+import customtkinter as ctk
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -8,36 +10,106 @@ import datetime
 root = tk.Tk()  #create the main app window
 root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}")  #full-screen size
 root.title("Stress Level Survey")
-root.configure(bg="#FCF8E8")  #change the background color of entire window
+root.configure(bg="#FFF8E1")  #change the background color of entire window
+
+#--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
+#Get profile from the database
+def get_profile():
+    global profile
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+    
+    #Fetch the profile
+    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
+    result = cursor.fetchone()
+    
+    connect.close() #Close connection
+    if result:
+        profile = result[0]  # Store the profile 
+    else:
+        profile = None  # Set profile to None if no profile found
+
+get_profile()
+
+#Initialise table
+def initialise_table(): 
+        #Connect to database
+        connect = sqlite3.connect('moodify_database.db')
+        #Create cursor
+        cursor = connect.cursor()
+        
+        #Create table
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS stress_quiz (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            profile TEXT,
+            date DATE,
+            score INTEGER,
+            stress_level TEXT,
+            FOREIGN KEY (profile) REFERENCES user_info(profile)
+        )
+        ''')
+        
+        #Save data, update
+        connect.commit()
+        #Close connection
+        connect.close()
+        
+#Initialise table before GUI starts        
+initialise_table()
+
+def save_stress_result(score, level):
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+
+    date_today = datetime.date.today().isoformat()  #2025-05-20 fromat current date
+
+    cursor.execute("INSERT INTO stress_quiz (profile, date, score, stress_level) VALUES (?, ?, ?, ?)",
+              (profile, date_today, score, level))
+
+    connect.commit()
+    connect.close()  
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #title label
-title = tk.Label(root, text="Stress Level Survey📃", font=("Comic Sans MS", 18, "bold"), bg="#FCF8E8", fg="#333")
+title = tk.Label(root, text="Stress Level Survey📃", font=("Arial", 20, "bold"), bg="#FCF8E8", fg="#333")
 title.pack(pady=10)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # Frame to hold instruction label and restart button side by side
-instruction_frame = tk.Frame(root, bg="#FCF8E8")
+instruction_frame = tk.Frame(root, bg="#FFF8E1")
 instruction_frame.pack(pady=(0, 10))
 
 #instruction label to tell user what to do
-instruction_label = tk.Label(instruction_frame, text="Hi! Please press one of the buttons below to answer each question.", font=("Segoe UI", 13, "italic"), bg="#FCF8E8", fg="#555", wraplength=500, justify="left")
+instruction_label = tk.Label(instruction_frame, text="Hi! Please press one of the buttons below to answer each question.", font=("Segoe UI", 13, "italic"), bg="#FFF8E1", fg="#555", wraplength=500, justify="left")
 instruction_label.pack(side="left",pady=(0, 10),anchor="w")
+
+# Progress bar
+progress = ctk.CTkProgressBar(root, orientation="horizontal", width=700, height=15, corner_radius=10, fg_color="#FFE0B2", progress_color="#FFB74D")
+progress.set(0)
+progress.pack(pady=(5, 10))
 
 # Restart button
 def reset_quiz():
     global current_index, user_scores
     current_index = 0
     user_scores = []
+    progress.set(0)
     for widget in chat_frame.winfo_children():
         widget.destroy()
     result_label.config(text="[Your stress level and tips will be displayed here.]")
     chat_canvas.yview_moveto(0)  # Scroll to top when restarting
     display_next_question()
 
-reset_btn = tk.Button(instruction_frame, text="🔁 Restart Survey", font=("Segoe UI", 12, "bold"),bg="#FFECB3", fg="#333", command=reset_quiz, relief="ridge", padx=5, pady=3)
-reset_btn.pack(side="left",anchor="e")
+reset_btn = ctk.CTkButton(instruction_frame, text="🔁 Restart Survey", 
+                           font=ctk.CTkFont("Segoe UI", 16, "bold"),
+                           fg_color="#FFCC80", 
+                           text_color="#6D4C41", 
+                           command=reset_quiz, 
+                           hover_color="#FFB380", # Darker yellow on hover
+                           corner_radius=14) # Adding CustomTkinter styling
+reset_btn.pack(side="left",anchor="e",pady=(3,10))
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -54,6 +126,9 @@ quiz_questions=[
     "Do you feel a lack of motivation or energy?",
     "How often do you procrastinate tasks due to feeling overwhelmed?"
 ]
+
+# Define total number of questions for progress bar calculation
+TOTAL_QUESTIONS = len(quiz_questions)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -94,20 +169,33 @@ current_index = 0 #set 0 to display the first question first
 user_scores=[] #list to store user's selected scores
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+# Container frame to hold chat on the left and result/tips on the right
+main_frame = tk.Frame(root, bg="#FFF8E1")
+main_frame.place(relx=0.5, rely=0.55, anchor="center", relwidth=0.9, relheight=0.6)
+
+# Left frame for chat box
+left_frame = tk.Frame(main_frame, bg="#FFFFFF", bd=2, relief="flat")
+left_frame.place(relx=0, rely=0, relwidth=0.55, relheight=1)
+
+# Right frame for result tips
+right_frame = tk.Frame(main_frame, bg="#FFFDE7")
+right_frame.place(relx=0.56, rely=0, relwidth=0.43, relheight=1)
+
 # Outer frame with border acting as the "box"
-chat_box = tk.Frame(root, bg="#FFFFFF", bd=2, relief="flat")
+chat_box = tk.Frame(left_frame, bg="#FFFFFF", bd=2, relief="flat")
 chat_box.place(relx=0.5, rely=0.45, anchor="center", width=600, height=400) #relx=horizontal,value between 0.0 (left) and 1.0 (right) #rely=vertical.value between 0.0 (top) and 1.0 (bottom)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
+
 # Scrollbar inside the chat box
-scrollbar = ttk.Scrollbar(chat_box, orient="vertical")
+scrollbar = ttk.Scrollbar(left_frame, orient="vertical")
 scrollbar.pack(side="right", fill="y")
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Canvas for scrollable area
-chat_canvas = tk.Canvas(chat_box, bg="#FFFFFF", yscrollcommand=scrollbar.set, highlightthickness=0) #yscrollcommand=scrollbar.set:connects the canvas's vertical scrolling to the scrollbar
+chat_canvas = tk.Canvas(left_frame, bg="#FFFFFF", yscrollcommand=scrollbar.set, highlightthickness=0) #yscrollcommand=scrollbar.set:connects the canvas's vertical scrolling to the scrollbar
 chat_canvas.pack(side="left", fill="both", expand=True)
 scrollbar.config(command=chat_canvas.yview) #when move the scrollbar, it scrolls the canvas vertically using .yview()
 
@@ -140,11 +228,12 @@ chat_canvas.bind_all("<Button-5>", lambda event: chat_canvas.yview_scroll(1, "un
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Result label (outside and below the chat interface)
-result_label = tk.Label(root, text="[Your stress level and tips will be displayed here.]", font=("Segoe UI", 14), bg="#FCF8E8", fg="#3A3D64", wraplength=800, justify="left")
+result_label = tk.Label(right_frame, text="[Your stress level and tips will be displayed here.]", font=("Segoe UI", 14), bg="#FCF8E8", fg="#3A3D64", wraplength=480, justify="left")
 # Place result_label just below the chat_box
-result_label.place(relx=0.5, rely=0.85, anchor="center")   # Just below the title and chat box
+result_label.place(relx=0.5,rely=0.30,anchor="center")  # Just below the title and chat box
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 
 # Function to calculate stress level and update the result label
 def calculate_stress_level():
@@ -153,19 +242,46 @@ def calculate_stress_level():
     # Determine stress level and tips
     if total_score <= 7:
         level = "Low Stress😊"
-        tips = "You're managing your stress well. Keep up the good work!"
+        tips = (
+            "You're managing your stress well. Keep up the good work!\n"
+            "• Maintain a balanced lifestyle\n"
+            "• Exercise regularly to boost mood\n"
+            "• Practice gratitude journaling daily\n"
+            "• Ensure good sleep hygiene"
+        )
     elif 8 <= total_score <= 15:
         level = "Moderate Stress🤔"
-        tips = "Take some time to relax. Practice deep breathing and mindfulness."
+        tips = (
+            "Take some time to relax. Practice deep breathing and mindfulness.\n"
+            "• Take short breaks during work or study\n"
+            "• Engage in hobbies you enjoy\n"
+            "• Avoid caffeine and sugar close to bedtime\n"
+            "• Try progressive muscle relaxation"
+        )
     elif 16 <= total_score <= 22:
         level = "High Stress😵‍💫"
-        tips = "Your stress levels are getting high. Consider talking to a trusted friend or engaging in a calming activity."
+        tips = (
+            "Your stress levels are getting high. Consider talking to a trusted friend or engaging in a calming activity.\n"
+            "• Schedule regular 'me-time' to unwind\n"
+            "• Practice deep breathing exercises or guided imagery\n"
+            "• Limit exposure to stress triggers\n"
+            "• Talk to supportive friends or counselors"
+        )
     else:
         level = "Severe Stress🤒"
-        tips = "Your stress levels are quite high. It might be helpful to seek support from a mental health professional."
+        tips = (
+            "Your stress levels are quite high. It might be helpful to seek support from a mental health professional.\n"
+            "• Consider professional counseling or therapy\n"
+            "• Explore mindfulness-based stress reduction\n"
+            "• Keep a stress diary to track triggers\n"
+            "• Prioritize self-care routines and set boundaries"
+        )
     
     # Add result to chat_frame like a message
     result_label.config(text=f"✨ Stress Level: {level}\n💡 Tips: {tips}", font=("Comic Sans MS", 14, "bold"))
+    
+    #Save to database
+    save_stress_result(total_score, level.split()[0])  #Use only "Low", "Moderate", "High"
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -180,40 +296,76 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
         option_idx = quiz_options[question_index].index(answer)
         score = quiz_options_score[question_index][option_idx]
         user_scores.append(score)
-        response_label = tk.Label(chat_frame, text=f"🧍 You: {answer}", font=("Calibri", 14), bg="#E1F5FE", fg="#2A3C5B", wraplength=560, justify="right", padx=10, pady=5,anchor="e")
-        response_label.pack(pady=5, anchor="e")
+        #user response bubble
+        user_bubble_frame = ctk.CTkFrame(chat_frame, fg_color="#FFD54F", corner_radius=15) # Light blue bubble
+        user_bubble_frame.pack(pady=(5, 2), padx=(100,25), anchor="e", ipadx=5, ipady=3) # Anchor right
+        
+        response_label = ctk.CTkLabel(user_bubble_frame, text=f"🧍 You: {answer}", 
+                                      font=ctk.CTkFont("Calibri", 17, "bold"), 
+                                      text_color="#6D4C41", 
+                                      wraplength=380, justify="left")
+        response_label.pack(padx=10, pady=5, anchor="e")
 
     # Inside display_next_question(), after displaying the user response
+    # Timestamp for user message
     timestamp = datetime.datetime.now().strftime("%I:%M %p")
-    time_label = tk.Label(chat_frame, text=timestamp, font=("Segoe UI", 8), bg="#FFFFFF", fg="#888")
-    time_label.pack(anchor="e", padx=10)
+    time_label = ctk.CTkLabel(chat_frame, text=timestamp, font=ctk.CTkFont("Segoe UI", 11), text_color="#888888")
+    time_label.pack(anchor="e", padx=15, pady=(0, 5))
 
     #move to the next question if there's a new answer
     if current_index < len(quiz_questions): #check if there are more question to display
         #display the question as a chat bubble
         #label to display the question
-        question_label = tk.Label(chat_frame, text=f"🤖 Q{current_index+1}: {quiz_questions[current_index]}", font=("Calibri", 13,"bold"), bg="#F3E5F5", fg="#3D3D3D", wraplength=560,  padx=10, pady=5)
-        question_label.pack(pady=10, anchor="w")
+        bot_bubble_frame = ctk.CTkFrame(chat_frame, fg_color="#FBE9E7", corner_radius=15) # Light grey bubble
+        bot_bubble_frame.pack(pady=(5, 2), padx=10, anchor="w", fill="x", ipadx=5, ipady=3) # Anchor left
+
+        question_label = ctk.CTkLabel(bot_bubble_frame, text=f"🤖 Q{current_index+1}: {quiz_questions[current_index]}", 
+                                      font=ctk.CTkFont("Calibri", 17, "bold"), 
+                                      text_color="#3E2723", 
+                                      wraplength=560, justify="left")
+        question_label.pack(padx=10, pady=5, anchor="w")
+
+        # Timestamp for bot message
+        timestamp = datetime.datetime.now().strftime("%I:%M %p")
+        time_label = ctk.CTkLabel(chat_frame, text=timestamp, font=ctk.CTkFont("Segoe UI", 11), text_color="#888888")
+        time_label.pack(anchor="w", padx=15, pady=(0, 5))
 
         #display options as buttons
         options = quiz_options[current_index]
-        button_frame = tk.Frame(chat_frame, bg="white")
-        button_frame.pack(pady=5, anchor="center")
+        button_frame = ctk.CTkFrame(chat_frame, fg_color="transparent") # Transparent background
+        button_frame.pack(pady=10, anchor="w", padx=10)
 
         for option in options:                                                         #When clicked, it calls display_next_question(opt), passing the selected option as the answer #button_frame to remove the options after a selection
-            button = tk.Button(button_frame, text=option, bg="#D1C4E9",fg="#222222", relief="flat", command=lambda opt=option: [display_next_question(opt), button_frame.destroy()],activebackground="#B39DDB",activeforeground="white",font=("Segoe UI", 12))
+            button = ctk.CTkButton(button_frame, text=option, 
+                                   fg_color="#FFAB91", # Light purple for options
+                                   text_color="#4E342E", 
+                                   command=lambda opt=option: [display_next_question(opt), button_frame.destroy()],
+                                   hover_color="#FF8A65", # Darker purple on hover
+                                   corner_radius=6,
+                                   font=ctk.CTkFont("Segoe UI", 15, "bold"),
+                                   width=120, height=35)
             button.pack(side="left", padx=5)
-        
         current_index += 1 #+1 and move to next question
+        progress.set(current_index / TOTAL_QUESTIONS)
     else:
         calculate_stress_level()
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Display an intro message before the first question
-intro_label = tk.Label(chat_frame, text="🤖 Hi! I'm here to check your stress level. Let's begin the survey!", 
-                       font=("Calibri", 13, "bold"), bg="#FFF3E0", fg="#4E342E", wraplength=560, padx=10, pady=5)
-intro_label.pack(pady=10, anchor="w")
+intro_bubble_frame = ctk.CTkFrame(chat_frame, fg_color="#FFE0B2", corner_radius=15) # Light purple intro bubble
+intro_bubble_frame.pack(pady=10, padx=(10, 100), anchor="w", ipadx=5, ipady=3)
+
+intro_label = ctk.CTkLabel(intro_bubble_frame, text="👋 Hi! I'm here to check your stress level. Let's begin the survey!", 
+                           font=ctk.CTkFont("Calibri", 18, "bold"), 
+                           text_color="#795548", 
+                           wraplength=560, justify="left") # Reduced wraplength
+intro_label.pack(padx=10, pady=5, anchor="w")
+
+# Timestamp for intro message
+timestamp = datetime.datetime.now().strftime("%I:%M %p")
+time_label = ctk.CTkLabel(chat_frame, text=timestamp, font=ctk.CTkFont("Segoe UI", 11), text_color="#757575")
+time_label.pack(anchor="w", padx=10, pady=(0, 5))
 
 # Delay the first question slightly to simulate a chat feel
 root.after(1000, display_next_question)  # delay 1 second before showing the first question
