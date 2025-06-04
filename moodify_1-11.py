@@ -4,6 +4,7 @@ import sqlite3
 from tkinter import messagebox #To show popup boxes
 from PIL import Image, ImageTk #Handle and display images
 import os
+import subprocess
 
 # Find the folder where the current Python file is
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -86,7 +87,7 @@ profile_entry.pack(pady=(0, 20))
 gender_label = tk.Label(main_frame, text="Gender", font=label_font, bg=frame_bg)
 gender_label.pack(pady=(0, 5))
 #Gender input column
-gender_combobox = ttk.Combobox(main_frame, values=["Male", "Female"], font=main_font, width=28) #Dropdown selection
+gender_combobox = ttk.Combobox(main_frame, values=["Male", "Female"], font=main_font, width=28, state="readonly") #Dropdown selection
 gender_combobox.pack()     
 
 #Add empty space below the form
@@ -142,7 +143,8 @@ def enter_data():
         connect.close()
 
         #Close the current Tkinter window
-        root.destroy()  
+        root.destroy()
+        subprocess.Popen(["python3", "instruction_page_.py"])  
     
 #Submit button   
 button = tk.Button(main_frame, text="SUBMIT",font=label_font, bg=button_color, width=20, command= enter_data)  
