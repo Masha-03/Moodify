@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import sqlite3
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
+import matplotlib.dates as mdates
 
 plt.style.use('fivethirtyeight') 
 
@@ -17,7 +18,7 @@ def get_profile():
     return result[0] if result else None
 
 #3 different views
-def get_date_range(view_mode):
+def date_range(view_mode):
     today = datetime.today()
     if view_mode == 'weekly':
         return [(today - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(6, -1, -1)]
@@ -29,32 +30,34 @@ def get_date_range(view_mode):
     else:
         return []
 
-def get_breathing_data(profile):
+def get_breathing_data(profile, date_range_list):
     connect = sqlite3.connect('moodify_database.db')
     cursor = connect.cursor()
-    today = datetime.today()
-    last_7_days = [(today - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(6, -1, -1)]
-    breathing_data = []
-    for date in last_7_days:
+    sessions = []
+    for day in date_range_list:
         cursor.execute('''
             SELECT completed_sessions FROM breathing_exercise
             WHERE profile = ? AND date = ?
-        ''', (profile, date))
+        ''', (profile, day))
         result = cursor.fetchone()
-        breathing_data.append(result[0] if result else 0)
+        sessions.append(result[0] if result else 0)
     connect.close()
-    return last_7_days, breathing_data
+    return date_range_list, sessions
 
-def get_mood_data(profile):
+def get_mood_data(profile, date_range_list):
     connect = sqlite3.connect("moodify_database.db")
     cursor = connect.cursor()
+    start_date = date_range_list[0]
+
     cursor.execute('''
         SELECT mood, COUNT(*) FROM mood_entries
-        WHERE profile = ? AND date >= DATE('now', '-6 days')
+        WHERE profile = ? AND date >= ?
         GROUP BY mood
-    ''', (profile,))
+    ''', (profile, start_date))
+    
     data = cursor.fetchall()
     connect.close()
+
     all_moods = ["Happy", "Sad", "Angry", "Excited", "Sleepy", "Relaxed"]
     mood_counts = {mood: 0 for mood in all_moods}
     for mood, count in data:
@@ -63,38 +66,37 @@ def get_mood_data(profile):
     filtered = {k: v for k, v in mood_counts.items() if v > 0}
     return list(filtered.keys()), list(filtered.values())
 
-def get_diary_data(profile):
+def get_diary_data(profile, date_range_list):
     connect = sqlite3.connect("moodify_database.db")
     cursor = connect.cursor()
-    today = datetime.today()
-    last_7_days = [(today - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(6, -1, -1)]
-    entry_counts = []
-    for date in last_7_days:
+    counts = []
+    for day in date_range_list:
         cursor.execute('''
             SELECT COUNT(*) FROM diary_entries
             WHERE profile = ? AND date = ?
-        ''', (profile, date))
+        ''', (profile, day))
         result = cursor.fetchone()
-        entry_counts.append(result[0] if result else 0)
+        counts.append(result[0] if result else 0)
     connect.close()
-    return last_7_days, entry_counts
+    return date_range_list, counts
 
-def get_stress_data(profile):
+def get_stress_data(profile, date_range_list):
     connect = sqlite3.connect("moodify_database.db")
     cursor = connect.cursor()
-    today = date.today()
-    last_7_days = [(today - timedelta(days=i)).isoformat() for i in range(6, -1, -1)]
-    placeholders = ','.join(['?'] * len(last_7_days))
+    placeholders = ','.join(['?'] * len(date_range_list))
+
     cursor.execute(f'''
         SELECT date, stress_level FROM stress_quiz 
         WHERE profile = ? AND date IN ({placeholders})
-    ''', [profile] + last_7_days)
+    ''', [profile] + date_range_list)
+
     results = cursor.fetchall()
     connect.close()
-    stress_levels = {date_: level for date_, level in results}
+
     level_map = {'Low': 1, 'Medium': 2, 'High': 3}
-    values = [level_map.get(stress_levels.get(day), 0) for day in last_7_days]
-    return last_7_days, values
+    stress_levels = {date_: level_map.get(level, 0) for date_, level in results}
+    values = [stress_levels.get(day, 0) for day in date_range_list]
+    return date_range_list, values
 
 #Embed Matplotlib chart inside Tkinter frame
 def embed_chart(fig, parent):
@@ -108,20 +110,27 @@ def create_weekly_charts(profile, container):
         widget.destroy()
 
     #Retrieve data
-    dates, sessions = get_breathing_data(profile)
-    moods, mood_counts = get_mood_data(profile)
-    dates_diary, diary_counts = get_diary_data(profile)
-    dates_stress, stress_levels = get_stress_data(profile)
-    
+    mode = "weekly"  
+    range_list = date_range(mode)
+
+    dates, sessions = get_breathing_data(profile, range_list)
+    dates_diary, diary_counts = get_diary_data(profile, range_list)
+    dates_stress, stress_levels = get_stress_data(profile, range_list)
+    moods, mood_counts = get_mood_data(profile, range_list)
+        
     charts = []
 
     #Chart 1: Breathing Exercise - Bar Chart
     plt.style.use('fivethirtyeight')
     fig1, ax1 = plt.subplots(figsize=(5, 4))
     bars = ax1.bar(dates, sessions, color="#c3b091")
-    ax1.set_title("Breathing Sessions")
+    first_date = datetime.strptime(dates[0], '%Y-%m-%d')  # convert string to datetime
+    month_year = first_date.strftime('%B %Y')  #month and year rn
+    ax1.set_title(f"Breathing Sessions - {month_year}", fontsize=18)
     ax1.set_xticks(range(len(dates)))
-    ax1.set_xticklabels(dates, rotation=45)
+    #Only show the day
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%d'))
+    plt.setp(ax1.get_xticklabels(), rotation=0, fontsize=14)
     fig1.tight_layout()
     charts.append(fig1)
 
@@ -135,7 +144,9 @@ def create_weekly_charts(profile, container):
     }
     pie_colors = [color_map[mood] for mood in moods]
     ax2.pie(mood_counts, labels=moods, autopct='%1.1f%%', colors=pie_colors, startangle=140)
-    ax2.set_title("Mood Distribution")
+    first_date = datetime.strptime(dates[0], '%Y-%m-%d')  # convert string to datetime
+    month_year = first_date.strftime('%B %Y')  #month and year rn
+    ax2.set_title(f"Mood Distribution - {month_year}", fontsize=18)
     fig2.tight_layout()
     charts.append(fig2)
 
@@ -143,9 +154,13 @@ def create_weekly_charts(profile, container):
     plt.style.use('fivethirtyeight')
     fig3, ax3 = plt.subplots(figsize=(5, 4))
     ax3.plot(dates_diary, diary_counts, marker='o', color='#6a5acd')
-    ax3.set_title("Diary Entries")
+    first_date = datetime.strptime(dates[0], '%Y-%m-%d')  # convert string to datetime
+    month_year = first_date.strftime('%B %Y')  #month and year rn
+    ax3.set_title(f"Diary Entries - {month_year}", fontsize=18)
     ax3.set_xticks(range(len(dates_diary)))
-    ax3.set_xticklabels(dates_diary, rotation=45)
+    #Only show the day
+    ax3.xaxis.set_major_formatter(mdates.DateFormatter('%d'))
+    plt.setp(ax3.get_xticklabels(), rotation=0, fontsize=14)
     fig3.tight_layout()
     charts.append(fig3)
 
@@ -153,7 +168,12 @@ def create_weekly_charts(profile, container):
     plt.style.use('fivethirtyeight')
     fig4, ax4 = plt.subplots(figsize=(5, 4))
     ax4.barh(dates_stress, stress_levels, color='purple')
-    ax4.set_title("Stress Levels")
+    #Only show the day
+    ax4.yaxis.set_major_formatter(mdates.DateFormatter('%d'))
+    plt.setp(ax4.get_xticklabels(), rotation=0, fontsize=15)
+    first_date = datetime.strptime(dates[0], '%Y-%m-%d')  # convert string to datetime
+    month_year = first_date.strftime('%B %Y')  #month and year rn
+    ax4.set_title(f"Stress Levels - {month_year}", fontsize=18)
     ax4.set_xlim(0, 4)
     ax4.set_xticks([1, 2, 3])
     ax4.set_xticklabels(['Low', 'Medium', 'High'])
@@ -171,6 +191,124 @@ def create_weekly_charts(profile, container):
         for widget in frame.winfo_children():
             widget.destroy()
 
+        embed_chart(fig, frame)
+        
+def create_monthly_charts(profile, container):
+    for widget in container.winfo_children():
+        widget.destroy()
+
+    mode = "monthly"  
+    range_list = date_range(mode)
+    dates, sessions = get_breathing_data(profile, range_list)
+    dates_diary, diary_counts = get_diary_data(profile, range_list)
+    dates_stress, stress_levels = get_stress_data(profile, range_list)
+    moods, mood_counts = get_mood_data(profile, range_list)
+    
+    filtered_sessions = [(d, s) for d, s in zip(dates, sessions) if s > 0]
+    if filtered_sessions:
+        dates, sessions = zip(*filtered_sessions)
+    else:
+        dates, sessions = [], []
+
+    # Plot same style as weekly
+    charts = []
+    fig1, ax1 = plt.subplots(figsize=(5, 4))
+    ax1.bar(dates, sessions, color="#c3b091")
+    ax1.set_title("Breathing Sessions - Monthly")
+    ax1.set_xticks(range(len(dates)))
+    ax1.set_xticklabels(dates, rotation=45)
+    fig1.tight_layout()
+    charts.append(fig1)
+
+    fig2, ax2 = plt.subplots(figsize=(5, 4))
+    color_map = {
+        "Happy": '#FFD700', "Sad": '#87CEEB', "Angry": '#FF6347',
+        "Excited": '#FF69B4', "Sleepy": '#C0C0C0', "Relaxed": '#90EE90'
+    }
+    pie_colors = [color_map[mood] for mood in moods]
+    ax2.pie(mood_counts, labels=moods, autopct='%1.1f%%', colors=pie_colors, startangle=140)
+    ax2.set_title("Mood Distribution - Monthly")
+    fig2.tight_layout()
+    charts.append(fig2)
+
+    fig3, ax3 = plt.subplots(figsize=(5, 4))
+    ax3.plot(dates_diary, diary_counts, marker='o', color='#6a5acd')
+    ax3.set_title("Diary Entries - Monthly")
+    ax3.set_xticks(range(len(dates_diary)))
+    ax3.set_xticklabels(dates_diary, rotation=45)
+    fig3.tight_layout()
+    charts.append(fig3)
+
+    fig4, ax4 = plt.subplots(figsize=(5, 4))
+    ax4.barh(dates_stress, stress_levels, color='purple')
+    ax4.set_title("Stress Levels - Monthly")
+    ax4.set_xlim(0, 4)
+    ax4.set_xticks([1, 2, 3])
+    ax4.set_xticklabels(['Low', 'Medium', 'High'])
+    fig4.tight_layout()
+    charts.append(fig4)
+
+    for i, fig in enumerate(charts):
+        frame = tk.Frame(container, bg='white')
+        frame.grid(row=i//2, column=i%2, padx=10, pady=10, sticky='nsew')
+        container.grid_rowconfigure(i // 2, weight=1)
+        container.grid_columnconfigure(i % 2, weight=1)
+        embed_chart(fig, frame)
+        
+def create_annual_charts(profile, container):
+    for widget in container.winfo_children():
+        widget.destroy()
+
+    mode = "annual"  
+    range_list = date_range(mode)
+    dates, sessions = get_breathing_data(profile, range_list)
+    dates_diary, diary_counts = get_diary_data(profile, range_list)
+    dates_stress, stress_levels = get_stress_data(profile, range_list)
+    moods, mood_counts = get_mood_data(profile, range_list)
+
+    # Plot same style as weekly
+    charts = []
+    fig1, ax1 = plt.subplots(figsize=(5, 4))
+    ax1.bar(dates, sessions, color="#c3b091")
+    ax1.set_title("Breathing Sessions - Annual")
+    ax1.set_xticks(range(len(dates)))
+    ax1.set_xticklabels(dates, rotation=45)
+    fig1.tight_layout()
+    charts.append(fig1)
+
+    fig2, ax2 = plt.subplots(figsize=(5, 4))
+    color_map = {
+        "Happy": '#FFD700', "Sad": '#87CEEB', "Angry": '#FF6347',
+        "Excited": '#FF69B4', "Sleepy": '#C0C0C0', "Relaxed": '#90EE90'
+    }
+    pie_colors = [color_map[mood] for mood in moods]
+    ax2.pie(mood_counts, labels=moods, autopct='%1.1f%%', colors=pie_colors, startangle=140)
+    ax2.set_title("Mood Distribution -Annual")
+    fig2.tight_layout()
+    charts.append(fig2)
+
+    fig3, ax3 = plt.subplots(figsize=(5, 4))
+    ax3.plot(dates_diary, diary_counts, marker='o', color='#6a5acd')
+    ax3.set_title("Diary Entries - Annual")
+    ax3.set_xticks(range(len(dates_diary)))
+    ax3.set_xticklabels(dates_diary, rotation=45)
+    fig3.tight_layout()
+    charts.append(fig3)
+
+    fig4, ax4 = plt.subplots(figsize=(5, 4))
+    ax4.barh(dates_stress, stress_levels, color='purple')
+    ax4.set_title("Stress Levels - Annual")
+    ax4.set_xlim(0, 4)
+    ax4.set_xticks([1, 2, 3])
+    ax4.set_xticklabels(['Low', 'Medium', 'High'])
+    fig4.tight_layout()
+    charts.append(fig4)
+
+    for i, fig in enumerate(charts):
+        frame = tk.Frame(container, bg='white')
+        frame.grid(row=i//2, column=i%2, padx=10, pady=10, sticky='nsew')
+        container.grid_rowconfigure(i // 2, weight=1)
+        container.grid_columnconfigure(i % 2, weight=1)
         embed_chart(fig, frame)
 
 def main():
@@ -214,7 +352,12 @@ def main():
             btn.pack(pady=10)
             btn.bind("<Enter>", on_hover)
             btn.bind("<Leave>", on_leave)
-            btn.config(command=lambda t=tab.lower(): create_weekly_charts(profile, main_area))
+            if tab.lower() == "weekly":
+                btn.config(command=lambda: create_weekly_charts(profile, main_area))
+            elif tab.lower() == "monthly":
+                btn.config(command=lambda: create_monthly_charts(profile, main_area))
+            elif tab.lower() == "annual":
+                btn.config(command=lambda: create_annual_charts(profile, main_area))
 
     # Load default view
     load_weekly()

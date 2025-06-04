@@ -136,7 +136,7 @@ title.pack(pady=20) #pack()=Places the widget inside the window or frame. Pady=A
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #frame for left side #create this frame is because pack and grid cannot use at the same time,need to seperate them
-left_frame=tk.Frame(root,  bg="#FFF8F099", bd=0, highlightthickness=0) #make it 'transparent'
+left_frame=tk.Frame(root) #make it 'transparent'
 left_frame.pack(side="left", fill="y", padx=20, pady=20) #pack=geometry manager #padx=add horizontal padding #pady=add vertical padding
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
