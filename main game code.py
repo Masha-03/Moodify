@@ -90,14 +90,14 @@ class FemaleCharacter(pygame.sprite.Sprite):
 
         moving = False
             
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+        if keys[pygame.K_LEFT] :
             Female.rect.x=Female.rect.x-Female.speedx
             Female.facing_right = False
             Female.walkingfacing_right = False
             moving = True
             
                     
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+        if keys[pygame.K_RIGHT]:
             Female.rect.x = Female.rect.x + Female.speedx
             Female.facing_right = True
             Female.walkingfacing_right = True
@@ -287,7 +287,7 @@ VIRTUAL_WIDTH = 1280
 VIRTUAL_HEIGHT = 720
 #setting up pygame
 pygame.init() # to start the system: sound,graphics etc of pygame module
-
+pygame.display.set_caption("Moodify")
 screen = pygame.display.set_mode((VIRTUAL_WIDTH, VIRTUAL_HEIGHT))
 fullscreen =False
 Time = pygame.time.Clock()
@@ -359,13 +359,13 @@ watering_button_rect = water_button.get_rect()
 #icon in TV
 bubble_icon = pygame.image.load("bubble popper/1.png").convert_alpha()
 bubble_icon_rect = bubble_icon.get_rect(center=(300, 200)) 
-open_bubble_popper = False
+open_bubble_popper = None
 catch_star_icon = pygame.image.load('catch_star/catch star icon.png').convert_alpha()
 catch_star_rect = catch_star_icon.get_rect(center= (500,200))
-open_catch_star = False 
+open_catch_star = None
 worrycloud_icon = pygame.image.load('Worry cloud game/worry cloud icon.png').convert_alpha()
 worrycloud_rect = worrycloud_icon.get_rect(center=(700,200))
-open_worrycloud = False
+open_worrycloud = None
 
 
 # speech bar position and img
@@ -489,7 +489,12 @@ while True:
                 phone_process.terminate()
             if instruction_process and instruction_process.poll() is None :
                 instruction_process.terminate()
-
+            if open_bubble_popper and open_bubble_popper.poll() is None :
+                open_bubble_popper.terminate()
+            if open_catch_star and open_catch_star.poll() is None :
+                open_catch_star.terminate()
+            if open_worrycloud and open_worrycloud.poll() is None :
+                open_worrycloud.terminate()
             sys.exit() 
         if event.type == pygame.KEYDOWN:#check if any key is press 
             if event.key == pygame.K_ESCAPE: #if its the ESC key
@@ -512,17 +517,29 @@ while True:
                 if TV_quit_button_rect.collidepoint(event.pos):
                     show_tv_screen = False
                 if bubble_icon_rect.collidepoint(event.pos):
-                    open_bubble_popper = True
+                    if not open_bubble_popper or open_bubble_popper.poll() is not None:
+                        pygame.mixer.music.stop()
+                        stop_rain_sound()
+                        open_bubble_popper=subprocess.Popen([sys.executable,"bubble popper/buble poper.py"])
+                        music_paused_for_tkinter = True 
                 if catch_star_rect.collidepoint(event.pos):
-                    open_catch_star = True
+                    if not open_bubble_popper or open_bubble_popper.poll() is not None:
+                        pygame.mixer.music.stop()
+                        stop_rain_sound()
+                        open_catch_star=subprocess.Popen([sys.executable,"catch_star/Catch The Falling Stars.py"])
+                        music_paused_for_tkinter = True 
                 if worrycloud_rect.collidepoint(event.pos):
-                    open_worrycloud = True
+                    if not open_bubble_popper or open_bubble_popper.poll() is not None:
+                        pygame.mixer.music.stop()
+                        stop_rain_sound()
+                        open_worrycloud=subprocess.Popen([sys.executable,"worry cloud game/Worry Cloud.py"])
+                        music_paused_for_tkinter = True #lazy to create a new variable so i use same heheh
             if show_radio:
                 if Radio_quit_button_rect.collidepoint(event.pos):
                     show_radio =False
                 if play_button_rect.collidepoint(event.pos): # poll return 0 for finished process (finihed running)
                     if not tkinterradio_process or tkinterradio_process is not None: #if its not None (not open ye/ ended)
-                        pygame.mixer.music.stop() #stop the music
+                        pygame.mixer.music.stop()
                         stop_rain_sound()
                         tkinterradio_process=subprocess.Popen([sys.executable,"tkinter pages/sound/sound_.py"])
                         music_paused_for_tkinter = True
@@ -581,7 +598,7 @@ while True:
                 
                 if diary_rect.collidepoint(event.pos):
                     if not diary_process or diary_process.poll() is not None:
-                        subprocess.Popen([sys.executable,"tkinter pages/diary_.py"]) 
+                        diary_process=subprocess.Popen([sys.executable,"tkinter pages/diary_.py"]) 
 
                 if calendar_rect.collidepoint(event.pos):
                     if not calendar_process or calendar_process.poll() is not None:#if its not open yet or close rn poll()is not None = closed
@@ -699,15 +716,29 @@ while True:
         virtual_surface.blit(text_surface,text_rect)
 
     #mini games
-    if open_bubble_popper:
-        process =subprocess.Popen([sys.executable,"bubble popper/buble poper.py"]) #without freezing the main game
-        open_bubble_popper =False #avoid open multiple times
-    if open_catch_star:
-        process = subprocess.Popen([sys.executable,"catch_star/Catch The Falling Stars.py"])
-        open_catch_star = False
-    if open_worrycloud:
-        process = subprocess.Popen([sys.executable,"worry cloud game/Worry Cloud.py"])
-        open_worrycloud = False
+    if open_bubble_popper and music_paused_for_tkinter and open_bubble_popper.poll() is not None: 
+        #if the page is exist , music True (not None), the page ended = output 0(not None)
+        play_background_music()
+        music_paused_for_tkinter = False
+        open_bubble_popper = None  #reset to prevent reuse
+        if rain_group : #if the sprite exist 
+            play_rain_sound()
+    
+    if open_catch_star and music_paused_for_tkinter and open_catch_star.poll() is not None: 
+        #if the page is exist , music True (not None), the page ended = output 0(not None)
+        play_background_music()
+        music_paused_for_tkinter = False
+        open_catch_star = None  #reset to prevent reuse
+        if rain_group : #if the sprite exist 
+            play_rain_sound()
+
+    if open_worrycloud and music_paused_for_tkinter and open_worrycloud.poll() is not None: 
+        #if the page is exist , music True (not None), the page ended = output 0(not None)
+        play_background_music()
+        music_paused_for_tkinter = False
+        open_worrycloud = None  #reset to prevent reuse
+        if rain_group : #if the sprite exist 
+            play_rain_sound()
 
     if tkinterradio_process and music_paused_for_tkinter and tkinterradio_process.poll() is not None: 
         #if the page is exist , music True (not None), the page ended = output 0(not None)
