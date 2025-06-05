@@ -334,8 +334,8 @@ def create_annual_charts(profile, container):
     fig1, ax1 = plt.subplots(figsize=(5, 4))
     ax1.bar(months, avg_sessions, color="#c3b091")
     ax1.set_title("Breathing Sessions - Annual")
-    ax1.set_xticks(range(len(dates)))
-    ax1.set_xticklabels(dates, rotation=45)
+    ax1.set_xticks(range(len(months)))
+    ax1.set_xticklabels(months, fontsize=10)
     fig1.tight_layout()
     charts.append(fig1)
 
@@ -356,8 +356,8 @@ def create_annual_charts(profile, container):
     fig3, ax3 = plt.subplots(figsize=(5, 4))
     ax3.plot(months, diary_avg, color='#6a5acd', linestyle='--', marker='s')
     ax3.set_title("Diary Entries - Annual")
-    ax3.set_xticks(range(len(dates_diary)))
-    ax3.set_xticklabels(dates_diary, rotation=45)
+    ax3.set_xticks(range(len(months)))
+    ax3.set_xticklabels(months, fontsize=10)
     fig3.tight_layout()
     charts.append(fig3)
     

@@ -2,10 +2,57 @@ import tkinter as tk
 import pygame
 import customtkinter as ctk
 import sys
+import sqlite3
+import subprocess #Open new window
 
+#--------------------------------------------------------------masha---------------------------------------------------------------------------------#
+#Get profile from the database
+def get_profile():
+    global profile
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+    
+    #Fetch the profile
+    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
+    result = cursor.fetchone()
+    
+    connect.close() #Close connection
+    if result:
+        profile = result[0]  #Store the profile 
+    else:
+        profile = None  #Set profile to None if no profile found
+        
+def get_gender():
+    if profile is None:
+        return None
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+    cursor.execute("SELECT gender FROM user_info WHERE profile = ? LIMIT 1", (profile,))
+    result = cursor.fetchone()
+    connect.close()
+    if result:
+        return result[0]
+    else:
+        return None
+    
 def start_game():
-    root.destroy()  # Close the instruction window
-    run_game()      # Call your main Pygame game function
+    get_profile()
+    gender = get_gender()
+    
+    if gender is None:
+        tk.messagebox.showerror("Error", "No gender found for profile.")
+        return
+    
+    gender = gender.strip().lower()
+    
+    if gender == "female":
+        root.destroy()
+        subprocess.Popen(["python3", "main game code.py"])
+    elif gender == "male":
+        root.destroy()
+        subprocess.Popen(["python3", "main game code_Male.py"])
+        
+#--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 
 def run_game():
     pygame.init()
