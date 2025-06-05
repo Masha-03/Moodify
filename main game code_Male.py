@@ -626,7 +626,7 @@ while True:
 
                 if instruction_rect.collidepoint(event.pos):
                     if not instruction_process or instruction_process.poll() is not None:
-                        instruction_process = subprocess.Popen([sys.executable,"instruction_page_.py"])
+                        instruction_process = subprocess.Popen([sys.executable,"intruction_page_icon.py"])
 
     scaled_surface = pygame.transform.scale(virtual_surface, (screen_width, screen_height))
     screen.blit(scaled_surface,(0,0))
