@@ -7,9 +7,8 @@ import sqlite3
 from datetime import datetime
 
 #Set default timings
-INHALE = 4
-HOLD = 7
-EXHALE = 4
+INHALE = 5
+EXHALE = 5
 
 #Theme
 ctk.set_appearance_mode("light")
@@ -77,7 +76,7 @@ class Timer:
         self.root.configure(bg="#DDEFFB")  # Soft blue background    
         
         #Title
-        title=tk.Label(self.root,text="Breathing Exercise",font=("Segoe UI",18,"bold"), bg="#DDEFFB", fg="#152238")
+        title=tk.Label(self.root,text="5-5 Breathing Exercise",font=("Segoe UI",18,"bold"), bg="#DDEFFB", fg="#152238")
         title.pack(pady=30)
         
         #Main container frame
@@ -193,10 +192,6 @@ class Timer:
         else:
             #Move to the next phase when time runs out
             if self.phase == "inhale":
-                self.phase = "hold"
-                self.time_remaining = HOLD
-                self.instruction_label.configure(text="Hold your breath...")
-            elif self.phase == "hold":
                 self.phase = "exhale"
                 self.time_remaining = EXHALE
                 self.instruction_label.configure(text="Exhale slowly...")
