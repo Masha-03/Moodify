@@ -9,7 +9,7 @@ from datetime import datetime
 #Set default timings
 INHALE = 4
 HOLD = 7
-EXHALE = 4
+EXHALE = 8
 
 #Theme
 ctk.set_appearance_mode("light")
@@ -77,7 +77,7 @@ class Timer:
         self.root.configure(bg="#DDEFFB")  # Soft blue background    
         
         #Title
-        title=tk.Label(self.root,text="Breathing Exercise",font=("Segoe UI",18,"bold"), bg="#DDEFFB", fg="#152238")
+        title=tk.Label(self.root,text="4-7-8 Breathing Exercise",font=("Segoe UI",18,"bold"), bg="#DDEFFB", fg="#152238")
         title.pack(pady=30)
         
         #Main container frame
