@@ -4,6 +4,8 @@ import customtkinter as ctk
 import sys
 import sqlite3
 import subprocess #Open new window
+import os
+from PIL import Image,ImageTk
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 #Get profile from the database
@@ -73,31 +75,54 @@ def run_game():
     sys.exit()
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+def get_image_path(filename):
+    # This gets the path of the current Python file
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, filename)
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 #Tkinter instruction window
 root = tk.Tk()
 root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}")
 root.title("Moodify Instructions")
-root.configure(bg="#FFF2E6")  # Soft peach background
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+# Load and set background image
+bg_image = Image.open(get_image_path("instruction_page_bg.png"))  # Replace with your image file
+bg_image = bg_image.resize((root.winfo_screenwidth(), root.winfo_screenheight()), Image.Resampling.LANCZOS)
+bg_photo = ImageTk.PhotoImage(bg_image)
+bg_label = tk.Label(root, image=bg_photo)
+bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # Title Label
-title_label = tk.Label(root,text="🌼 Welcome to Moodify! 🌼",font=("Segoe UI", 20, "bold"),bg="#FFF2E6",fg="#4A4A4A",pady=20)
+title_label = tk.Label(root,text="🌼 Welcome to Moodify! 🌼",font=("Segoe UI", 20, "bold"),bg="#fbe4ff",fg="#4A4A4A",pady=20)
 title_label.pack(pady=(10, 10))
 
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 # Outer frame (holds the framed instruction box)
-outer_frame = tk.Frame(root, bg="#FFF2E6")
+outer_frame = tk.Frame(root, bg="#fbe4ff")
 outer_frame.pack(pady=(0,10), padx=30, fill="both", expand=True)
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Inner box frame with visible border
 box_frame = tk.Frame(outer_frame, bg="#FFEFE1", bd=3, relief="ridge",width=1100,height=420)
 box_frame.pack(fill="x", expand=False,padx=20,pady=10)
 box_frame.pack_propagate(False)
 
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 # Canvas inside the box
 canvas = tk.Canvas(box_frame, bg="#FFEFE1", highlightthickness=0)
 canvas.pack(side="left", fill="y")
 canvas.configure(height=420,width=1100)
 
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#SCROLLBAR
 # Scrollbar INSIDE the box
 scrollbar = tk.Scrollbar(box_frame, orient="vertical", command=canvas.yview)
 scrollbar.pack(side="right", fill="y", padx=(0, 5), pady=5)
@@ -107,11 +132,15 @@ scrollable_frame = tk.Frame(canvas, bg="#FFEFE1")
 canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
 canvas.configure(yscrollcommand=scrollbar.set)
 
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 # Auto scrollregion update
 def update_scrollregion(event):
     canvas.configure(scrollregion=canvas.bbox("all"))
 
 scrollable_frame.bind("<Configure>", update_scrollregion)
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Enable scrolling with the mouse wheel
 def on_mousewheel(event):
