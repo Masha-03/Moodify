@@ -6,7 +6,10 @@ import sqlite3
 import subprocess #Open new window
 import os
 from PIL import Image,ImageTk
+<<<<<<< HEAD
 import time
+=======
+>>>>>>> 980c75d3c0a5cf54692ace9c8a380f3e76155f67
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 #Get profile from the database

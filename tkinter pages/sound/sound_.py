@@ -3,6 +3,7 @@ from tkinter import ttk #provide theme widgets #for the layout of progress bar
 from PIL import Image,ImageTk
 import pygame #for pygame.mixer and inside the progress bar(handle audio playback and get current position of the song)
 import os
+import customtkinter as ctk
 
 #initialize pygame mixer
 pygame.mixer.init()
@@ -138,50 +139,59 @@ def set_volume(val): #val=the value when users slide the volume slider(val is or
 
 #hover effect function #they bound to widgets by using .bind()
 def enter(event): #when mouse enter a widget(eg.button) it changes the widget's background to bg="#DDE6ED" #event=event subject
-    event.widget.config(bg="#64B5F6",width=44, height=44) #when mouse touch the button,the button will become bigger
+    event.widget.config(bg="#b8daae",width=44, height=44) #when mouse touch the button,the button will become bigger
 
 def leave(event): #when mouse leave the widget, background colour returns to bg="#FFFFFF"
-    event.widget.config(bg="#90CAF9",width=40, height=40)#when mouse went out of the button,the button will reset to original size
+    event.widget.config(bg="#b8daae",width=40, height=40)#when mouse went out of the button,the button will reset to original size
 
+def get_image_path(filename):
+    # This gets the path of the current Python file
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, filename)
 #----------------------------------------------------------------------------------------------------------------------#
 
 #main window
 root=tk.Tk()
 root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}") #full-screen sized
 root.title("Soothing Sound Player")
-root.configure(bg="#e1f5fe") 
 
+# Load and set background image
+bg_image = Image.open(get_image_path("sound_bg.png"))  # Replace with your image file
+bg_image = bg_image.resize((root.winfo_screenwidth(), root.winfo_screenheight()), Image.Resampling.LANCZOS)
+bg_photo = ImageTk.PhotoImage(bg_image)
+bg_label = tk.Label(root, image=bg_photo)
+bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 #----------------------------------------------------------------------------------------------------------------------#
 
 #title
-title=tk.Label(root,text="Relax Soothing Sound Player🎶", font=("Segoe UI", 18, "bold"),bg="#e1f5fe",fg="#01579b")
+title=tk.Label(root,text="Relax Soothing Sound Player🎶", font=("Segoe UI", 18, "bold"),bg="#d9e9df",fg="black")
 title.pack(pady=(10,5)) #pady=(10,5)adds vertical spacing above and below.
 
 #----------------------------------------------------------------------------------------------------------------------#
 
 #frame to hold center and volume(right)
-center_volume_frame=tk.Frame(root, bg="#e1f5fe")
+center_volume_frame=tk.Frame(root, bg="#d9e9df")
 center_volume_frame.pack(expand=True,fill="both",padx=30,pady=20)
 
 #frame to hold playlist and buttons(left)
-playlist_button_frame=tk.Frame(center_volume_frame,bg="#e1f5fe")
+playlist_button_frame=tk.Frame(center_volume_frame,bg="#d9e9df")
 playlist_button_frame.pack(side="left",expand=True,fill="both", anchor="center",padx=(150,0))
 
 #----------------------------------------------------------------------------------------------------------------------#
 
 #label for now playing(since now dont have song yet,so display"no sound is playing")
-label_now_playing=tk.Label(playlist_button_frame, text="No sound is playing.", bg="#e1f5fe", font=("Segoe UI", 13,"bold"))
+label_now_playing=tk.Label(playlist_button_frame, text="No sound is playing.", bg="#d9e9df", font=("Segoe UI", 13,"bold"))
 label_now_playing.pack(pady=(3,7))
 
 #----------------------------------------------------------------------------------------------------------------------#
 #PLAYLIST
 
 #title for playlist
-label_playlist=tk.Label(playlist_button_frame, text="Playlist🎧", bg="#e1f5fe", font=("Comic Sans MS", 13))
+label_playlist=tk.Label(playlist_button_frame, text="Playlist🎧", bg="#d9e9df", font=("Comic Sans MS", 13))
 label_playlist.pack(pady=(0,5))
 
 #the listbox to show available sound
-playlist_box=tk.Listbox(playlist_button_frame, width=100, height=20, bg="white", fg="#1a237e",selectbackground="#bbdefb", selectforeground="#0d47a1", font=("Segoe UI", 10, "italic"),bd=1, relief="groove",highlightthickness=2,highlightbackground="#64B5F6")
+playlist_box=tk.Listbox(playlist_button_frame, width=100, height=20, bg="white", fg="#1a237e",selectbackground="#a3d2ca", selectforeground="black",activestyle="none", font=("Segoe UI", 10, "italic"),bd=2, relief="groove",highlightthickness=2)
 playlist_box.pack(pady=(0,5),anchor="center")
 
 #loop through each elements in the dictionary which is "song_dict"
@@ -192,7 +202,7 @@ for song_name in song_dict: #each element is temporarily stored in variable "son
 #Progress bar(ttk)
 
 #progress bar frame
-progress_frame = tk.Frame(playlist_button_frame, bg="#e1f5fe")
+progress_frame = tk.Frame(playlist_button_frame, bg="#d9e9df")
 progress_frame.pack(pady=(5, 10), fill="x")
 
 #progress bar
@@ -203,14 +213,14 @@ progress_bar.pack(side="left", expand=True, fill="x", padx=(5, 5))
 #Duration
 
 #label to display the sound duration
-duration_label = tk.Label(progress_frame, text="00:00", bg="#e1f5fe", font=("Segoe UI", 10))
+duration_label = tk.Label(progress_frame, text="00:00", bg="#d9e9df", font=("Segoe UI", 10))
 duration_label.pack(side="left", padx=(5, 10))
 
 #----------------------------------------------------------------------------------------------------------------------#
 #CONTROL BUTTON
 
 #hold all control button
-button_frame=tk.Frame(playlist_button_frame,bg="#e1f5fe")
+button_frame=tk.Frame(playlist_button_frame,bg="#d9e9df")
 button_frame.pack(pady=(10,15))
 
 #image for button
@@ -228,7 +238,7 @@ image_references = [previous_image,stop_image,play_image, pause_image, next_imag
 #function to create button
 def create_button(frame, image,command): #frame=where button will be place #image=image that display on the button #command=function to be executed when button is clicked
     #create button
-    button = tk.Button(frame, image=image, bg="#90CAF9", relief="groove", command=command,cursor="hand2") #command=command:function that will be called when the button is clicked
+    button = tk.Button(frame, image=image, bg="#78a45c", relief="groove", command=command,cursor="hand2") #command=command:function that will be called when the button is clicked
     button.image = image  #assigns image to a property of the button object itself.Prevent garbage collection,ensure the image remain visible                                                 #cursor=hand2:make the mouse become a small hand when clicking the button
     button.bind("<Enter>", enter)  #when mouse enter the button area,enter() function will be triggered
     button.bind("<Leave>", leave) #when mouse went out the button area,leave() function will be triggered
@@ -252,14 +262,14 @@ button_next.grid(row=0, column=4, padx=10, pady=5)
 #----------------------------------------------------------------------------------------------------------------------#
 #VOLUME CONTROL
 
-volume_frame = tk.Frame(center_volume_frame, bg="#e1f5fe")
+volume_frame = tk.Frame(center_volume_frame, bg="#d9e9df")
 volume_frame.pack(side="right",anchor="n", padx=40)
 
-volume_label = tk.Label(volume_frame, text="Volume 🔊", bg="#e1f5fe", fg="#0d47a1", font=("Segoe UI", 12))
+volume_label = tk.Label(volume_frame, text="Volume 🔊", bg="#d9e9df", fg="#5e7f68", font=("Segoe UI", 12))
 volume_label.pack()
 
 #volume control slider                                 #resolution=1:slider moves in steps of 1 unit                                   #troughcolor=the track colour
-volume_control = tk.Scale(volume_frame, from_=0, to=100, resolution=1, orient="vertical", command=set_volume,bg="#e1f5fe", fg="#0d47a1", troughcolor="#b3e5fc", width=15, sliderlength=20)
+volume_control = tk.Scale(volume_frame, from_=0, to=100, resolution=1, orient="vertical", command=set_volume,bg="#d9e9df", fg="#5e7f68", troughcolor="#7fa06a", width=15, sliderlength=20)
 volume_control.set(50) #set default volume position to 50,like when users open this window the volume will be at 50
 volume_control.pack()
 

@@ -3,14 +3,27 @@ from tkinter import ttk
 import datetime
 import sqlite3
 import customtkinter as ctk
+import os
+from PIL import Image,ImageTk
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+def get_image_path(filename):
+    # This gets the path of the current Python file
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, filename)
 
 #main window
 root = tk.Tk()  #create the main app window
 root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}")  #full-screen size
 root.title("Stress Level Survey")
 root.configure(bg="#FFF8E1")  #change the background color of entire window
+
+# Load and set background image
+bg_image = Image.open(get_image_path("stress_bg.png"))  # Replace with your image file
+bg_image = bg_image.resize((root.winfo_screenwidth(), root.winfo_screenheight()), Image.Resampling.LANCZOS)
+bg_photo = ImageTk.PhotoImage(bg_image)
+bg_label = tk.Label(root, image=bg_photo)
+bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
 #Get profile from the database
@@ -110,6 +123,8 @@ reset_btn = ctk.CTkButton(instruction_frame, text="🔁 Restart Survey",
                            hover_color="#FFB380", # Darker yellow on hover
                            corner_radius=14) # Adding CustomTkinter styling
 reset_btn.pack(side="left",anchor="e",pady=(3,10))
+
+
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 

@@ -5,6 +5,8 @@ from tkinter import messagebox #for show pop-up message
 import requests #getting data from API
 import tkinter.font as tkfont #use to import font module from tkinter library
 import sqlite3
+import os
+from PIL import Image, ImageTk
 
 #counts how many words are in the diary
 def word_count(event=None): #event=None:means it can be called with/without event
@@ -132,6 +134,10 @@ def save_entry():
     #Close connection
     connect.close()
 
+def get_image_path(filename):
+    # This gets the path of the current Python file
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, filename)
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #main window
@@ -139,6 +145,13 @@ root=tk.Tk()
 root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}") #Full-screen size
 root.title("Diary📖")
 root.configure(bg="#fdf6f0")
+
+# Load and set background image
+bg_image = Image.open(get_image_path("diary_bg.png"))  # Replace with your image file
+bg_image = bg_image.resize((root.winfo_screenwidth(), root.winfo_screenheight()), Image.Resampling.LANCZOS)
+bg_photo = ImageTk.PhotoImage(bg_image)
+bg_label = tk.Label(root, image=bg_photo)
+bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
 
