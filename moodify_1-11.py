@@ -44,7 +44,7 @@ screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
 
 #Load and resize image to fill the screen
-bg_image = Image.open("intro_bg.png")
+bg_image = Image.open("graphics/intro_bg.png")
 bg_image = bg_image.resize((screen_width, screen_height))
 #Converts image into a format Tkinter can use
 bg_photo = ImageTk.PhotoImage(bg_image)

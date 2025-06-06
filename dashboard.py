@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -105,10 +106,17 @@ def embed_chart(fig, parent):
     canvas.draw()
     canvas.get_tk_widget().pack(expand=True, fill='both')
 
+################################################################################################################################################################################
+
 # Create all figures
-def create_weekly_charts(profile, container):
+def create_weekly_charts(profile, container, bg_photo):
     for widget in container.winfo_children():
         widget.destroy()
+
+    #Background picture
+    bg_label = tk.Label(container, image=bg_photo)
+    bg_label.image = bg_photo  # Prevent garbage collection
+    bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
     #Retrieve data
     mode = "weekly"  
@@ -194,9 +202,16 @@ def create_weekly_charts(profile, container):
 
         embed_chart(fig, frame)
         
-def create_monthly_charts(profile, container):
+################################################################################################################################################################################
+        
+def create_monthly_charts(profile, container, bg_photo):
     for widget in container.winfo_children():
         widget.destroy()
+        
+    #Background picture
+    bg_label = tk.Label(container, image=bg_photo)
+    bg_label.image = bg_photo  # Prevent garbage collection
+    bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
     mode = "monthly"  
     range_list = date_range(mode)
@@ -273,7 +288,8 @@ def create_monthly_charts(profile, container):
         container.grid_rowconfigure(i // 2, weight=1)
         container.grid_columnconfigure(i % 2, weight=1)
         embed_chart(fig, frame)
-
+        
+################################################################################################################################################################################        
 # Get mood entries for annual average calculation
 def get_annual_mood_data(profile, date_list):
     connect = sqlite3.connect("moodify_database.db")
@@ -315,9 +331,14 @@ def calculate_monthly_average(dates, values):
     
     return months_order, monthly_averages
 
-def create_annual_charts(profile, container):
+def create_annual_charts(profile, container, bg_photo):
     for widget in container.winfo_children():
         widget.destroy()
+
+    #Background picture
+    bg_label = tk.Label(container, image=bg_photo)
+    bg_label.image = bg_photo  # Prevent garbage collection
+    bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
     mode = "annual"  
     range_list = date_range(mode)
@@ -354,7 +375,7 @@ def create_annual_charts(profile, container):
     # Chart 3: Diary Entries - Line Chart
     _, diary_avg = calculate_monthly_average(dates_diary, diary_counts)
     fig3, ax3 = plt.subplots(figsize=(5, 4))
-    ax3.plot(months, diary_avg, color='#6a5acd', linestyle='--', marker='s')
+    ax3.plot(months, diary_avg, color='#6a5acd', marker='s')
     ax3.set_title("Diary Entries - Annual")
     ax3.set_xticks(range(len(months)))
     ax3.set_xticklabels(months, fontsize=10)
@@ -379,6 +400,8 @@ def create_annual_charts(profile, container):
         container.grid_columnconfigure(i % 2, weight=1)
         embed_chart(fig, frame)
 
+################################################################################################################################################################################
+
 def main():
     profile = get_profile()
     if not profile:
@@ -390,42 +413,69 @@ def main():
     root.title("Moodify Dashboard")
     root.state("zoomed")
     root.configure(bg='white')
+    
+    #Background picture
+    bg_image = Image.open("tkinter pages/dashboard_bg.png")  #load pic
+    bg_photo = ImageTk.PhotoImage(bg_image)
+
+
+    #Wrap sidebar and main_area in a content frame
+    content_frame = tk.Frame(root, bg="white")
+    content_frame.place(relx=0, rely=0, relwidth=1, relheight=1)  # Fills entire window
 
     #Sidebar
-    sidebar = tk.Frame(root, width=200, bg="#2E2E2E")
+    sidebar = tk.Frame(content_frame, width=200, bg="#545454")
     sidebar.pack(side="left", fill="y")
 
-    tab_label = tk.Label(sidebar, text="VIEW BY", fg="#ffffff", bg="#2E2E2E", font=("Segoe UI", 14, "bold"))
+    tab_label = tk.Label(sidebar, text="VIEW BY", fg="#ffffff", bg="#545454", font=("Segoe UI", 14, "bold"))
     tab_label.pack(pady=20)
     
     #Main area for charts
-    main_area = tk.Frame(root, bg="white")
+    main_area = tk.Frame(content_frame, bg="white")
     main_area.pack(side="right", expand=True, fill="both")
     
     #Make the main_area resizable in grid
     main_area.grid_rowconfigure((0,1), weight=1)
     main_area.grid_columnconfigure((0,1), weight=1)
+    
+    def set_main_bg():
+        width = main_area.winfo_width()
+        height = main_area.winfo_height()
+
+        if width < 10 or height < 10:
+            root.after(100, set_main_bg)
+            return
+
+        resized = bg_image.resize((width, height))
+        bg_photo_resized = ImageTk.PhotoImage(resized)
+        bg_label = tk.Label(main_area, image=bg_photo_resized)
+        bg_label.image = bg_photo_resized  # Keep reference
+        bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+        #Lower the label so it doesn’t cover other widgets
+        bg_label.lower()
+        
+    root.after(100, set_main_bg)  # Wait for geometry to be available
 
     def on_hover(e): e.widget.config(bg="#5C5C5C")
     def on_leave(e): e.widget.config(bg="#3C3C3C")
 
     def load_weekly():
-        create_weekly_charts(profile, main_area)
+        create_weekly_charts(profile, main_area, bg_photo)
         
         #Ceate sidebar buttons
         for tab in ["Weekly", "Monthly", "Annual"]:
             btn = tk.Button(
-                sidebar, text=tab, fg="#ffffff", bg="#3C3C3C", relief="flat", font=("Segoe UI", 12), width=18, height=2, activebackground="#5C5C5C"
+                sidebar, text=tab, fg="#ffffff", bg="#545454", relief="flat", font=("Segoe UI", 12), width=18, height=2, activebackground="#5C5C5C"
             )
             btn.pack(pady=10)
             btn.bind("<Enter>", on_hover)
             btn.bind("<Leave>", on_leave)
             if tab.lower() == "weekly":
-                btn.config(command=lambda: create_weekly_charts(profile, main_area))
+                btn.config(command=lambda: create_weekly_charts(profile, main_area, bg_photo))
             elif tab.lower() == "monthly":
-                btn.config(command=lambda: create_monthly_charts(profile, main_area))
+                btn.config(command=lambda: create_monthly_charts(profile, main_area, bg_photo))
             elif tab.lower() == "annual":
-                btn.config(command=lambda: create_annual_charts(profile, main_area))
+                btn.config(command=lambda: create_annual_charts(profile, main_area, bg_photo))
 
     # Load default view
     load_weekly()

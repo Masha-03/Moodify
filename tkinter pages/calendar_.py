@@ -153,13 +153,13 @@ bg_label.lower()
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #Title label
-title_label = ctk.CTkLabel(app, text="My History 🧸", font=ctk.CTkFont("Helvetica", 26, weight="bold"), text_color="#333")
+title_label = ctk.CTkLabel(app, text="My History 🧸", font=ctk.CTkFont("Helvetica", 26, weight="bold"), text_color="#333", fg_color="#e9e2d0")
 title_label.pack(pady=(20, 10)) #pack()=Places the widget inside the window or frame. Pady=Adds () pixels of vertical space around the widget.
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #frame for left side #create this frame is because pack and grid cannot use at the same time,need to seperate them
-left_frame = ctk.CTkFrame(app, width=300, fg_color="#FFF8F0", corner_radius=15)
+left_frame = ctk.CTkFrame(app, width=300, height=200, fg_color="transparent")
 left_frame.pack(side="left", fill="y", padx=40, pady=20) #pack=geometry manager #padx=add horizontal padding #pady=add vertical padding
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -207,36 +207,36 @@ history_frame = ctk.CTkFrame(app, corner_radius=15, fg_color="#E6D6B8")
 history_frame.pack(expand=True, fill="both", padx=40, pady=40)
 
 # Container
-container = ctk.CTkFrame(history_frame, fg_color="transparent", corner_radius=15)
+container = ctk.CTkFrame(history_frame, fg_color="#E6D6B8", corner_radius=15)
 container.pack(expand=True, fill="both", padx=20, pady=10)
 
 # Diary Title
-ctk.CTkLabel(container, text="Title:", font=ctk.CTkFont(size=14, weight="bold")).pack(anchor="w", pady=(10, 5))
-title_display = ctk.CTkLabel(container, text="", fg_color="white", corner_radius=6)
+ctk.CTkLabel(container, text="Title:", font=ctk.CTkFont(size=15, weight="bold")).pack(anchor="w", pady=(10, 5))
+title_display = ctk.CTkLabel(container, text="", fg_color="white", corner_radius=6, anchor="w")
 title_display.pack(fill="x", pady=(0, 10))
 
 # Diary Entry
-ctk.CTkLabel(container, text="Entry:", font=ctk.CTkFont(size=14, weight="bold")).pack(anchor="w", pady=(5, 5))
+ctk.CTkLabel(container, text="Entry:", font=ctk.CTkFont(size=15, weight="bold")).pack(anchor="w", pady=(5, 5))
 content_frame = ctk.CTkFrame(container, fg_color="white", corner_radius=6)
 content_frame.pack(fill="x", pady=(0, 10))
 
-content_text = ctk.CTkTextbox(content_frame, wrap="word", fg_color="white", corner_radius=0, height=100)
+content_text = ctk.CTkTextbox(content_frame, wrap="word", fg_color="white", corner_radius=0, height=100, font=ctk.CTkFont(size=14))
 content_text.pack(side="left", fill="both", expand=True)
 content_scroll = ctk.CTkScrollbar(content_frame, orientation="vertical", command=content_text.yview)
 content_scroll.pack(side="right", fill="y")
 content_text.configure(yscrollcommand=content_scroll.set, state="disabled")
 
 # Mood
-ctk.CTkLabel(container, text="Mood:", font=ctk.CTkFont(size=14, weight="bold")).pack(anchor="w", pady=(10, 5))
-mood_display = ctk.CTkLabel(container, text="", fg_color="white", corner_radius=6)
+ctk.CTkLabel(container, text="Mood:", font=ctk.CTkFont(size=15, weight="bold")).pack(anchor="w", pady=(10, 5))
+mood_display = ctk.CTkLabel(container, text="", fg_color="white", corner_radius=6, anchor="w")
 mood_display.pack(fill="x", pady=(0, 10))
 
 # Mood Description
-ctk.CTkLabel(container, text="Mood Description:", font=ctk.CTkFont(size=14, weight="bold")).pack(anchor="w", pady=(5, 5))
+ctk.CTkLabel(container, text="Mood Description:", font=ctk.CTkFont(size=15, weight="bold")).pack(anchor="w", pady=(5, 5))
 mooddesc_frame = ctk.CTkFrame(container, fg_color="white", corner_radius=6)
 mooddesc_frame.pack(fill="x", pady=(0, 10))
 
-mooddesc_display = ctk.CTkTextbox(mooddesc_frame, wrap="word", fg_color="white", corner_radius=0, height=100)
+mooddesc_display = ctk.CTkTextbox(mooddesc_frame, wrap="word", fg_color="white", corner_radius=0, height=100, font=ctk.CTkFont(size=14))
 mooddesc_display.pack(side="left", fill="both", expand=True)
 mooddesc_scroll = ctk.CTkScrollbar(mooddesc_frame, orientation="vertical", command=mooddesc_display.yview)
 mooddesc_scroll.pack(side="right", fill="y")
