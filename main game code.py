@@ -5,13 +5,15 @@ import datetime # to get user device time
 import subprocess
 import time
 import settings
+import os
 
+#------------------------------------masha--------------------------------------
 #Open settings when gender gets changed and user is redirected to new gender window
 open_settings_on_start = "--open-settings" in sys.argv
 
 if open_settings_on_start:
     settings.settings_open= True
-
+#--------------------------------------------------------------------------
 #create the rain sprite and set up its speed and postion
 class Rain(pygame.sprite.Sprite): 
     def __init__(rain): #set up the sprite image for image manipulation (runs automatically)
@@ -287,6 +289,11 @@ def sofa_speech():
                         "This sofa has ‘comfort’ written all over it!"]
     speech = random.choice(speech_forsofa)
     return speech 
+
+def asset(*path_parts): #means the function can take any num of strings as argument
+    return os.path.join(os.path.dirname(__file__), *path_parts)
+
+
 #using a virtual screen so can do fullscreen
 VIRTUAL_WIDTH = 1280
 VIRTUAL_HEIGHT = 720
@@ -309,122 +316,122 @@ current_hour = datetime.datetime.now().hour
 #----------------------------------------------------------------------------
 #images
 #raining image
-raindrops= pygame.image.load("graphics/raindrops.png").convert_alpha()
+raindrops= pygame.image.load(asset("graphics","raindrops.png")).convert_alpha()
 
 #night time image
-night_background = pygame.image.load("graphics/night.png").convert()
+night_background = pygame.image.load(asset("graphics","night.png")).convert()
 
 # day time image
-sunny_background = pygame.image.load("graphics/sunny day background.png").convert()
+sunny_background = pygame.image.load(asset("graphics","sunny day background.png")).convert()
 
 #background image
-background_surface =pygame.image.load("graphics/main game page no window.png").convert_alpha()
+background_surface =pygame.image.load(asset("graphics","main game page no window.png")).convert_alpha()
 # to scale background image on the virtual surface
 background_surface = scale_bg()
 
 
 #character image (female)
 Fcharacter_image_idle = [
-    pygame.image.load("F-right/pixil-frame-0.png"),
-    pygame.image.load("F-right/pixil-frame-1.png"),
-    pygame.image.load("F-right/pixil-frame-2.png"),
-    pygame.image.load("F-right/pixil-frame-3.png"),
+    pygame.image.load(asset("F-right","pixil-frame-0.png")),
+    pygame.image.load(asset("F-right","pixil-frame-1.png")),
+    pygame.image.load(asset("F-right","pixil-frame-2.png")),
+    pygame.image.load(asset("F-right","pixil-frame-3.png")),
 ]
 
 Fcharacter_walking_img =[
-    pygame.image.load("F-walking/pixil-frame-0.png"),
-    pygame.image.load("F-walking/pixil-frame-1.png"),
-    pygame.image.load("F-walking/pixil-frame-2.png"),
-    pygame.image.load("F-walking/pixil-frame-3.png"),
+    pygame.image.load(asset("F-walking/pixil-frame-0.png")),
+    pygame.image.load(asset("F-walking/pixil-frame-1.png")),
+    pygame.image.load(asset("F-walking/pixil-frame-2.png")),
+    pygame.image.load(asset("F-walking/pixil-frame-3.png")),
 ]
 
 dog_walking_img =[ 
-    pygame.image.load("dog frames/pixil-frame-0.png"),
-    pygame.image.load("dog frames/pixil-frame-1.png"),
-    pygame.image.load("dog frames/pixil-frame-2.png"),
-    pygame.image.load("dog frames/pixil-frame-3.png"),
+    pygame.image.load(asset("dog frames","pixil-frame-0.png")),
+    pygame.image.load(asset("dog frames","pixil-frame-1.png")),
+    pygame.image.load(asset("dog frames","pixil-frame-2.png")),
+    pygame.image.load(asset("dog frames","pixil-frame-3.png")),
 ]
 
 dog_idle_img =[
-    pygame.image.load("dog idle frame/pixil-frame-0.png"),
-    pygame.image.load("dog idle frame/pixil-frame-1.png"),
-    pygame.image.load("dog idle frame/pixil-frame-2.png"),
-    pygame.image.load("dog idle frame/pixil-frame-3.png"),
+    pygame.image.load(asset("dog idle frame","pixil-frame-0.png")),
+    pygame.image.load(asset("dog idle frame","pixil-frame-1.png")),
+    pygame.image.load(asset("dog idle frame","pixil-frame-2.png")),
+    pygame.image.load(asset("dog idle frame","pixil-frame-3.png")),
 ]
 #TV and radio img
-TV_mini_games_img =pygame.image.load("graphics/mini games interface.png")
-quit_button_img = pygame.image.load("graphics/cancel button.png")
-radio_img = pygame.image.load("graphics/radio interface.png")
-plant_img =pygame.image.load("graphics/plant interface.png")
-watering_pot =pygame.image.load("graphics/watering pot.png")
-waterdrops = pygame.image.load("graphics/water drops.png")
-water_button = pygame.image.load("graphics/water button.png")
+TV_mini_games_img =pygame.image.load(asset("graphics","mini games interface.png"))
+quit_button_img = pygame.image.load(asset("graphics","cancel button.png"))
+radio_img = pygame.image.load(asset("graphics","radio interface.png"))
+plant_img =pygame.image.load(asset("graphics","plant interface.png"))
+watering_pot =pygame.image.load(asset("graphics","watering pot.png"))
+waterdrops = pygame.image.load(asset("graphics","water drops.png"))
+water_button = pygame.image.load(asset("graphics","water button.png"))
 watering_button_rect = water_button.get_rect()
 
 #icon in TV
-bubble_icon = pygame.image.load("bubble popper/1.png").convert_alpha()
+bubble_icon = pygame.image.load(asset("bubble popper","1.png")).convert_alpha()
 bubble_icon_rect = bubble_icon.get_rect(center=(300, 200)) 
 open_bubble_popper = None
-catch_star_icon = pygame.image.load('catch_star/catch star icon.png').convert_alpha()
+catch_star_icon = pygame.image.load(asset('catch_star','catch star icon.png')).convert_alpha()
 catch_star_rect = catch_star_icon.get_rect(center= (500,200))
 open_catch_star = None
-worrycloud_icon = pygame.image.load('Worry cloud game/worry cloud icon.png').convert_alpha()
+worrycloud_icon = pygame.image.load(asset('Worry cloud game','worry cloud icon.png')).convert_alpha()
 worrycloud_rect = worrycloud_icon.get_rect(center=(700,200))
 open_worrycloud = None
 
 
 # speech bar position and img
-Speech_bar =pygame.image.load("graphics/speech bar.png")
+Speech_bar =pygame.image.load(asset("graphics","speech bar.png"))
 speechbar_rect =Speech_bar.get_rect()
 speechbar_rect.x = 300
 speechbar_rect.y =520
 show_text =False
 
 #to other feature img
-hourglass_img = pygame.image.load("graphics/hourglass.png")
+hourglass_img = pygame.image.load(asset("graphics","hourglass.png"))
 hourglass_rect = hourglass_img.get_rect()
 hourglass_rect.x = 130
 hourglass_rect.y = 355
 breathing_process = None
 music_paused_for_tkinter = False
 
-diary_img = pygame.image.load("graphics/diary.png")
+diary_img = pygame.image.load(asset("graphics","diary.png"))
 diary_rect = diary_img.get_rect()
 diary_rect.x = 920
 diary_rect.y = 455
 diary_process = None
 
-moodtracker_img = pygame.image.load("graphics/mood tracker.png")
+moodtracker_img = pygame.image.load(asset("graphics","mood tracker.png"))
 moodtracker_rect = moodtracker_img.get_rect()
 moodtracker_rect.x= 350
 moodtracker_rect.y= 70
 moodtracker_process = None
 
-play_button_img = pygame.image.load("graphics/play button.png")
+play_button_img = pygame.image.load(asset("graphics","play button.png"))
 play_button_rect = play_button_img.get_rect()
 play_button_rect.x = 550
 play_button_rect.y = 400
 tkinterradio_process = None
 
-calendar_img = pygame.image.load("graphics/calendar.png")
+calendar_img = pygame.image.load(asset("graphics","calendar.png"))
 calendar_rect = calendar_img.get_rect()
 calendar_rect.x= 370
 calendar_rect.y= 140
 calendar_process = None
 
-graph_img = pygame.image.load("graphics/bar graph.png")
+graph_img = pygame.image.load(asset("graphics","bar graph.png"))
 graph_rect = graph_img.get_rect()
 graph_rect.x= 500
 graph_rect.y= 154
 graph_process = None
 
-phone_img = pygame.image.load("graphics/phone.png")
+phone_img = pygame.image.load(asset("graphics","phone.png"))
 phone_rect = phone_img.get_rect()
 phone_rect.x= 1185
 phone_rect.y= 190
 phone_process = None
 
-instruction_img = pygame.image.load("graphics/question_mark.png")
+instruction_img = pygame.image.load(asset("graphics","question_mark.png"))
 instruction_rect = instruction_img.get_rect()
 instruction_rect.x= 1189
 instruction_rect.y= 100
@@ -462,10 +469,10 @@ def draw_icon_button(virtual_surface,icon, x, y):
     rect = pygame.Rect(x, y, icon.get_width(), icon.get_height())
     virtual_surface.blit(icon, (x, y))
     return rect
-settings_icon = pygame.image.load("settings/settings_icon.png")
+settings_icon = pygame.image.load(asset("settings","settings_icon.png"))
 settings_icon = pygame.transform.scale(settings_icon, (80, 80))
 settings_open = False
-settings.FONT = pygame.font.Font("texts/PressStart2P-Regular.ttf", 20)
+settings.FONT = pygame.font.Font(asset("texts", "PressStart2P-Regular.ttf"), 20)
 #--------------------------------------------------------------------------------------------------------------------------------------------------
 #bg music
 play_background_music()
@@ -525,19 +532,19 @@ while True:
                     if not open_bubble_popper or open_bubble_popper.poll() is not None:
                         pygame.mixer.music.stop()
                         stop_rain_sound()
-                        open_bubble_popper=subprocess.Popen([sys.executable,"bubble popper/buble poper.py"])
+                        open_bubble_popper = subprocess.Popen([sys.executable, asset("bubble popper", "buble poper.py")])
                         music_paused_for_tkinter = True 
                 if catch_star_rect.collidepoint(event.pos):
                     if not open_bubble_popper or open_bubble_popper.poll() is not None:
                         pygame.mixer.music.stop()
                         stop_rain_sound()
-                        open_catch_star=subprocess.Popen([sys.executable,"catch_star/Catch The Falling Stars.py"])
+                        open_catch_star=subprocess.Popen([sys.executable,asset("catch_star","Catch The Falling Stars.py")])
                         music_paused_for_tkinter = True 
                 if worrycloud_rect.collidepoint(event.pos):
                     if not open_bubble_popper or open_bubble_popper.poll() is not None:
                         pygame.mixer.music.stop()
                         stop_rain_sound()
-                        open_worrycloud=subprocess.Popen([sys.executable,"worry cloud game/Worry Cloud.py"])
+                        open_worrycloud=subprocess.Popen([sys.executable,asset("worry cloud game","Worry Cloud.py")])
                         music_paused_for_tkinter = True #lazy to create a new variable so i use same heheh
             if show_radio:
                 if Radio_quit_button_rect.collidepoint(event.pos):
@@ -546,7 +553,7 @@ while True:
                     if not tkinterradio_process or tkinterradio_process is not None: #if its not None (not open ye/ ended)
                         pygame.mixer.music.stop()
                         stop_rain_sound()
-                        tkinterradio_process=subprocess.Popen([sys.executable,"tkinter pages/sound/sound_.py"])
+                        tkinterradio_process=subprocess.Popen([sys.executable,asset("tkinter pages","sound","sound_.py")])
                         music_paused_for_tkinter = True
                         
                         
@@ -603,34 +610,34 @@ while True:
                 
                 if diary_rect.collidepoint(event.pos):
                     if not diary_process or diary_process.poll() is not None:
-                        diary_process=subprocess.Popen([sys.executable,"tkinter pages/diary_.py"]) 
+                        diary_process=subprocess.Popen([sys.executable,asset("tkinter pages","diary_.py")]) 
 
                 if calendar_rect.collidepoint(event.pos):
                     if not calendar_process or calendar_process.poll() is not None:#if its not open yet or close rn poll()is not None = closed
-                        calendar_process = subprocess.Popen([sys.executable,"tkinter pages/calendar_.py"])
+                        calendar_process = subprocess.Popen([sys.executable,asset("tkinter pages","calendar_.py")])
 
                 if moodtracker_rect.collidepoint(event.pos):
                     if not moodtracker_process or moodtracker_process.poll() is not None:
-                        calendar_process = subprocess.Popen([sys.executable,"tkinter pages/moodtracker/moodtracker_.py"])
+                        calendar_process = subprocess.Popen([sys.executable,asset("tkinter pages","moodtracker","moodtracker_.py")])
                 
                 if hourglass_rect.collidepoint(event.pos):
                     if not breathing_process or moodtracker_process.poll() is not None:
                         pygame.mixer.music.stop() #stop the music
                         stop_rain_sound()
-                        breathing_process = subprocess.Popen([sys.executable,"tkinter pages/breathing/timer.py"])
+                        breathing_process = subprocess.Popen([sys.executable,asset("tkinter pages","breathing","timer.py")])
                         music_paused_for_tkinter = True
     
                 if graph_rect.collidepoint(event.pos):
                     if not graph_process or graph_process.poll() is not None:
-                        graph_process = subprocess.Popen([sys.executable,"tkinter pages/dashboard.py"])
+                        graph_process = subprocess.Popen([sys.executable,asset("tkinter pages","dashboard.py")])
 
                 if phone_rect.collidepoint(event.pos):
                     if not phone_process or phone_process.poll() is not None:
-                        phone_process = subprocess.Popen([sys.executable,"tkinter pages/stress_quiz_.py"])
+                        phone_process = subprocess.Popen([sys.executable,asset("tkinter pages","stress_quiz_.py")])
 
                 if instruction_rect.collidepoint(event.pos):
                     if not instruction_process or instruction_process.poll() is not None:
-                        instruction_process = subprocess.Popen([sys.executable,"tkinter pages/intruction_page_icon.py"])
+                        instruction_process = subprocess.Popen([sys.executable,asset("tkinter pages","intruction_page_icon.py")])
 
     scaled_surface = pygame.transform.scale(virtual_surface, (screen_width, screen_height))
     screen.blit(scaled_surface,(0,0))
