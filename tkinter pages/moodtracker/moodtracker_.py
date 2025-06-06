@@ -1,4 +1,3 @@
-import customtkinter as ctk
 import tkinter as tk
 import random #for ask_user
 from tkinter import messagebox #for show pop-up message

@@ -17,9 +17,12 @@ root.configure(bg="#FFF2E6")  # Soft peach background
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Load and set background image
-bg_image = Image.open(get_image_path("instruction_page_bg.png"))  # Replace with your image file
+base_dir = os.path.dirname(os.path.abspath(__file__)) 
+bg_image_path = os.path.join(base_dir, "instruction_page_bg.png") 
+bg_image=Image.open(bg_image_path)
 bg_image = bg_image.resize((root.winfo_screenwidth(), root.winfo_screenheight()), Image.Resampling.LANCZOS)
 bg_photo = ImageTk.PhotoImage(bg_image)
+
 bg_label = tk.Label(root, image=bg_photo)
 bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 

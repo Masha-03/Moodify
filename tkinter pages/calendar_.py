@@ -3,6 +3,8 @@ import customtkinter as ctk
 from tkcalendar import Calendar
 import sqlite3
 from PIL import Image, ImageTk
+import os
+
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
 #Get profile from the database
@@ -138,7 +140,9 @@ app.title("Calendar")
 app.configure(bg="#FFF8F0") #change the background color of entire window
 
 #Load and set the background image
-bg_image = Image.open("tkinter pages/calendar_bg.png") 
+base_dir = os.path.dirname(os.path.abspath(__file__)) 
+bg_image_path = os.path.join(base_dir, "calendar_bg.png") 
+bg_image=Image.open(bg_image_path)
 bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
 bg_photo = ImageTk.PhotoImage(bg_image)
 
