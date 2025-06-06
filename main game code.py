@@ -6,6 +6,11 @@ import subprocess
 import time
 import settings
 
+#Open settings when gender gets changed and user is redirected to new gender window
+open_settings_on_start = "--open-settings" in sys.argv
+
+if open_settings_on_start:
+    settings.settings_open= True
 
 #create the rain sprite and set up its speed and postion
 class Rain(pygame.sprite.Sprite): 

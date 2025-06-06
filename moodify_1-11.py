@@ -4,7 +4,9 @@ import sqlite3
 from tkinter import messagebox #To show popup boxes
 from PIL import Image, ImageTk #Handle and display images
 import os
+import sys
 import subprocess
+import time
 
 # Find the folder where the current Python file is
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -142,9 +144,12 @@ def enter_data():
         #Close connection
         connect.close()
 
+        subprocess.Popen([sys.executable, "tkinter pages/instruction_page_.py"])
+        #Wait for 3 seconds before closing the window
+        time.sleep(3)
         #Close the current Tkinter window
         root.destroy()
-        subprocess.Popen(["python3", "instruction_page_.py"])  
+          
     
 #Submit button   
 button = tk.Button(main_frame, text="SUBMIT",font=label_font, bg=button_color, width=20, command= enter_data)  
