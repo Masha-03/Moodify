@@ -151,6 +151,8 @@ def draw_intro_screen():
     "Collect falling stars to build Resilience",
     "Press 'M' to change mood background",
     "Press 'F' to toggle Fullscreen",
+    "Press 'ESC' to exit",
+    "Catch 10 stars to see a motivational message",
     "Press SPACE to start"
   ]
   scaled_instruction_font = get_scaled_font(instruction_font_size) # Use the specific instruction font size
@@ -217,7 +219,7 @@ def main():
   clock = pygame.time.Clock()
   run = True
   frame_count = 0
-  game_state = 'intro' # New game state variable
+  game_state = 'intro' #game starts in intro state
 
   while run:
     clock.tick(60)
@@ -239,7 +241,7 @@ def main():
               pygame.display.set_mode((monitor_size[0], monitor_size[1]), pygame.FULLSCREEN)
             handle_resize(pygame.event.Event(pygame.VIDEORESIZE, {"w": screen.get_width(), "h": screen.get_height()}))
           elif event.key == pygame.K_m:
-            game_state = 'mood_menu' # Switch to mood menu from intro
+            game_state = 'mood_menu' #switch to mood menu from intro
         elif game_state == 'playing':
           if event.key == pygame.K_f:
             if screen.get_flags() & pygame.FULLSCREEN: # returns the current display flags (like FULLSCREEN RESIZABLE), the & (bitwise AND) checks if FULLSCREEN flag is active
@@ -304,11 +306,11 @@ def main():
           message_display = False
           resilience_points = 0 # Reset resilience_points
     else:
-      stars = [] # Clear stars when not in playing state (intro or mood menu)
+      stars = [] #clear stars when not in playing state (intro/mood menu)
 
-    # Drawing based on game state
+    #drawing based on game state
     if game_state == 'intro':
-      # Draw a simple background for the intro
+      # draw a simple background for the intro
       screen.fill((0, 0, 50)) # Dark blue background
       draw_intro_screen()
     elif game_state == 'mood_menu':
