@@ -203,12 +203,12 @@ def draw_window():
 def handle_resize(event):
   global scale_x, scale_y, PLAYER_WIDTH, PLAYER_HEIGHT, SCALED_PLAYER, player_x, player_y, star_speed, STAR_SIZE, SCALED_STAR_IMAGES, BACKGROUND
 
-  scale_x, scale_y = get_scale_factors(event.w, event.h) # takes the new width (event.w) and new height (event.h) of the resized window from the event object
+  scale_x, scale_y = get_scale_factors(event.w, event.h) #takes the new width (event.w) and new height (event.h) of the resized window from the event object
 
   # update player size and position
   PLAYER_WIDTH = int(225 * scale_x) # scale player width
   PLAYER_HEIGHT = int(190 * scale_y) # scale player height
-  SCALED_PLAYER = pygame.transform.scale(PLAYER_IMAGE, (PLAYER_WIDTH, PLAYER_HEIGHT)) # scale player image
+  SCALED_PLAYER = pygame.transform.scale(PLAYER_IMAGE, (PLAYER_WIDTH, PLAYER_HEIGHT)) #scale player image
   player_x = int((event.w - PLAYER_WIDTH) // 2) # reposition player horizontally
   player_y = int((event.h - PLAYER_HEIGHT - 20)) # reposition player vertically
 
@@ -238,7 +238,7 @@ def main():
     clock.tick(60)
     frame_count += 1
 
-    for event in pygame.event.get(): # iterates through all the events that happened ( mouse clicks, key presses, window resizing).
+    for event in pygame.event.get(): #goes through all the events that happened ( mouse clicks, key presses, window resizing).
       if event.type == pygame.QUIT:
         run = False
       elif event.type == pygame.VIDEORESIZE:
@@ -304,17 +304,17 @@ def main():
       # move stars
       for star_info in stars[:]:
         star_rect = star_info["rect"]
-        star_rect.y += star_speed # increases the star vertical position (y), making it fall down the screen
+        star_rect.y += star_speed # ncreases the star vertical position (y), making it fall down the screen
         player_rect = pygame.Rect(player_x, player_y, PLAYER_WIDTH, PLAYER_HEIGHT)
         if star_rect.colliderect(player_rect):
           CATCH_SOUND.play() # play the catch sound
           stars.remove(star_info)
-          resilience_points += 1 # Increment resilience_points
+          resilience_points += 1 #increment resilience_points
         elif star_rect.y > screen.get_height():
           stars.remove(star_info)
 
       # check if basket is full
-      if resilience_points >= basket_capacity and not message_display: # Check resilience_points
+      if resilience_points >= basket_capacity and not message_display: #check resilience_points
         message_display = True
         current_message = random.choice(emotional_messages)
         message_timer = 0
@@ -324,17 +324,17 @@ def main():
         message_timer += 1
         if message_timer > MESSAGE_DURATION:
           message_display = False
-          resilience_points = 0 # Reset resilience_points
+          resilience_points = 0 #reset resilience_points
     else:
       stars = [] #clear stars when not in playing state (intro/mood menu)
 
     #drawing based on game state
     if game_state == 'intro':
-      # draw a simple background for the intro
+      #simple background for the intro
       screen.fill((0, 0, 50)) # Dark blue background
       draw_intro_screen()
     elif game_state == 'mood_menu':
-      draw_window() # Draw the regular game elements
+      draw_window() #regular game elements
     else: # game_state == 'playing'
       draw_window()
 
