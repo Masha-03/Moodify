@@ -113,17 +113,25 @@ def clear_entry():
     for button in emoji_buttons:
         button.configure(bg="#ffe0e0")
 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 def show_help():
     messagebox.showinfo("Help", "Select your mood by clicking an emoji or type your mood in the box. You can press the *Insert Timestamp* button to insert current time. Then click 'Save Mood'. Press Ctrl+F to toggle fullscreen.")
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 def update_word_count(event=None):
     text = text_entry.get("1.0", "end").strip()
     words = len(text.split()) if text else 0
     word_count_label.config(text=f"Words: {words}")
 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 def insert_timestamp():
     now = datetime.datetime.now().strftime("%B %d, %Y")
     text_entry.insert(tk.END, f"\n[{now}] ")
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #function to handle the button click
 def set_mood(mood):
@@ -165,12 +173,16 @@ def set_mood(mood):
     for button in emoji_buttons:
         button.configure(bg=btn_colour)
 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 # Get current file directory
 base_dir = os.path.dirname(__file__)
 
 # Build image paths safely
 def get_image_path(filename):
     return os.path.join(base_dir, filename)
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Resize image using PIL
 def resize_image(image_path, size=(50, 50)):
@@ -301,11 +313,17 @@ exit_button = ctk.CTkButton(
 )
 exit_button.place(relx=0.97, rely=0.04, anchor="ne")
 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 clear_button = tk.Button(root, text="Clear Entry", font=("Comic Sans MS", 10), bg="#ffd3d3", command=clear_entry)
 clear_button.place(relx=0.97, rely=0.19, anchor="ne")
 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 timestamp_button = tk.Button(root, text="Insert Timestamp", font=("Comic Sans MS", 10), command=insert_timestamp)
 timestamp_button.place(relx=0.97, rely=0.14, anchor="ne")
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 help_button = ctk.CTkButton(root, text="❓ Help", font=("Segoe UI", 14), fg_color="#5A9BD5", hover_color="#7AB8FF", text_color="white", corner_radius=25, command=show_help)
 help_button.place(relx=0.97, rely=0.09, anchor="ne")

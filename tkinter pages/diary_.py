@@ -355,7 +355,7 @@ exit_button.place(relx=0.97, rely=0.04, anchor="ne")
 help_button = ctk.CTkButton(root, text="❓ Help", font=("Segoe UI", 14), fg_color="#5A9BD5", hover_color="#7AB8FF", text_color="white", corner_radius=25, command=show_help)
 help_button.place(relx=0.97, rely=0.09, anchor="ne")
 
-#----------------------------------------------------------------------------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Start auto reminder
 root.after(600000, auto_save_reminder)
