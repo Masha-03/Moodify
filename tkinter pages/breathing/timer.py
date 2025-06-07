@@ -5,6 +5,8 @@ import time #Animations
 import pygame  #For background music
 import sqlite3
 from datetime import datetime
+import os
+import sys
 
 #Get profile from the database
 def get_profile():
@@ -351,7 +353,7 @@ class Timer478(ctk.CTkFrame):
         initialise_table()
         
         #Title
-        self.title=tk.Label(self.parent,text="4-7-4 Breathing Exercise",font=("Segoe UI",18,"bold"), bg="#DDEFFB", fg="#152238")
+        self.title=tk.Label(self.parent,text="4-7-8 Breathing Exercise",font=("Segoe UI",18,"bold"), bg="#DDEFFB", fg="#152238")
         self.title.pack(pady=10, fill='x')
             
         backbutton_frame = ctk.CTkFrame(self.parent, width=30, height=30, corner_radius=50, fg_color="#DDEFFB")
@@ -630,7 +632,7 @@ class Timer2to1(ctk.CTkFrame):
         initialise_table()
         
         #Title
-        self.title=tk.Label(self.parent,text="4-7-4 Breathing Exercise",font=("Segoe UI",18,"bold"), bg="#DDEFFB", fg="#152238")
+        self.title=tk.Label(self.parent,text="2 to 1 Breathing Exercise",font=("Segoe UI",18,"bold"), bg="#DDEFFB", fg="#152238")
         self.title.pack(pady=10, fill='x')
             
         backbutton_frame = ctk.CTkFrame(self.parent, width=30, height=30, corner_radius=50, fg_color="#DDEFFB")
@@ -905,7 +907,7 @@ class Timer5_5(ctk.CTkFrame):
         initialise_table()
         
         #Title
-        self.title=tk.Label(self.parent,text="4-7-4 Breathing Exercise",font=("Segoe UI",18,"bold"), bg="#DDEFFB", fg="#152238")
+        self.title=tk.Label(self.parent,text="5-5 Breathing Exercise",font=("Segoe UI",18,"bold"), bg="#DDEFFB", fg="#152238")
         self.title.pack(pady=10, fill='x')
             
         backbutton_frame = ctk.CTkFrame(self.parent, width=30, height=30, corner_radius=50, fg_color="#DDEFFB")
@@ -1169,7 +1171,9 @@ title_label = ctk.CTkLabel(
 title_label.pack(pady=(30, 10))
 
 #Load and set the background image
-bg_image = Image.open("tkinter pages/breathing/breathing_bg.png") 
+base_dir= os.path.dirname(os.path.abspath(__file__))
+bg_image_path = os.path.join(base_dir, "breathing_bg.png")
+bg_image = Image.open(bg_image_path) 
 bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
 bg_photo = ImageTk.PhotoImage(bg_image)
 
@@ -1181,14 +1185,21 @@ bg_label.image = bg_photo  # Keep a reference to avoid garbage collection
 #Lower the label so it doesn’t cover other widgets
 bg_label.lower()
 
-# Load images
-def load_image(path):
-    return ctk.CTkImage(dark_image=Image.open(path), size=(80, 80))
+#Define the base directory
+base_dir = os.path.dirname(os.path.abspath(__file__))
 
-img_calm = load_image("tkinter pages/breathing/calm.png")
-img_balance = load_image("tkinter pages/breathing/balance.png")
-img_release = load_image("tkinter pages/breathing/release.png")
-img_relax = load_image("tkinter pages/breathing/relax.png")
+#Load and resize an image
+def load_image(filename, size=(100, 100)):
+    image_path = os.path.join(base_dir, filename)
+    img = Image.open(image_path)
+    img = img.resize(size, Image.Resampling.LANCZOS)
+    return ctk.CTkImage(light_image=img, dark_image=img, size=size)
+
+#Load all images
+img_calm = load_image("calm.png")
+img_balance = load_image("balance.png")
+img_release = load_image("release.png")
+img_relax = load_image("relax.png")
 
 # Button style
 button_style = {
@@ -1268,7 +1279,9 @@ def open_4_7_4():
     main_frame.pack(expand=True, fill="both", padx=40, pady=20)
     
     #Load and set the background image
-    bg_image = Image.open("tkinter pages/breathing/breathing_bg.png") 
+    base_dir= os.path.dirname(os.path.abspath(__file__))
+    bg_image_path = os.path.join(base_dir, "breathing_bg.png")
+    bg_image = Image.open(bg_image_path) 
     bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
     bg_photo = ImageTk.PhotoImage(bg_image)
 
@@ -1296,7 +1309,9 @@ def open_5_5():
     main_frame.pack(expand=True, fill="both", padx=40, pady=20)
     
     #Load and set the background image
-    bg_image = Image.open("tkinter pages/breathing/breathing_bg.png") 
+    base_dir= os.path.dirname(os.path.abspath(__file__))
+    bg_image_path = os.path.join(base_dir, "breathing_bg.png")
+    bg_image = Image.open(bg_image_path) 
     bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
     bg_photo = ImageTk.PhotoImage(bg_image)
 
@@ -1324,7 +1339,9 @@ def open_4_7_8():
     main_frame.pack(expand=True, fill="both", padx=40, pady=20)
     
     #Load and set the background image
-    bg_image = Image.open("tkinter pages/breathing/breathing_bg.png") 
+    base_dir= os.path.dirname(os.path.abspath(__file__))
+    bg_image_path = os.path.join(base_dir, "breathing_bg.png")
+    bg_image = Image.open(bg_image_path) 
     bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
     bg_photo = ImageTk.PhotoImage(bg_image)
 
@@ -1352,7 +1369,9 @@ def open_2to1():
     main_frame.pack(expand=True, fill="both", padx=40, pady=20)
     
     #Load and set the background image
-    bg_image = Image.open("tkinter pages/breathing/breathing_bg.png") 
+    base_dir= os.path.dirname(os.path.abspath(__file__))
+    bg_image_path = os.path.join(base_dir, "breathing_bg.png")
+    bg_image = Image.open(bg_image_path) 
     bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
     bg_photo = ImageTk.PhotoImage(bg_image)
 
@@ -1396,6 +1415,15 @@ create_icon_button(main_frame, img_balance, "5-5 Breathing Exercise", open_5_5).
 create_icon_button(main_frame, img_release, "4-7-8 Breathing Exercise", open_4_7_8).grid(row=1, column=0, padx=40, pady=30)
 create_icon_button(main_frame, img_relax, "2 to 1 Breathing Exercise", open_2to1).grid(row=1, column=1, padx=40, pady=30)
 
+#Debug
+def on_close():
+    if not app.winfo_exists():
+        return
+
+    #Forcefully terminate the application to prevent lingering events
+    sys.exit()
+
+app.protocol("WM_DELETE_WINDOW", on_close)
 
 #Run the app
 app.mainloop()

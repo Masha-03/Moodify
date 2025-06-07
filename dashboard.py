@@ -8,12 +8,9 @@ import sqlite3
 from datetime import datetime, timedelta
 import matplotlib.dates as mdates
 from collections import defaultdict, Counter
+import os
 
 plt.style.use('fivethirtyeight') 
-
-#Background picture
-bg_image = Image.open("tkinter pages/dashboard_bg.png")  #load pic
-bg_photo = ImageTk.PhotoImage(bg_image)
 
 def get_profile():
     connect = sqlite3.connect('moodify_database.db')
@@ -113,8 +110,7 @@ def embed_chart(fig, parent):
 ################################################################################################################################################################################
 
 # Create all figures
-def create_weekly_charts(profile, container):
-    global bg_photo
+def create_weekly_charts(profile, container, bg_photo):
     for widget in container.winfo_children():
         widget.destroy()
 
@@ -209,8 +205,7 @@ def create_weekly_charts(profile, container):
         
 ################################################################################################################################################################################
         
-def create_monthly_charts(profile, container):
-    global bg_photo
+def create_monthly_charts(profile, container, bg_photo):
     for widget in container.winfo_children():
         widget.destroy()
 
@@ -337,8 +332,7 @@ def calculate_monthly_average(dates, values):
     
     return months_order, monthly_averages
 
-def create_annual_charts(profile, container):
-    global bg_photo
+def create_annual_charts(profile, container, bg_photo):
     for widget in container.winfo_children():
         widget.destroy()
 
@@ -421,6 +415,12 @@ def main():
     root.state("zoomed")
     root.configure(bg='white')
 
+    #Background picture
+    base_dir= os.path.dirname(os.path.abspath(__file__))
+    bg_image_path = os.path.join(base_dir, "tkinter pages", "dashboard_bg.png")
+    bg_image = Image.open(bg_image_path)  #load pic
+    bg_photo = ImageTk.PhotoImage(bg_image)
+
     #Wrap sidebar and main_area in a content frame
     content_frame = tk.Frame(root, bg="white")
     content_frame.place(relx=0, rely=0, relwidth=1, relheight=1)  # Fills entire window
@@ -462,7 +462,7 @@ def main():
     def on_leave(e): e.widget.config(bg="#3C3C3C")
 
     def load_weekly():
-        create_weekly_charts(profile, main_area)
+        create_weekly_charts(profile, main_area, bg_photo)
         
         #Ceate sidebar buttons
         for tab in ["Weekly", "Monthly", "Annual"]:
