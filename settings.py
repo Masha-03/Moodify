@@ -7,6 +7,15 @@ import sqlite3
 from tkinter import messagebox 
 import time
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        base_path = sys._MEIPASS  # used by PyInstaller
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
 # Constants for screen dimension and colors
 BG_COLOR = (245, 235, 220)
 SETTINGS_BG = (210, 180, 140)
@@ -28,14 +37,12 @@ scale_size = 0.75
 
 male_frames = [
     pygame.transform.scale_by(
-        pygame.image.load(f"male/boy_pixil_frame_{i}.png"), scale_size
-    )
+        pygame.image.load(resource_path(os.path.join(f"male/boy_pixil_frame_{i}.png"))), scale_size)
     for i in range(4)]
 
 female_frames = [
     pygame.transform.scale_by(
-        pygame.image.load(f"female/girl_pixil_frame_{i}.png"), scale_size
-    )
+        pygame.image.load(resource_path(os.path.join(f"female/girl_pixil_frame_{i}.png"))), scale_size)
     for i in range(4)]
 
 # Animation variables
