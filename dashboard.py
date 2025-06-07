@@ -8,6 +8,7 @@ import sqlite3
 from datetime import datetime, timedelta
 import matplotlib.dates as mdates
 from collections import defaultdict, Counter
+import os
 
 plt.style.use('fivethirtyeight') 
 
@@ -213,6 +214,11 @@ def create_monthly_charts(profile, container, bg_photo):
     bg_label.image = bg_photo  # Prevent garbage collection
     bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
+    #Background picture
+    bg_label = tk.Label(container, image=bg_photo)
+    bg_label.image = bg_photo  # Prevent garbage collection
+    bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
     mode = "monthly"  
     range_list = date_range(mode)
     dates, sessions = get_breathing_data(profile, range_list)
@@ -413,18 +419,9 @@ def main():
     root.title("Moodify Dashboard")
     root.state("zoomed")
     root.configure(bg='white')
-    
-    #Background picture
-    bg_image = Image.open("tkinter pages/dashboard_bg.png")  #load pic
-    bg_photo = ImageTk.PhotoImage(bg_image)
-
-
-    #Wrap sidebar and main_area in a content frame
-    content_frame = tk.Frame(root, bg="white")
-    content_frame.place(relx=0, rely=0, relwidth=1, relheight=1)  # Fills entire window
 
     #Sidebar
-    sidebar = tk.Frame(content_frame, width=200, bg="#545454")
+    sidebar = tk.Frame(root, width=200, bg="#2E2E2E")
     sidebar.pack(side="left", fill="y")
 
     tab_label = tk.Label(sidebar, text="VIEW BY", fg="#ffffff", bg="#545454", font=("Segoe UI", 14, "bold"))

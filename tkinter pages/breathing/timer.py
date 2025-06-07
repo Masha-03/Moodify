@@ -5,6 +5,8 @@ import time #Animations
 import pygame  #For background music
 import sqlite3
 from datetime import datetime
+import os
+import sys
 
 #Get profile from the database
 def get_profile():
@@ -41,8 +43,10 @@ class Timer474(ctk.CTkFrame):
         
         #Initialize Pygame for music playback
         pygame.mixer.init()
-        #Load the background music 
-        pygame.mixer.music.load("tkinter pages/breathing/breathing.mp3")
+        #Gets the directory of the current script
+        base_dir = os.path.dirname(os.path.abspath(__file__))  
+        audio_path = os.path.join(base_dir, "breathing.mp3")
+        pygame.mixer.music.load(audio_path)
         pygame.mixer.music.play(loops=-1)  # -1 for infinite loop
 
         #Initialise table
@@ -321,8 +325,10 @@ class Timer478(ctk.CTkFrame):
         
         #Initialize Pygame for music playback
         pygame.mixer.init()
-        #Load the background music 
-        pygame.mixer.music.load("tkinter pages/breathing/breathing.mp3")
+        #Gets the directory of the current script
+        base_dir = os.path.dirname(os.path.abspath(__file__))  
+        audio_path = os.path.join(base_dir, "breathing.mp3")
+        pygame.mixer.music.load(audio_path)
         pygame.mixer.music.play(loops=-1)  # -1 for infinite loop
 
         #Initialise table
@@ -600,8 +606,10 @@ class Timer2to1(ctk.CTkFrame):
         
         #Initialize Pygame for music playback
         pygame.mixer.init()
-        #Load the background music 
-        pygame.mixer.music.load("tkinter pages/breathing/breathing.mp3")
+        #Gets the directory of the current script
+        base_dir = os.path.dirname(os.path.abspath(__file__))  
+        audio_path = os.path.join(base_dir, "breathing.mp3")
+        pygame.mixer.music.load(audio_path)
         pygame.mixer.music.play(loops=-1)  # -1 for infinite loop
 
         #Initialise table
@@ -875,8 +883,10 @@ class Timer5_5(ctk.CTkFrame):
         
         #Initialize Pygame for music playback
         pygame.mixer.init()
-        #Load the background music 
-        pygame.mixer.music.load("tkinter pages/breathing/breathing.mp3")
+        #Gets the directory of the current script
+        base_dir = os.path.dirname(os.path.abspath(__file__))  
+        audio_path = os.path.join(base_dir, "breathing.mp3")
+        pygame.mixer.music.load(audio_path)
         pygame.mixer.music.play(loops=-1)  # -1 for infinite loop
 
         #Initialise table
@@ -1162,14 +1172,16 @@ app.bind("<Escape>", exit_fullscreen)
 #Main title (outside the frame, centered)
 title_label = ctk.CTkLabel(
     app,
-    text="Breathing Exercise 🧘",
+    text="Breathing Exercise",
     font=("Helvetica", 28, "bold"),
     text_color="#3a3a3a", fg_color="#cee6f4"
 )
 title_label.pack(pady=(30, 10))
 
 #Load and set the background image
-bg_image = Image.open("tkinter pages/breathing/breathing_bg.png") 
+base_dir= os.path.dirname(os.path.abspath(__file__))
+bg_image_path = os.path.join(base_dir, "breathing_bg.png")
+bg_image = Image.open(bg_image_path) 
 bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
 bg_photo = ImageTk.PhotoImage(bg_image)
 
@@ -1181,14 +1193,21 @@ bg_label.image = bg_photo  # Keep a reference to avoid garbage collection
 #Lower the label so it doesn’t cover other widgets
 bg_label.lower()
 
-# Load images
-def load_image(path):
-    return ctk.CTkImage(dark_image=Image.open(path), size=(80, 80))
+#Define the base directory
+base_dir = os.path.dirname(os.path.abspath(__file__))
 
-img_calm = load_image("tkinter pages/breathing/calm.png")
-img_balance = load_image("tkinter pages/breathing/balance.png")
-img_release = load_image("tkinter pages/breathing/release.png")
-img_relax = load_image("tkinter pages/breathing/relax.png")
+#Load and resize an image
+def load_image(filename, size=(100, 100)):
+    image_path = os.path.join(base_dir, filename)
+    img = Image.open(image_path)
+    img = img.resize(size, Image.Resampling.LANCZOS)
+    return ctk.CTkImage(light_image=img, dark_image=img, size=size)
+
+#Load all images
+img_calm = load_image("calm.png")
+img_balance = load_image("balance.png")
+img_release = load_image("release.png")
+img_relax = load_image("relax.png")
 
 # Button style
 button_style = {
@@ -1208,6 +1227,11 @@ def clear_app_widgets():
         widget.destroy()
 
 def go_home():
+    try:
+        pygame.mixer.music.stop()
+    except Exception as e:
+        print("Error stopping music:", e)
+        
     clear_app_widgets()
     global main_frame
     global title_label
@@ -1273,7 +1297,9 @@ def open_4_7_4():
     
     
     #Load and set the background image
-    bg_image = Image.open("tkinter pages/breathing/breathing_bg.png") 
+    base_dir= os.path.dirname(os.path.abspath(__file__))
+    bg_image_path = os.path.join(base_dir, "breathing_bg.png")
+    bg_image = Image.open(bg_image_path) 
     bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
     bg_photo = ImageTk.PhotoImage(bg_image)
 
@@ -1303,7 +1329,9 @@ def open_5_5():
         main_frame.pack(expand=True, fill="both", padx=40, pady=20)
     
     #Load and set the background image
-    bg_image = Image.open("tkinter pages/breathing/breathing_bg.png") 
+    base_dir= os.path.dirname(os.path.abspath(__file__))
+    bg_image_path = os.path.join(base_dir, "breathing_bg.png")
+    bg_image = Image.open(bg_image_path) 
     bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
     bg_photo = ImageTk.PhotoImage(bg_image)
 
@@ -1333,7 +1361,9 @@ def open_4_7_8():
         main_frame.pack(expand=True, fill="both", padx=40, pady=20)
     
     #Load and set the background image
-    bg_image = Image.open("tkinter pages/breathing/breathing_bg.png") 
+    base_dir= os.path.dirname(os.path.abspath(__file__))
+    bg_image_path = os.path.join(base_dir, "breathing_bg.png")
+    bg_image = Image.open(bg_image_path) 
     bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
     bg_photo = ImageTk.PhotoImage(bg_image)
 
@@ -1366,7 +1396,9 @@ def open_2to1():
         main_frame.pack(expand=True, fill="both", padx=40, pady=20)
     
     #Load and set the background image
-    bg_image = Image.open("tkinter pages/breathing/breathing_bg.png") 
+    base_dir= os.path.dirname(os.path.abspath(__file__))
+    bg_image_path = os.path.join(base_dir, "breathing_bg.png")
+    bg_image = Image.open(bg_image_path) 
     bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
     bg_photo = ImageTk.PhotoImage(bg_image)
 
@@ -1417,7 +1449,6 @@ def on_close():
         return
 
     #Forcefully terminate the application to prevent lingering events
-    import sys
     sys.exit()
 
 app.protocol("WM_DELETE_WINDOW", on_close)
