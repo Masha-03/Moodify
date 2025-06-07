@@ -9,6 +9,7 @@ import os
 from PIL import Image, ImageTk
 import customtkinter as ctk
 from datetime import datetime
+from tkinter import simpledialog,messagebox
 
 #counts how many words are in the diary
 def word_count(event=None): #event=None:means it can be called with/without event
@@ -16,6 +17,8 @@ def word_count(event=None): #event=None:means it can be called with/without even
     words = content.split() #split the entire string into a list of words
     word_count = len(words) #len(words)=count how many words in the list #len=return the length of something
     word_count_label.config(text=f"{word_count} words") #update the label
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #function for the weather
 def get_weather():
@@ -36,10 +39,14 @@ def get_weather():
     except: #if something breaks
         return "Error fetching weather" #catches any unexpected error
 
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
+
 #function to refresh the prompts
 def refresh_prompts():
     new_prompt=random.choice(writing_prompts)
     promts_label.config(text=new_prompt)
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #function for update the font
 def update_font():
@@ -47,17 +54,24 @@ def update_font():
     text_entry.configure(font=(chosen_font, 12))
     smalltitle_entry.configure(font=(chosen_font,12)) #let the smalltitle can change the font too
 
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
+#function for clear entry
 def clear_entry():
     text_entry.delete("1.0", "end")
     smalltitle_entry.delete(0, "end")
     word_count_label.config(text="0 words")
-    
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------#    
 def show_help():
     messagebox.showinfo("Help", "Write your diary entry, choose a font, and click Save. Press Ctrl+F to toggle fullscreen.")
 
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
+#auto save reminder
 def auto_save_reminder():
     messagebox.showinfo("Reminder", "Don't forget to save your diary entry!")
     root.after(600000, auto_save_reminder)  # every 10 minutes
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 def insert_timestamp():
     now = datetime.now().strftime("%B %d, %Y")
@@ -152,10 +166,13 @@ def save_entry():
     #Close connection
     connect.close()
 
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
+
 def get_image_path(filename):
     # This gets the path of the current Python file
     base_path = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base_path, filename)
+
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #main window
@@ -163,6 +180,7 @@ root=tk.Tk()
 root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}") #Full-screen size
 root.title("Diary📖")
 root.configure(bg="#fdf6f0")
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Load and set background image
 base_dir = os.path.dirname(os.path.abspath(__file__)) 
@@ -268,10 +286,13 @@ font_selection.config(font=("Times New Roman", 12)) #set the font of the optionm
 font_selection.pack(side="left", pady=(0,10))
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
+#clear all entry
 clear_button = tk.Button(font_frame, text="Clear Entry", command=clear_entry, font=("Comic Sans MS", 10), bg="#ffd3d3", fg="#333")
 clear_button.pack(side="left", padx=10, pady=(0,10))
 
-timestamp_button = tk.Button(font_frame, text="Insert Timestamp", font=("Comic Sans MS", 10), command=insert_timestamp)
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
+#when press the button it auto insert the current time
+timestamp_button = tk.Button(font_frame, text="Insert Timestamp", font=("Comic Sans MS", 10), command=insert_timestamp,bg="#ffe7e7")
 timestamp_button.pack(side="left", padx=10, pady=(0,10))
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
 #About main text entry
@@ -329,8 +350,12 @@ exit_button = ctk.CTkButton(
 )
 exit_button.place(relx=0.97, rely=0.04, anchor="ne")
 
-help_button = tk.Button(root, text="Help ❓", command=show_help, font=("Comic Sans MS", 10), bg="#ff770e", fg="white")
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
+
+help_button = ctk.CTkButton(root, text="❓ Help", font=("Segoe UI", 14), fg_color="#5A9BD5", hover_color="#7AB8FF", text_color="white", corner_radius=25, command=show_help)
 help_button.place(relx=0.97, rely=0.09, anchor="ne")
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Start auto reminder
 root.after(600000, auto_save_reminder)

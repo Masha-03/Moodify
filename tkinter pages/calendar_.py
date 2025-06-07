@@ -4,6 +4,7 @@ from tkcalendar import Calendar
 import sqlite3
 from PIL import Image, ImageTk
 import os
+from tkinter import messagebox
 
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
@@ -106,6 +107,29 @@ def show_entry(selected_date):
    
     connect.close()
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
+#give users some tips
+def show_help():
+    messagebox.showinfo("Help", "Click on a date to view your diary and mood. Press Ctrl+F to toggle fullscreen.")
+
+#Track fullscreen state
+is_fullscreen = [False]
+
+# Toggle fullscreen using the 'f' key
+def toggle_fullscreen(event=None):
+    is_fullscreen[0] = not is_fullscreen[0]
+    app.attributes("-fullscreen", is_fullscreen[0])
+
+#clear the display
+def clear_display():
+    title_display.configure(text="")
+    content_text.configure(state="normal")
+    content_text.delete("1.0", tk.END)
+    content_text.configure(state="disabled")
+
+    mood_display.configure(text="")
+    mooddesc_display.configure(state="normal")
+    mooddesc_display.delete("1.0", tk.END)
+    mooddesc_display.configure(state="disabled")
 
 #to get the date
 def grab_date():
@@ -138,6 +162,9 @@ except:
     app.geometry(f"{screen_width}x{screen_height}")
 app.title("Calendar")
 app.configure(bg="#FFF8F0") #change the background color of entire window
+
+#Bind the 'f' key (lowercase only) (for fullscreen)
+app.bind("<Control-f>", toggle_fullscreen)
 
 #Load and set the background image
 base_dir = os.path.dirname(os.path.abspath(__file__)) 
@@ -247,6 +274,31 @@ mooddesc_scroll.pack(side="right", fill="y")
 mooddesc_display.configure(yscrollcommand=mooddesc_scroll.set, state="disabled")
 
 #---------------------------------------------------------------------------------------------------------`-------------------------------------------#
+#exit button
+exit_button = ctk.CTkButton(
+    app,
+    text="❌ Exit",
+    font=("Segoe UI", 14),
+    fg_color="#FF5151",
+    hover_color="#FF6A6A",
+    text_color="white",
+    corner_radius=25,
+    command=app.destroy
+)
+exit_button.place(relx=0.97, rely=0.04, anchor="ne")
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+help_button = ctk.CTkButton(app, text="❓ Help", font=("Segoe UI", 14), fg_color="#5A9BD5", hover_color="#7AB8FF", text_color="white", corner_radius=25, command=show_help)
+help_button.place(relx=0.97, rely=0.09, anchor="ne")
+
+
+clear_button = ctk.CTkButton(app, text="Clear Display", font=("Arial Rounded MT Bold", 14),
+                              fg_color="#E6D6B8", text_color="#333", hover_color="#C0C0C0",
+                              corner_radius=10, command=clear_display)
+clear_button.place(relx=0.04, rely=0.06, anchor="w")
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #run the whole program
 app.mainloop()

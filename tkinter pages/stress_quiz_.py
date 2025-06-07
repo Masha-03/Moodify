@@ -4,9 +4,8 @@ import datetime
 import sqlite3
 import customtkinter as ctk
 import os
-from PIL import Image,ImageTk
-
-#-------------------------------------------------------------------------------------------------------------------------------------------------#
+from PIL import Image,ImageTk 
+from tkinter import messagebox
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 def get_image_path(filename):
@@ -17,17 +16,23 @@ def get_image_path(filename):
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 #auto scroll to bottom after receive new msg
 def scroll_to_bottom():
-    chat_canvas.update_idletasks()
-    chat_canvas.yview_moveto(1)
+    chat_canvas.update_idletasks() #used when you modify the layout (like adding new chat messages) and want the UI to "catch up"
+    chat_canvas.yview_moveto(1) #This scrolls the chat_canvas vertically to position 1, which means 100% to the bottom.
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #disable option buttons immediately after one is clicked
 def on_option_click(opt, btn_frame):
-    for btn in btn_frame.winfo_children():
-        btn.configure(state="disabled")
-    display_next_question(opt)
-    btn_frame.destroy()
+    for btn in btn_frame.winfo_children(): #goes through every button inside btn_frame
+        btn.configure(state="disabled") #each button is disabled to prevent the user from clicking again after making a choice.
+    display_next_question(opt) 
+    btn_frame.destroy() #remove old button frame
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+#help function, to show users tips
+def show_help():
+    messagebox.showinfo("Help","Press one of the button below to answer each question. If you would like to restart the survey, press the button *restart survey*. Press Ctrl + f to toggle full screen.")
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 #main window
@@ -42,7 +47,7 @@ root.configure(bg="#FFF8E1")  #change the background color of entire window
 base_dir = os.path.dirname(os.path.abspath(__file__)) 
 bg_image_path = os.path.join(base_dir, "stress_bg.png") 
 bg_image=Image.open(bg_image_path)
-bg_image = bg_image.resize((root.winfo_screenwidth(), root.winfo_screenheight()), Image.Resampling.LANCZOS)
+bg_image = bg_image.resize((root.winfo_screenwidth(), root.winfo_screenheight()), Image.Resampling.LANCZOS) #full screen
 bg_photo = ImageTk.PhotoImage(bg_image)
 
 bg_label = tk.Label(root, image=bg_photo)
@@ -121,17 +126,21 @@ instruction_frame.pack(pady=(0, 10))
 instruction_label = tk.Label(instruction_frame, text="Hi! Please press one of the buttons below to answer each question.", font=("Segoe UI", 13, "italic"), bg="#FFF8E1", fg="#555", wraplength=500, justify="left")
 instruction_label.pack(side="left",pady=(0, 10),anchor="w")
 
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 # Progress bar
 progress = ctk.CTkProgressBar(root, orientation="horizontal", width=700, height=15, corner_radius=10, fg_color="#FFE0B2", progress_color="#FFB74D")
 progress.set(0)
 progress.pack(pady=(5, 10))
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Restart button
 def reset_quiz():
     global current_index, user_scores
     current_index = 0
     user_scores = []
-    progress.set(0)
+    progress.set(0) #progress become 0
     for widget in chat_frame.winfo_children():
         widget.destroy()
     result_label.config(text="[Your stress level and tips will be displayed here.]")
@@ -146,8 +155,6 @@ reset_btn = ctk.CTkButton(instruction_frame, text="🔁 Restart Survey",
                            hover_color="#FFB380", # Darker yellow on hover
                            corner_radius=14) # Adding CustomTkinter styling
 reset_btn.pack(side="left",anchor="e",pady=(3,10))
-
-
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -446,6 +453,8 @@ exit_button = ctk.CTkButton(
 )
 exit_button.place(relx=0.97, rely=0.04, anchor="ne")
 
+help_button = ctk.CTkButton(root, text="❓ Help", font=("Segoe UI", 14), fg_color="#5A9BD5", hover_color="#7AB8FF", text_color="white", corner_radius=25, command=show_help)
+help_button.place(relx=0.97, rely=0.09, anchor="ne")
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Run the main program

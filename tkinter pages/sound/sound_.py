@@ -25,40 +25,47 @@ def resize_image(image_name, size=(40,40)):
     img=img.resize(size, Image.Resampling.LANCZOS) #Resampling=process of changing size of an image #LANCZOS=high quality resizing
     return ImageTk.PhotoImage(img)
 
+#----------------------------------------------------------------------------------------------------------------------#
+#help function, to show users tips
 def show_help():
     messagebox.showinfo("Help", "Use Left ← and Right → arrow keys to navigate sounds. Use Space to play and pause the sounds.")
 
-is_muted = [False]  # use a list to modify inside functions
+#----------------------------------------------------------------------------------------------------------------------#
+#let users choose want to mute the sound or unmute
+is_muted = [False]  #when entry it is unmuted first
 
 def toggle_mute():
-    if is_muted[0]:
+    if is_muted[0]: #if unmuted
         volume_control.set(50)  # restore volume to 50%
         set_volume("50")
         is_muted[0] = False
         button_mute.config(text="🔊 Unmute")  # speaker emoji
-    else:
+    else: #if muted
         volume_control.set(0)
         set_volume("0")
         is_muted[0] = True
         button_mute.config(text="🔇 Mute")  # muted emoji
 
+#----------------------------------------------------------------------------------------------------------------------#
+#when mouse touch the button there will be a small dialog to explan the function of the button
 def create_tooltip(widget, text):
-    tooltip = tk.Toplevel(widget)
-    tooltip.withdraw()
-    tooltip.overrideredirect(True)
+    tooltip = tk.Toplevel(widget) #create small pop up window on top of widget
+    tooltip.withdraw() #hide the tooltip at first
+    tooltip.overrideredirect(True) #removes the title bar and border, so it looks like a real tooltip 
     label = tk.Label(tooltip, text=text, bg="yellow", relief="solid", borderwidth=1, font=("Segoe UI", 8))
     label.pack()
 
-    def enter(event):
-        x = event.widget.winfo_rootx() + 20
+    def enter(event): #if mouse enter
+        x = event.widget.winfo_rootx() + 20 #get screen coordinates of widget
         y = event.widget.winfo_rooty() + 20
-        tooltip.geometry(f"+{x}+{y}")
-        tooltip.deiconify()
+        tooltip.geometry(f"+{x}+{y}") #positions the tooltip 20 pixels to the right and below the widget.
+        tooltip.deiconify() #shows tooltip by using deiconify
 
-    def leave(event):
-        tooltip.withdraw()
+    def leave(event): #if mouse leave
+        tooltip.withdraw() #the tooltip hidden again
 
-    widget.bind("<Enter>", enter)
+    #bind the event which is the mouse enter and leave
+    widget.bind("<Enter>", enter) 
     widget.bind("<Leave>", leave)
 
 #----------------------------------------------------------------------------------------------------------------------#
@@ -380,7 +387,7 @@ exit_button = ctk.CTkButton(
 )
 exit_button.place(relx=0.97, rely=0.04, anchor="ne")
 
-help_button = tk.Button(root, text="Help ❓", command=show_help, font=("Comic Sans MS", 10), bg="#ff770e", fg="white")
+help_button = ctk.CTkButton(root, text="❓ Help", font=("Segoe UI", 14), fg_color="#5A9BD5", hover_color="#7AB8FF", text_color="white", corner_radius=25, command=show_help)
 help_button.place(relx=0.85, rely=0.04, anchor="ne")
 
 #-----------------------------------------------------------------------------------------------------------------------#
