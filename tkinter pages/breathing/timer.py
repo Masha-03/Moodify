@@ -43,8 +43,10 @@ class Timer474(ctk.CTkFrame):
         
         #Initialize Pygame for music playback
         pygame.mixer.init()
-        #Load the background music 
-        pygame.mixer.music.load("tkinter pages/breathing/breathing.mp3")
+        #Gets the directory of the current script
+        base_dir = os.path.dirname(os.path.abspath(__file__))  
+        audio_path = os.path.join(base_dir, "breathing.mp3")
+        pygame.mixer.music.load(audio_path)
         pygame.mixer.music.play(loops=-1)  # -1 for infinite loop
 
         #Initialise table
@@ -133,23 +135,6 @@ class Timer474(ctk.CTkFrame):
         self.is_running = False     
         
         self.parent.mainloop()
-        
-    def load_audio(self, audio_path):
-        sound = pygame.mixer.Sound(audio_path)
-        return sound
-
-    def play_audio(self):
-        if hasattr(self, 'audio') and self.audio:
-            self.audio.play(-1)
-
-    def stop_audio(self):
-        pygame.mixer.music.stop()
-        if hasattr(self, 'audio') and self.audio:
-            self.audio.stop()
-
-    def go_back(self):
-        self.stop_audio()  # stop all music before going back
-        self.back_callback()
         
     def start_timer(self):
         self.is_running = True
@@ -340,8 +325,10 @@ class Timer478(ctk.CTkFrame):
         
         #Initialize Pygame for music playback
         pygame.mixer.init()
-        #Load the background music 
-        pygame.mixer.music.load("tkinter pages/breathing/breathing.mp3")
+        #Gets the directory of the current script
+        base_dir = os.path.dirname(os.path.abspath(__file__))  
+        audio_path = os.path.join(base_dir, "breathing.mp3")
+        pygame.mixer.music.load(audio_path)
         pygame.mixer.music.play(loops=-1)  # -1 for infinite loop
 
         #Initialise table
@@ -619,8 +606,10 @@ class Timer2to1(ctk.CTkFrame):
         
         #Initialize Pygame for music playback
         pygame.mixer.init()
-        #Load the background music 
-        pygame.mixer.music.load("tkinter pages/breathing/breathing.mp3")
+        #Gets the directory of the current script
+        base_dir = os.path.dirname(os.path.abspath(__file__))  
+        audio_path = os.path.join(base_dir, "breathing.mp3")
+        pygame.mixer.music.load(audio_path)
         pygame.mixer.music.play(loops=-1)  # -1 for infinite loop
 
         #Initialise table
@@ -894,8 +883,10 @@ class Timer5_5(ctk.CTkFrame):
         
         #Initialize Pygame for music playback
         pygame.mixer.init()
-        #Load the background music 
-        pygame.mixer.music.load("tkinter pages/breathing/breathing.mp3")
+        #Gets the directory of the current script
+        base_dir = os.path.dirname(os.path.abspath(__file__))  
+        audio_path = os.path.join(base_dir, "breathing.mp3")
+        pygame.mixer.music.load(audio_path)
         pygame.mixer.music.play(loops=-1)  # -1 for infinite loop
 
         #Initialise table
@@ -1181,7 +1172,7 @@ app.bind("<Escape>", exit_fullscreen)
 #Main title (outside the frame, centered)
 title_label = ctk.CTkLabel(
     app,
-    text="Breathing Exercise 🧘",
+    text="Breathing Exercise",
     font=("Helvetica", 28, "bold"),
     text_color="#3a3a3a", fg_color="#cee6f4"
 )
