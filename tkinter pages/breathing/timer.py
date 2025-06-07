@@ -134,6 +134,23 @@ class Timer474(ctk.CTkFrame):
         
         self.parent.mainloop()
         
+    def load_audio(self, audio_path):
+        sound = pygame.mixer.Sound(audio_path)
+        return sound
+
+    def play_audio(self):
+        if hasattr(self, 'audio') and self.audio:
+            self.audio.play(-1)
+
+    def stop_audio(self):
+        pygame.mixer.music.stop()
+        if hasattr(self, 'audio') and self.audio:
+            self.audio.stop()
+
+    def go_back(self):
+        self.stop_audio()  # stop all music before going back
+        self.back_callback()
+        
     def start_timer(self):
         self.is_running = True
         #Disable start button
@@ -1216,6 +1233,11 @@ def clear_app_widgets():
         widget.destroy()
 
 def go_home():
+    try:
+        pygame.mixer.music.stop()
+    except Exception as e:
+        print("Error stopping music:", e)
+        
     clear_app_widgets()
     global main_frame
     global title_label
