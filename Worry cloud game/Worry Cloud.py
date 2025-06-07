@@ -11,6 +11,22 @@ pygame.init()
 DB_NAME = "moodify_database.db"
 RECENT_WORRIES_DISPLAY_COUNT = 3
 
+#Get profile from the database
+def get_profile():
+    global profile
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+    
+    #Fetch the profile
+    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
+    result = cursor.fetchone()
+    
+    connect.close() #Close connection
+    if result:
+        profile = result[0]  #Store the profile 
+    else:
+        profile = None  #Set profile to None if no profile found
+
 def setup_database():
     """Connects to the SQLite database and creates the worries table if it doesn't exist."""
     try:
@@ -20,7 +36,9 @@ def setup_database():
            CREATE TABLE IF NOT EXISTS worries (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         worry_text TEXT,
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        profile TEXT,
+        FOREIGN KEY (profile) REFERENCES user_info(profile)
     )
         ''')
         conn.commit()
@@ -36,7 +54,8 @@ def save_worry_to_db(worry_text):
     try:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO worries (worry_text) VALUES (?)", (worry_text,))
+        cursor.execute("INSERT INTO worries (worry_text, profile) VALUES (?, ?)",
+            (worry_text, profile))
         conn.commit()
         conn.close()
     except sqlite3.Error as e:
@@ -472,6 +491,7 @@ placeholder_text = "Type your worry here..." # placeholder text for the input bo
 placeholder_color = (150, 150, 150) # make the text gray color when input box is not active
 
 # --- Database Integration: Initial database setup and load latest worries ---
+get_profile()
 setup_database()
 latest_worries_for_display = get_latest_worries()
 update_history_display_variables() # Initialize history display area variables
