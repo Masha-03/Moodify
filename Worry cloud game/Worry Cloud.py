@@ -2,7 +2,8 @@ import pygame
 import random
 import sqlite3
 from datetime import datetime
-
+import os
+import sys
 pygame.init()
 
 # #------------------------------------------------------------------------------------------ database code #------------------------------------------------------------------------------
@@ -69,15 +70,20 @@ def get_all_worries():
 
 # #----------------------------------------------------------------------------- database code #------------------------------------------------------------------------------------------
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        base_path = sys._MEIPASS  # used by PyInstaller
+    except Exception:
+        base_path = os.path.abspath(".")
 
-#paths for my files.
-# Direct paths are used here. Using forward slashes '/' for better cross-platform compatibility
-# with Pygame's loading functions, even on Windows
-MUSIC_PATH = "Worry cloud game/Worry_cloud/calm_music.wav"
-RAIN_SOUND_PATH = "Worry cloud game/Worry_cloud/rain_sound.wav"
-BACKGROUND_IMG_PATH = "Worry cloud game/Worry_cloud/star_bg2.jpg"
-CLOUD_IMG_PATH = "Worry cloud game/Worry_cloud/cloud.png" #for the worry cloud
-CLOUD2_IMG_PATH = "Worry cloud game/Worry_cloud/cloud2.png" #for background clouds
+    return os.path.join(base_path, relative_path)
+
+MUSIC_PATH = resource_path("Worry cloud game/Worry_cloud/calm_music.wav")
+RAIN_SOUND_PATH = resource_path("Worry cloud game/Worry_cloud/rain_sound.wav")
+BACKGROUND_IMG_PATH = resource_path("Worry cloud game/Worry_cloud/star_bg2.jpg")
+CLOUD_IMG_PATH = resource_path("Worry cloud game/Worry_cloud/cloud.png") #for the worry cloud
+CLOUD2_IMG_PATH = resource_path("Worry cloud game/Worry_cloud/cloud2.png") #for background clouds
 
 #play the ambient music.
 #first, check if the music file actually exists.
@@ -475,9 +481,9 @@ update_history_display_variables() # Initialize history display area variables
 while running:
     #handle all events (mouse clicks, key presses)
     for event in pygame.event.get():
-        if event.type == pygame.QUIT: #if i click the close button
+        if event.type == pygame.QUIT: #click the close button
             running = False
-
+        
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1: #left mouse button
                 if GAME_STATE == "MAIN_GAME":
@@ -520,6 +526,8 @@ while running:
 
         elif event.type == pygame.KEYDOWN: #a key was pressed
             if GAME_STATE == "MAIN_GAME":
+                if event.key == pygame.K_ESCAPE: #if the player presses the escape key
+                    running = False
                 if active: #only if the input box is active
                     # Clear prompt when user types
                     if show_prompts and current_prompt:
