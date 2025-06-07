@@ -26,6 +26,18 @@ def bob(widget, direction=1):
 
     widget.after(100, lambda: bob(widget, direction))
 
+def increase_font_size():
+    size = current_font_size.get()
+    if size < 20:  # max size limit
+        current_font_size.set(size + 1)
+        instruction_text_widget.configure(font=("Segoe UI", current_font_size.get()))
+
+def decrease_font_size():
+    size = current_font_size.get()
+    if size > 10:  # min size limit
+        current_font_size.set(size - 1)
+        instruction_text_widget.configure(font=("Segoe UI", current_font_size.get()))
+
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 #Get profile from the database
 def get_profile():
@@ -114,6 +126,7 @@ root = tk.Tk()
 root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}")
 root.title("Moodify Instructions")
 
+current_font_size = tk.IntVar(value=13)  # starting font size
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Load and set background image
@@ -327,6 +340,33 @@ back_to_top_btn = ctk.CTkButton(
     command=scroll_to_top
 )
 back_to_top_btn.place(relx=0.97, rely=0.84, anchor="se")
+
+increase_font_button = ctk.CTkButton(
+    root,
+    text="🔍 A+",
+    font=("Segoe UI", 14),
+    fg_color="#B0E0E6",
+    hover_color="#87CEFA",
+    text_color="black",
+    command=increase_font_size,
+    corner_radius=25,
+    width=60
+)
+increase_font_button.place(relx=0.07, rely=0.78)
+
+decrease_font_button = ctk.CTkButton(
+    root,
+    text="🔽 A-",
+    font=("Segoe UI", 14),
+    fg_color="#DDA0DD",
+    hover_color="#DA70D6",
+    text_color="black",
+    command=decrease_font_size,
+    corner_radius=25,
+    width=60
+)
+decrease_font_button.place(relx=0.07, rely=0.83)
+
 #---------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Run the app
