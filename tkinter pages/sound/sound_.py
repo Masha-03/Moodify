@@ -275,5 +275,18 @@ volume_control.pack()
 
 #----------------------------------------------------------------------------------------------------------------------#
 
+#Track fullscreen state
+is_fullscreen = [False]
+
+# Toggle fullscreen using the 'f' key
+def toggle_fullscreen(event=None):
+    is_fullscreen[0] = not is_fullscreen[0]
+    root.attributes("-fullscreen", is_fullscreen[0])
+
+# Bind the 'f' key (lowercase only)
+root.bind("<Control-f>", toggle_fullscreen)
+
+#-----------------------------------------------------------------------------------------------------------------------#
+
 #the whole program run
 root.mainloop()

@@ -1,18 +1,98 @@
 import tkinter as tk
+import pygame
 import customtkinter as ctk
+import sys
+import sqlite3
+import subprocess #Open new window
 import os
 from PIL import Image,ImageTk
+import time
 
+#--------------------------------------------------------------masha---------------------------------------------------------------------------------#
+#Get profile from the database
+def get_profile():
+    global profile
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+    
+    #Fetch the profile
+    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
+    result = cursor.fetchone()
+    
+    connect.close() #Close connection
+    if result:
+        profile = result[0]  #Store the profile 
+    else:
+        profile = None  #Set profile to None if no profile found
+        
+def get_gender():
+    if profile is None:
+        return None
+    connect = sqlite3.connect('moodify_database.db')
+    cursor = connect.cursor()
+    cursor.execute("SELECT gender FROM user_info WHERE profile = ? LIMIT 1", (profile,))
+    result = cursor.fetchone()
+    connect.close()
+    if result:
+        return result[0]
+    else:
+        return None
+    
+def start_game():
+    get_profile()
+    gender = get_gender()
+    
+    if gender is None:
+        tk.messagebox.showerror("Error", "No gender found for profile.")
+        return
+    
+    gender = gender.strip().lower()
+    
+    if gender == "female":
+        subprocess.Popen([sys.executable, "main game code.py"])
+        #Wait for 3 seconds before closing the window
+        time.sleep(3)
+        #Close the current Tkinter window
+        root.destroy()
+    elif gender == "male":
+        subprocess.Popen([sys.executable, "main game code_Male.py"])
+        #Wait for 3 seconds before closing the window
+        time.sleep(3)
+        #Close the current Tkinter window
+        root.destroy()
+        
+#--------------------------------------------------------------masha---------------------------------------------------------------------------------#
+
+def run_game():
+    pygame.init()
+    screen = pygame.display.set_mode((800, 600))
+    pygame.display.set_caption("Moodify Game")
+
+    running = True
+    while running:
+        screen.fill((0, 0, 0))  # Fill screen with black
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        pygame.display.flip()
+
+    pygame.quit()
+    sys.exit()
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 def get_image_path(filename):
     # This gets the path of the current Python file
     base_path = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base_path, filename)
+
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 #Tkinter instruction window
 root = tk.Tk()
 root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}")
 root.title("Moodify Instructions")
-root.configure(bg="#FFF2E6")  # Soft peach background
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -52,7 +132,7 @@ canvas.pack(side="left", fill="y")
 canvas.configure(height=420,width=1100)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-
+#SCROLLBAR
 # Scrollbar INSIDE the box
 scrollbar = tk.Scrollbar(box_frame, orient="vertical", command=canvas.yview)
 scrollbar.pack(side="right", fill="y", padx=(0, 5), pady=5)
@@ -85,29 +165,100 @@ canvas.bind_all("<Button-5>", lambda event: canvas.yview_scroll(1, "units"))
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # Instruction Text
+
+# Instruction Text (using Text widget for styling)
+instruction_text_widget = tk.Text(scrollable_frame, font=("Segoe UI", 13), bg="#FFF2E6", fg="#333333", wrap="word", padx=40, pady=20, height=20, width=100)
+instruction_text_widget.pack(pady=(0, 20))
+
+# Insert the bold, bigger "How to Use:" heading
+instruction_text_widget.insert("1.0", "💡 How to Use:\n\n")
+instruction_text_widget.tag_add("title", "1.0", "1.end")
+instruction_text_widget.tag_config("title", font=("Segoe UI", 20, "bold"), foreground="#333333")
+
 instruction_text = (
-        "💡 How to Use:\n\n"
-        "• Use the arrow keys to move your character.\n"
-        "• Press Ctrl + F to toggle fullscreen mode.\n"
-        "• Press Esc anytime to close the app.\n\n"
-        "👀 There are *8 cool features* waiting for you to explore:\n\n"
-        "📖 Tap the **books next to the radio** on the table to open your **Diary** — spill your thoughts, no judgment.\n"
-        "😄 Tap the **emoji squad on the wall** to track your feels with the **Mood Tracker**.\n"
-        "📅 Tap the **calendar on the wall** to throwback to your past moods and diary entries.\n"
-        "🎧 Tap the **radio by the books** to vibe out with **chill sounds** — total zen.\n"
-        "📊 Tap the **graph beside the calendar** to explore the **Statistics** feature and review your data.\n"
-        "⏳ Tap the **hourglass by the TV** to do some **breathing exercises** — in, out, chill.\n"
-        "📱 Tap the **phone under the settings icon** to take a quick **stress check quiz**.\n"
-        "🌱 Tap the **plant next to the TV** to water it — help it grow like your inner peace.\n\n"
-        "🔊 You can adjust or mute the background music anytime by clicking the **Settings** icon.\n"
-        "✨ Bonus fun: Click the **sofa, cockroach, teddy bear, or pirate** for random cute bubble convos!\n"
-        "🎮 Oh — and there are *3 hidden games* inside the computer. Go find 'em 👀\n\n"
+        "🎮 **Controls**:\n"
+        "• Move: Arrow Keys\n"  
+        "• Toggle Fullscreen: Ctrl + f\n"
+        "• Quit: ESC\n\n"
+        "👀 There are *8 COOL FEATURES* waiting for you to explore:\n\n"
+        "🌼 **Core Features**\n"
+        "📖 Diary\n"
+        "• Tap the **books next to the radio** on the table to open your **DIARY** — spill your thoughts, no judgment.\n"
+        "😄 Mood Tracker\n"
+        "• Tap the **emoji squad on the wall** to track your feels with the **MOOD TRACKER**.\n"
+        "📅 Calendar\n"
+        "• Tap the **calendar on the wall** to throwback to your past moods and diary entries.\n\n"
+        "🧘 **Mindfulness Tools**\n\n"
+        "🎧 Chill Sounds\n"
+        "• Tap the **radio by the books** to vibe out with **CHILL SOUNDS** — total zen.\n"
+        "⏳ Breathing Exercise\n"
+        "• Tap the **hourglass by the TV** to do some **BREATHING EXERCISE** — in, out, chill.\n"
+        "📱 Stress Check Survey\n"
+        "• Tap the **phone under the settings icon** to take a quick **STRESS CHECK SURVEY**.\n\n"
+        "🎉 **Fun Extras**\n"
+        "📊 Statistics\n"
+        "• Tap the **graph beside the calendar** to explore the **STATISTICS** feature and review your data.\n"
+        "🌱 Growing Plant\n"  
+        "• Tap the **plant next to the TV** to water it — help it grow like your inner peace.\n"
+        "🛋️ Sofa & Friends\n"
+        "• Bonus fun: Click the **sofa, cockroach, teddy bear, or pirate** for random cute bubble convos!\n"
+        "💻 Hidden Games\n"
+        "Oh — and there are *3 HIDDEN GAMES* inside the TV. Go find 'em 👀\n\n"
+        "🔊 You can adjust or mute the background music anytime by clicking the **SETTINGS** icon.\n\n"
         "🌟 This app is your chill zone. Take a break, have fun, and treat yourself!"
     )
 
-instruction_label = tk.Label(scrollable_frame,text=instruction_text,font=("Segoe UI", 13),bg="#FFF2E6",fg="#333333",justify="left",wraplength=1000,padx=40,pady=20)
-instruction_label.pack(pady=(0, 20))
+instruction_text_widget.insert("end", instruction_text)
+
+#Highlight keywords
+def highlight_text(text_widget, keyword, tag_name, color="red", font_weight="bold"):
+    start = "1.0"
+    while True:
+        pos = text_widget.search(keyword, start, stopindex="end")
+        if not pos:
+            break
+        end_pos = f"{pos}+{len(keyword)}c"
+        text_widget.tag_add(tag_name, pos, end_pos)
+        start = end_pos
+    text_widget.tag_config(tag_name, foreground=color, font=(None, 13, font_weight))
+
+# Apply highlights with balanced colors
+highlight_text(instruction_text_widget, "DIARY", "diary_tag", color="#FF80C6", font_weight="bold")
+highlight_text(instruction_text_widget, "MOOD TRACKER", "mood_tag", color="#FF80C6", font_weight="bold")
+highlight_text(instruction_text_widget, "STATISTICS", "stats_tag", color="#9B59B6", font_weight="bold")
+highlight_text(instruction_text_widget, "Arrow Keys", "arrow_keys_tag", color="#E67E22", font_weight="bold")
+highlight_text(instruction_text_widget, "Ctrl + f", "ctrl_f_tag", color="#E67E22", font_weight="bold")
+highlight_text(instruction_text_widget, "ESC", "esc_tag", color="#E67E22", font_weight="bold")
+highlight_text(instruction_text_widget, "8 COOL FEATURES", "cool_features_tag", color="#48A9FF", font_weight="bold")
+highlight_text(instruction_text_widget, "CHILL SOUNDS", "chill_sounds_tag", color="#22B5E6", font_weight="bold")
+highlight_text(instruction_text_widget, "BREATHING EXERCISE", "breathing_tag", color="#22B5E6", font_weight="bold")
+highlight_text(instruction_text_widget, "STRESS CHECK SURVEY", "stress_tag", color="#22B5E6", font_weight="bold")
+highlight_text(instruction_text_widget, "SETTINGS", "settings_tag", color="#95A5A6", font_weight="bold")
+highlight_text(instruction_text_widget, "3 HIDDEN GAMES", "hidden_games_tag", color="#9B59B6", font_weight="bold")
+highlight_text(instruction_text_widget, "Controls", "controls_tag", color="#E67E22", font_weight="bold")
+highlight_text(instruction_text_widget, "Core Features", "core_tag", color="#FF80C6", font_weight="bold")
+highlight_text(instruction_text_widget, "Mindfulness Tools", "mind_tag", color="#22B5E6", font_weight="bold")
+highlight_text(instruction_text_widget, "Fun Extras", "fun_tag", color="#9B59B6", font_weight="bold")
+highlight_text(instruction_text_widget, "sofa, cockroach, teddy bear, or pirate", "sofa_tag", color="#9B59B6", font_weight="bold")
+highlight_text(instruction_text_widget, "plant next to the TV", "plant_tag", color="#9B59B6", font_weight="bold")
+
+# Disable editing
+instruction_text_widget.config(state="disabled")
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+#Track fullscreen state
+is_fullscreen = [False]
+
+# Toggle fullscreen using the 'f' key
+def toggle_fullscreen(event=None):
+    is_fullscreen[0] = not is_fullscreen[0]
+    root.attributes("-fullscreen", is_fullscreen[0])
+
+# Bind the 'f' key (lowercase only)
+root.bind("<Control-f>", toggle_fullscreen)
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 # Run the app
 root.mainloop()
