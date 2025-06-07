@@ -32,9 +32,10 @@ MOODS = {
 } #.convert() --> change the pixel format of an image with no arguments, to create a copy that will draw more quickly on the screen
 current_mood = "Calm Night" #sets the initial background mood
 BACKGROUND = pygame.transform.scale(MOODS[current_mood], (screen.get_width(), screen.get_height())) #stretches/shrinks it to match the screen size. ########################################################
-mood_menu_active = False
 mood_options = list(MOODS.keys()) #create a list of the mood names from the MOODS dictionary above
 mood_index = 0
+game_state = 'intro'
+
 # -----------------------------------------------------------------------------------------------------------------------------------
 # load sound effect
 CATCH_SOUND = pygame.mixer.Sound("catch_star/catch_sound.wav") # catching sound
@@ -165,6 +166,7 @@ def draw_intro_screen():
 # -----------------------------------------------------------------------------------------------------------------------------------
 # Draw all the game elements on the screen
 def draw_window():
+  global game_state
   # scale the bg to match the current window size
   scaled_bg = pygame.transform.scale(BACKGROUND, (screen.get_width(), screen.get_height()))
   screen.blit(scaled_bg, (0, 0)) # draw the scaled background
@@ -180,8 +182,9 @@ def draw_window():
 
   # draw the message if active
   display_message()
-  if mood_menu_active: #if it is true, draw the mood menu
+  if game_state == 'mood_menu':
     draw_mood_menu()
+
   pygame.display.update() # update the display to show the changes
 # -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -214,12 +217,11 @@ def handle_resize(event):
 # -----------------------------------------------------------------------------------------------------------------------------------
 
 def main():
-  global player_x, resilience_points, message_display, message_timer, current_message, mood_menu_active, mood_index, current_mood, BACKGROUND, frame_count, stars
-  
+  global player_x, resilience_points, message_display, message_timer, current_message, game_state, mood_index, current_mood, BACKGROUND, frame_count, stars
+
   clock = pygame.time.Clock()
   run = True
   frame_count = 0
-  game_state = 'intro' #game starts in intro state
 
   while run:
     clock.tick(60)
@@ -231,6 +233,10 @@ def main():
       elif event.type == pygame.VIDEORESIZE:
         handle_resize(event) # handle window resizing
       elif event.type == pygame.KEYDOWN: #checks if any key is pressed
+        if event.key == pygame.K_ESCAPE: # if the escape key is pressed
+          pygame.quit()
+          sys.exit()
+
         if game_state == 'intro':
           if event.key == pygame.K_SPACE:
             game_state = 'playing'
@@ -241,7 +247,10 @@ def main():
               pygame.display.set_mode((monitor_size[0], monitor_size[1]), pygame.FULLSCREEN)
             handle_resize(pygame.event.Event(pygame.VIDEORESIZE, {"w": screen.get_width(), "h": screen.get_height()}))
           elif event.key == pygame.K_m:
-            game_state = 'mood_menu' #switch to mood menu from intro
+            if game_state == 'playing' or game_state == 'intro':
+                game_state = 'mood_menu'
+            elif game_state == 'mood_menu':
+                game_state = 'playing'
         elif game_state == 'playing':
           if event.key == pygame.K_f:
             if screen.get_flags() & pygame.FULLSCREEN: # returns the current display flags (like FULLSCREEN RESIZABLE), the & (bitwise AND) checks if FULLSCREEN flag is active
@@ -315,7 +324,6 @@ def main():
       draw_intro_screen()
     elif game_state == 'mood_menu':
       draw_window() # Draw the regular game elements
-      draw_mood_menu()
     else: # game_state == 'playing'
       draw_window()
 
