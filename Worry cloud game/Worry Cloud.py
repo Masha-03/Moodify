@@ -73,11 +73,11 @@ def get_all_worries():
 #paths for my files.
 # Direct paths are used here. Using forward slashes '/' for better cross-platform compatibility
 # with Pygame's loading functions, even on Windows
-MUSIC_PATH = "Worry_cloud/calm_music.wav"
-RAIN_SOUND_PATH = "Worry_cloud/rain_sound.wav"
-BACKGROUND_IMG_PATH = "Worry_cloud/star_bg2.jpg"
-CLOUD_IMG_PATH = "Worry_cloud/cloud.png" #for the worry cloud
-CLOUD2_IMG_PATH = "Worry_cloud/cloud2.png" #for background clouds
+MUSIC_PATH = "Worry cloud game/Worry_cloud/calm_music.wav"
+RAIN_SOUND_PATH = "Worry cloud game/Worry_cloud/rain_sound.wav"
+BACKGROUND_IMG_PATH = "Worry cloud game/Worry_cloud/star_bg2.jpg"
+CLOUD_IMG_PATH = "Worry cloud game/Worry_cloud/cloud.png" #for the worry cloud
+CLOUD2_IMG_PATH = "Worry cloud game/Worry_cloud/cloud2.png" #for background clouds
 
 #play the ambient music.
 #first, check if the music file actually exists.
