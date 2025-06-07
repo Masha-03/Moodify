@@ -111,6 +111,8 @@ def show_entry(selected_date):
 def show_help():
     messagebox.showinfo("Help", "Click on a date to view your diary and mood. Press Ctrl+F to toggle fullscreen.")
 
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
+
 #Track fullscreen state
 is_fullscreen = [False]
 
@@ -119,17 +121,21 @@ def toggle_fullscreen(event=None):
     is_fullscreen[0] = not is_fullscreen[0]
     app.attributes("-fullscreen", is_fullscreen[0])
 
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
+
 #clear the display
 def clear_display():
-    title_display.configure(text="")
-    content_text.configure(state="normal")
-    content_text.delete("1.0", tk.END)
-    content_text.configure(state="disabled")
+    title_display.configure(text="") #clear the title
+    content_text.configure(state="normal") #Makes the Text widget editable.
+    content_text.delete("1.0", tk.END) #Deletes all the text inside the Text widget (content_text)
+    content_text.configure(state="disabled") #Re-disables the text area to prevent user input again.
 
-    mood_display.configure(text="")
+    mood_display.configure(text="") #clear the mood 
     mooddesc_display.configure(state="normal")
-    mooddesc_display.delete("1.0", tk.END)
+    mooddesc_display.delete("1.0", tk.END) #delete all content
     mooddesc_display.configure(state="disabled")
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #to get the date
 def grab_date():
@@ -292,6 +298,7 @@ exit_button.place(relx=0.97, rely=0.04, anchor="ne")
 help_button = ctk.CTkButton(app, text="❓ Help", font=("Segoe UI", 14), fg_color="#5A9BD5", hover_color="#7AB8FF", text_color="white", corner_radius=25, command=show_help)
 help_button.place(relx=0.97, rely=0.09, anchor="ne")
 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 clear_button = ctk.CTkButton(app, text="Clear Display", font=("Arial Rounded MT Bold", 14),
                               fg_color="#E6D6B8", text_color="#333", hover_color="#C0C0C0",

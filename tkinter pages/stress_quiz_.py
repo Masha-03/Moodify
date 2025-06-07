@@ -257,6 +257,8 @@ def update_scroll_region(event=None): #event=None:allow function to be called au
                                                                 #chat_canvas.bbox("all"): Gets the bounding box (min and max x/y coordinates) of everything inside the canvas.
 chat_frame.bind("<Configure>", update_scroll_region)
 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 # Enable scrolling with the mouse wheel
 def on_mousewheel(event):
     chat_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
@@ -328,11 +330,13 @@ def calculate_stress_level():
     save_stress_result(total_score, level.split()[0])  #Use only "Low", "Moderate", "High"
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-
+#animation for button
 def pop_button(button, initial_pady):
     # Move up slightly (reduce pady to top)
     button.pack_configure(pady=(initial_pady[0] - 2, initial_pady[1] + 2))
     root.after(70, lambda: button.pack_configure(pady=initial_pady)) # Move back to original position
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #function to display next question
 def display_next_question(answer=None): #answer=None:parameter that stores the selected answer #if users selected a answer it will pass to a function
@@ -452,6 +456,8 @@ exit_button = ctk.CTkButton(
     command=root.destroy
 )
 exit_button.place(relx=0.97, rely=0.04, anchor="ne")
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 help_button = ctk.CTkButton(root, text="❓ Help", font=("Segoe UI", 14), fg_color="#5A9BD5", hover_color="#7AB8FF", text_color="white", corner_radius=25, command=show_help)
 help_button.place(relx=0.97, rely=0.09, anchor="ne")
