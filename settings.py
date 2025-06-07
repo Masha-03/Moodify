@@ -2,8 +2,19 @@ from numpy import conj
 import pygame
 import sys
 import os
+import subprocess
 import sqlite3
 from tkinter import messagebox 
+import time
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        base_path = sys._MEIPASS  # used by PyInstaller
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 # Constants for screen dimension and colors
 BG_COLOR = (245, 235, 220)
@@ -26,14 +37,12 @@ scale_size = 0.75
 
 male_frames = [
     pygame.transform.scale_by(
-        pygame.image.load(f"male/boy_pixil_frame_{i}.png"), scale_size
-    )
+        pygame.image.load(resource_path(os.path.join(f"male/boy_pixil_frame_{i}.png"))), scale_size)
     for i in range(4)]
 
 female_frames = [
     pygame.transform.scale_by(
-        pygame.image.load(f"female/girl_pixil_frame_{i}.png"), scale_size
-    )
+        pygame.image.load(resource_path(os.path.join(f"female/girl_pixil_frame_{i}.png"))), scale_size)
     for i in range(4)]
 
 # Animation variables
@@ -129,7 +138,6 @@ selected_gender_index = genders.index(gender) if gender in genders else 0
 
 print(f"Current Profile: {profile}")
 print(f"Current Gender: {gender}")
-
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 
@@ -243,11 +251,27 @@ def handle_event(event, rects):
                         rects["gender_dropdown_rect"].height,
                     )
                     if option_rect.collidepoint(mouse_pos):
-                        selected_gender_index = i
+                        selected_gender = genders[i] 
                         gender_dropdown_active = False
-                        #Update in database
-                        update_gender(genders[selected_gender_index]) 
-                        break
+
+                        if selected_gender.lower() != gender.lower():
+                            #Update in database
+                            update_gender(selected_gender)
+                            
+                            #Launch the new gender window then open settings 
+                            if selected_gender.lower().lower() == "male":
+                                subprocess.Popen([sys.executable, "main game code_Male.py", "--open-settings"])
+                            else:
+                                subprocess.Popen([sys.executable, "main game code.py", "--open-settings"])
+                                
+                            #Wait for 3 seconds before closing the window
+                            time.sleep(3)
+                            #Close current Pygame window
+                            pygame.quit()
+
+                            # Exit the current script
+                            sys.exit() 
+                            break
 
             if rects.get("profile_name_input_rect") and rects["profile_name_input_rect"].collidepoint(mouse_pos):
                 input_active = True

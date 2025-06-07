@@ -208,6 +208,11 @@ def create_weekly_charts(profile, container, bg_photo):
 def create_monthly_charts(profile, container, bg_photo):
     for widget in container.winfo_children():
         widget.destroy()
+        
+    #Background picture
+    bg_label = tk.Label(container, image=bg_photo)
+    bg_label.image = bg_photo  # Prevent garbage collection
+    bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
     #Background picture
     bg_label = tk.Label(container, image=bg_photo)
@@ -376,7 +381,7 @@ def create_annual_charts(profile, container, bg_photo):
     # Chart 3: Diary Entries - Line Chart
     _, diary_avg = calculate_monthly_average(dates_diary, diary_counts)
     fig3, ax3 = plt.subplots(figsize=(5, 4))
-    ax3.plot(months, diary_avg, color='#6a5acd', linestyle='--', marker='s')
+    ax3.plot(months, diary_avg, color='#6a5acd', marker='s')
     ax3.set_title("Diary Entries - Annual")
     ax3.set_xticks(range(len(months)))
     ax3.set_xticklabels(months, fontsize=10)
@@ -415,21 +420,11 @@ def main():
     root.state("zoomed")
     root.configure(bg='white')
 
-    #Background picture
-    base_dir= os.path.dirname(os.path.abspath(__file__))
-    bg_image_path = os.path.join(base_dir, "tkinter pages", "dashboard_bg.png")
-    bg_image = Image.open(bg_image_path)  #load pic
-    bg_photo = ImageTk.PhotoImage(bg_image)
-
-    #Wrap sidebar and main_area in a content frame
-    content_frame = tk.Frame(root, bg="white")
-    content_frame.place(relx=0, rely=0, relwidth=1, relheight=1)  # Fills entire window
-
     #Sidebar
-    sidebar = tk.Frame(content_frame, width=200, bg="#2E2E2E")
+    sidebar = tk.Frame(root, width=200, bg="#2E2E2E")
     sidebar.pack(side="left", fill="y")
 
-    tab_label = tk.Label(sidebar, text="VIEW BY", fg="#ffffff", bg="#2E2E2E", font=("Segoe UI", 14, "bold"))
+    tab_label = tk.Label(sidebar, text="VIEW BY", fg="#ffffff", bg="#545454", font=("Segoe UI", 14, "bold"))
     tab_label.pack(pady=20)
     
     #Main area for charts
@@ -467,7 +462,7 @@ def main():
         #Ceate sidebar buttons
         for tab in ["Weekly", "Monthly", "Annual"]:
             btn = tk.Button(
-                sidebar, text=tab, fg="#ffffff", bg="#3C3C3C", relief="flat", font=("Segoe UI", 12), width=18, height=2, activebackground="#5C5C5C"
+                sidebar, text=tab, fg="#ffffff", bg="#545454", relief="flat", font=("Segoe UI", 12), width=18, height=2, activebackground="#5C5C5C"
             )
             btn.pack(pady=10)
             btn.bind("<Enter>", on_hover)

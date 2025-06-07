@@ -1220,6 +1220,9 @@ button_style = {
 ################################################################################################################################################################################
 
 def clear_app_widgets():
+    if not app.winfo_exists():
+        return 
+    
     for widget in app.winfo_children():
         widget.destroy()
 
@@ -1289,7 +1292,9 @@ def open_4_7_4():
     
     global main_frame
     main_frame = ctk.CTkFrame(app, fg_color="#f3f3f3", corner_radius=20)
-    main_frame.pack(expand=True, fill="both", padx=40, pady=20)
+    if app.winfo_exists():
+        main_frame.pack(expand=True, fill="both", padx=40, pady=20)
+    
     
     #Load and set the background image
     base_dir= os.path.dirname(os.path.abspath(__file__))
@@ -1307,8 +1312,9 @@ def open_4_7_4():
     bg_label.lower()
     
     # Then create timer inside main_frame
-    page = Timer474(main_frame, back_callback=go_home)
-    page.pack(expand=True, fill="both")
+    if app.winfo_exists():
+        page = Timer474(main_frame, back_callback=go_home)
+        page.pack(expand=True, fill="both")
     
 def open_5_5():
     if not app.winfo_exists():
@@ -1319,7 +1325,8 @@ def open_5_5():
     
     global main_frame
     main_frame = ctk.CTkFrame(app, fg_color="#f3f3f3", corner_radius=20)
-    main_frame.pack(expand=True, fill="both", padx=40, pady=20)
+    if app.winfo_exists():
+        main_frame.pack(expand=True, fill="both", padx=40, pady=20)
     
     #Load and set the background image
     base_dir= os.path.dirname(os.path.abspath(__file__))
@@ -1337,8 +1344,9 @@ def open_5_5():
     bg_label.lower()
     
     # Then create timer inside main_frame
-    page = Timer5_5(main_frame, back_callback=go_home)
-    page.pack(expand=True, fill="both")
+    if app.winfo_exists():
+        page = Timer5_5(main_frame, back_callback=go_home)
+        page.pack(expand=True, fill="both")
     
 def open_4_7_8(): 
     if not app.winfo_exists():
@@ -1349,7 +1357,8 @@ def open_4_7_8():
     
     global main_frame
     main_frame = ctk.CTkFrame(app, fg_color="#f3f3f3", corner_radius=20)
-    main_frame.pack(expand=True, fill="both", padx=40, pady=20)
+    if app.winfo_exists():
+        main_frame.pack(expand=True, fill="both", padx=40, pady=20)
     
     #Load and set the background image
     base_dir= os.path.dirname(os.path.abspath(__file__))
@@ -1367,8 +1376,12 @@ def open_4_7_8():
     bg_label.lower()
     
     # Then create timer inside main_frame
-    page = Timer478(main_frame, back_callback=go_home)
-    page.pack(expand=True, fill="both")
+    if app.winfo_exists():
+        page = Timer478(main_frame, back_callback=go_home)
+        try:
+            page.pack(expand=True, fill="both")
+        except tk.TclError:
+            print("Widget was destroyed before packing.")
     
 def open_2to1(): 
     if not app.winfo_exists():
@@ -1379,7 +1392,8 @@ def open_2to1():
     
     global main_frame
     main_frame = ctk.CTkFrame(app, fg_color="#f3f3f3", corner_radius=20)
-    main_frame.pack(expand=True, fill="both", padx=40, pady=20)
+    if app.winfo_exists():
+        main_frame.pack(expand=True, fill="both", padx=40, pady=20)
     
     #Load and set the background image
     base_dir= os.path.dirname(os.path.abspath(__file__))
@@ -1397,8 +1411,9 @@ def open_2to1():
     bg_label.lower()
     
     # Then create timer inside main_frame
-    page = Timer2to1(main_frame, back_callback=go_home)
-    page.pack(expand=True, fill="both")
+    if app.winfo_exists():
+        page = Timer2to1(main_frame, back_callback=go_home)
+        page.pack(expand=True, fill="both")
 
 ################################################################################################################################################################################
 

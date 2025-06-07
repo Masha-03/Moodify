@@ -5,6 +5,10 @@ from tkinter import messagebox #for show pop-up message
 import requests #getting data from API
 import tkinter.font as tkfont #use to import font module from tkinter library
 import sqlite3
+import os
+from PIL import Image, ImageTk
+import customtkinter as ctk
+from datetime import datetime
 
 #counts how many words are in the diary
 def word_count(event=None): #event=None:means it can be called with/without event
@@ -42,7 +46,23 @@ def update_font():
     chosen_font = selected_font.get()
     text_entry.configure(font=(chosen_font, 12))
     smalltitle_entry.configure(font=(chosen_font,12)) #let the smalltitle can change the font too
+
+def clear_entry():
+    text_entry.delete("1.0", "end")
+    smalltitle_entry.delete(0, "end")
+    word_count_label.config(text="0 words")
     
+def show_help():
+    messagebox.showinfo("Help", "Write your diary entry, choose a font, and click Save. Press Ctrl+F to toggle fullscreen.")
+
+def auto_save_reminder():
+    messagebox.showinfo("Reminder", "Don't forget to save your diary entry!")
+    root.after(600000, auto_save_reminder)  # every 10 minutes
+
+def insert_timestamp():
+    now = datetime.now().strftime("%B %d, %Y")
+    text_entry.insert(tk.END, f"\n[{now}] ")
+
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
 
 #Get profile from the database
@@ -132,6 +152,10 @@ def save_entry():
     #Close connection
     connect.close()
 
+def get_image_path(filename):
+    # This gets the path of the current Python file
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, filename)
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #main window
@@ -139,6 +163,16 @@ root=tk.Tk()
 root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}") #Full-screen size
 root.title("Diary📖")
 root.configure(bg="#fdf6f0")
+
+# Load and set background image
+base_dir = os.path.dirname(os.path.abspath(__file__)) 
+bg_image_path = os.path.join(base_dir, "diary_bg.png") 
+bg_image=Image.open(bg_image_path)
+bg_image = bg_image.resize((root.winfo_screenwidth(), root.winfo_screenheight()), Image.Resampling.LANCZOS)
+bg_photo = ImageTk.PhotoImage(bg_image)
+
+bg_label = tk.Label(root, image=bg_photo)
+bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -174,6 +208,7 @@ promts_label.pack(side="left",pady=(10,10))
 #while button clicked the prompts will refresh
 refresh_button=tk.Button(prompts_frame, text="New Prompt", command=refresh_prompts, font=("Comic Sans MS",10), bg="#b5d5ff", fg="#333",relief="groove")
 refresh_button.pack(side="left")
+
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
 #About adjust the position of current date and weather
@@ -232,6 +267,12 @@ font_selection = tk.OptionMenu(font_frame, selected_font, *available_fonts, comm
 font_selection.config(font=("Times New Roman", 12)) #set the font of the optionmenu itself
 font_selection.pack(side="left", pady=(0,10))
 
+#------------------------------------------------------------------------------------------------------------------------------------------------#
+clear_button = tk.Button(font_frame, text="Clear Entry", command=clear_entry, font=("Comic Sans MS", 10), bg="#ffd3d3", fg="#333")
+clear_button.pack(side="left", padx=10, pady=(0,10))
+
+timestamp_button = tk.Button(font_frame, text="Insert Timestamp", font=("Comic Sans MS", 10), command=insert_timestamp)
+timestamp_button.pack(side="left", padx=10, pady=(0,10))
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
 #About main text entry
 
@@ -261,6 +302,38 @@ save_button.pack(pady=1)
 #connect the text box to word counter
 text_entry.bind("<KeyRelease>", word_count) #everytime type/delete something,it triggers word_count #<KeyRelease>=when a key is pressed(event binding system from tkinter library)
 
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
+
+#Track fullscreen state
+is_fullscreen = [False]
+
+# Toggle fullscreen using the 'f' key
+def toggle_fullscreen(event=None):
+    is_fullscreen[0] = not is_fullscreen[0]
+    root.attributes("-fullscreen", is_fullscreen[0])
+
+# Bind the 'f' key (lowercase only)
+root.bind("<Control-f>", toggle_fullscreen)
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#exit button incase the ctrl+f key doesnt works
+exit_button = ctk.CTkButton(
+    root,
+    text="❌ Exit",
+    font=("Segoe UI", 14),
+    fg_color="#FF5151",
+    hover_color="#FF6A6A",
+    text_color="white",
+    corner_radius=25,
+    command=root.destroy
+)
+exit_button.place(relx=0.97, rely=0.04, anchor="ne")
+
+help_button = tk.Button(root, text="Help ❓", command=show_help, font=("Comic Sans MS", 10), bg="#ff770e", fg="white")
+help_button.place(relx=0.97, rely=0.09, anchor="ne")
+
+# Start auto reminder
+root.after(600000, auto_save_reminder)
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
 
 #run the whole program

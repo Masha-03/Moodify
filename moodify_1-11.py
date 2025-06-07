@@ -4,7 +4,9 @@ import sqlite3
 from tkinter import messagebox #To show popup boxes
 from PIL import Image, ImageTk #Handle and display images
 import os
+import sys
 import subprocess
+import time
 
 # Find the folder where the current Python file is
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -44,7 +46,7 @@ screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
 
 #Load and resize image to fill the screen
-bg_image = Image.open("intro_bg.png")
+bg_image = Image.open("graphics/intro_bg.png")
 bg_image = bg_image.resize((screen_width, screen_height))
 #Converts image into a format Tkinter can use
 bg_photo = ImageTk.PhotoImage(bg_image)
@@ -142,9 +144,12 @@ def enter_data():
         #Close connection
         connect.close()
 
+        subprocess.Popen([sys.executable, "tkinter pages/instruction_page_.py"])
+        #Wait for 3 seconds before closing the window
+        time.sleep(3)
         #Close the current Tkinter window
         root.destroy()
-        subprocess.Popen(["python3", "instruction_page_.py"])  
+          
     
 #Submit button   
 button = tk.Button(main_frame, text="SUBMIT",font=label_font, bg=button_color, width=20, command= enter_data)  
