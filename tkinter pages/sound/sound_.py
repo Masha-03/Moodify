@@ -4,6 +4,7 @@ from PIL import Image,ImageTk
 import pygame #for pygame.mixer and inside the progress bar(handle audio playback and get current position of the song)
 import os
 import customtkinter as ctk
+from tkinter import messagebox
 
 #initialize pygame mixer
 pygame.mixer.init()
@@ -23,6 +24,42 @@ def resize_image(image_name, size=(40,40)):
     img=Image.open(image_path)
     img=img.resize(size, Image.Resampling.LANCZOS) #Resampling=process of changing size of an image #LANCZOS=high quality resizing
     return ImageTk.PhotoImage(img)
+
+def show_help():
+    messagebox.showinfo("Help", "Use Left ← and Right → arrow keys to navigate sounds. Use Space to play and pause the sounds.")
+
+is_muted = [False]  # use a list to modify inside functions
+
+def toggle_mute():
+    if is_muted[0]:
+        volume_control.set(50)  # restore volume to 50%
+        set_volume("50")
+        is_muted[0] = False
+        button_mute.config(text="🔊 Unmute")  # speaker emoji
+    else:
+        volume_control.set(0)
+        set_volume("0")
+        is_muted[0] = True
+        button_mute.config(text="🔇 Mute")  # muted emoji
+
+def create_tooltip(widget, text):
+    tooltip = tk.Toplevel(widget)
+    tooltip.withdraw()
+    tooltip.overrideredirect(True)
+    label = tk.Label(tooltip, text=text, bg="yellow", relief="solid", borderwidth=1, font=("Segoe UI", 8))
+    label.pack()
+
+    def enter(event):
+        x = event.widget.winfo_rootx() + 20
+        y = event.widget.winfo_rooty() + 20
+        tooltip.geometry(f"+{x}+{y}")
+        tooltip.deiconify()
+
+    def leave(event):
+        tooltip.withdraw()
+
+    widget.bind("<Enter>", enter)
+    widget.bind("<Leave>", leave)
 
 #----------------------------------------------------------------------------------------------------------------------#
 #import sound from file
@@ -186,14 +223,6 @@ bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 title=tk.Label(root,text="Relax Soothing Sound Player🎶", font=("Segoe UI", 18, "bold"),bg="#d9e9df",fg="black")
 title.pack(pady=(10,5)) #pady=(10,5)adds vertical spacing above and below.
 
-#------------------------------------------------------------------------------------------------------------------------#
-#tips label to let users know the keyboard shortcut
-tips_label = tk.Label(root, 
-                      text="Tip: 1. Use Left ← and Right → arrow keys to navigate sounds.\n"
-                           "2. Use Space to play and pause the sounds.",
-                      font=("Arial", 10, "italic"),bg="#d9e9df", fg="blue")
-tips_label.pack(pady=(5,0))
-
 #----------------------------------------------------------------------------------------------------------------------#
 
 #frame to hold center and volume(right)
@@ -284,6 +313,12 @@ button_next = create_button(button_frame, next_image, next_sound)
 button_next.grid(row=0, column=4, padx=10, pady=5)
 
 
+#for the tooltips
+create_tooltip(button_play, "Play the selected sound")
+create_tooltip(button_pause, "Pause playback")
+create_tooltip(button_stop, "Stop playback")
+create_tooltip(button_next, "Next sound")
+create_tooltip(button_previous, "Previous sound")
 #----------------------------------------------------------------------------------------------------------------------#
 #VOLUME CONTROL
 
@@ -297,6 +332,12 @@ volume_label.pack()
 volume_control = tk.Scale(volume_frame, from_=0, to=100, resolution=1, orient="vertical", command=set_volume,bg="#d9e9df", fg="#5e7f68", troughcolor="#7fa06a", width=15, sliderlength=20)
 volume_control.set(50) #set default volume position to 50,like when users open this window the volume will be at 50
 volume_control.pack()
+
+button_mute = tk.Button(volume_frame, text="🔊 Unmute", font=("Segoe UI", 11), bg="#78a45c", relief="groove", command=toggle_mute, cursor="hand2")
+button_mute.pack(pady=5)
+
+button_mute.bind("<Enter>", lambda e: button_mute.config(bg="#a9c58d"))
+button_mute.bind("<Leave>", lambda e: button_mute.config(bg="#78a45c"))
 
 # Set pygame mixer volume to default slider value
 pygame.mixer.music.set_volume(0.5)
@@ -338,6 +379,10 @@ exit_button = ctk.CTkButton(
     command=root.destroy
 )
 exit_button.place(relx=0.97, rely=0.04, anchor="ne")
+
+help_button = tk.Button(root, text="Help ❓", command=show_help, font=("Comic Sans MS", 10), bg="#ff770e", fg="white")
+help_button.place(relx=0.85, rely=0.04, anchor="ne")
+
 #-----------------------------------------------------------------------------------------------------------------------#
 
 #the whole program run
