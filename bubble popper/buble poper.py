@@ -1,16 +1,26 @@
 import pygame
 import random
 import sys
-import time
-import subprocess
+import os
 
 calming_words = [
     "Fail", "Weak", "Loser", "Alone", "Broken",
     "Fake", "Empty", "Lost", "Stuck", "Worthless"
 ]
 
+#resource path for PyInstaller compatibility
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS  # used by PyInstaller to get the temporary directory
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
 # Initialize Pygame
 pygame.init()
+pygame.mixer.init() 
+
 word_font = pygame.font.SysFont(None, 28)  # font for the words in the bubble
 
 # Screen settings
@@ -46,11 +56,19 @@ PARTICLE_COUNT = 50
 pop_sounds = []
 for i in range(1, 5):
     try:
-        sound = pygame.mixer.Sound(f"bubble sound/pop{i}.wav")  # load sound files
+        sound = pygame.mixer.Sound(resource_path(f"bubble popper/bubble sound/pop{i}.wav"))  # load sound files ##
         sound.set_volume(1.0)  # setting volume to max
         pop_sounds.append(sound)  # add to the list
     except:
         print(f"not playing pop{i}.wav")  # shows if the sound is not playing because file missing
+
+# Background music ##
+try: ##
+    pygame.mixer.music.load(resource_path("bubble popper/playground.wav"))  # Load background music ##
+    pygame.mixer.music.set_volume(0.5)  # Set initial volume for background music ##
+    pygame.mixer.music.play(-1)  # Play indefinitely ##
+except pygame.error as e: ##
+    print(f"Could not load or play background music: {e}") ##
 
 def show_loading_screen():
     screen.fill(LOADING_COLOR)  # Fill with light blue
