@@ -1,15 +1,90 @@
 import pygame
 import os
 import random
-pygame.init() #gotta start pygame
+import sqlite3
+from datetime import datetime
+import os
+import sys
+pygame.init()
 
-#paths for my files. need to make sure 'worry_cloud' folder is there.
-MUSIC_PATH = os.path.join("Worry_cloud", "calm_music.wav")
-RAIN_SOUND_PATH = os.path.join("Worry_cloud", "rain_sound.wav")
-# Keeping the background as star_bg2.jpg 
-BACKGROUND_IMG_PATH = os.path.join("Worry_cloud", "star_bg2.jpg")
-CLOUD_IMG_PATH = os.path.join("Worry_cloud", "cloud.png") #for the worry cloud
-CLOUD2_IMG_PATH = os.path.join("Worry_cloud", "cloud2.png") #for background clouds
+# #------------------------------------------------------------------------------------------ database code #------------------------------------------------------------------------------
+
+DB_NAME = "moodify_database.db"
+RECENT_WORRIES_DISPLAY_COUNT = 3
+
+def setup_database():
+    """Connects to the SQLite database and creates the worries table if it doesn't exist."""
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute('''
+           CREATE TABLE IF NOT EXISTS worries (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        worry_text TEXT,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+        ''')
+        conn.commit()
+        conn.close()
+    except sqlite3.Error as e:
+        print(f"SQLite database setup error: {e}")
+
+def save_worry_to_db(worry_text):
+    """Saves a worry text to the database."""
+    if not worry_text.strip(): #dont save empty worries
+        return
+
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO worries (worry_text) VALUES (?)", (worry_text,))
+        conn.commit()
+        conn.close()
+    except sqlite3.Error as e:
+        print(f"SQLite save error: {e}")
+
+def get_latest_worries(count=RECENT_WORRIES_DISPLAY_COUNT):
+    """Retrieves the latest 'count' worries from the database."""
+    worries_list = []
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute("SELECT worry_text, timestamp FROM worries ORDER BY timestamp DESC LIMIT ?", (count,))
+        worries_list = cursor.fetchall()
+        conn.close()
+    except sqlite3.Error as e:
+        print(f"SQLite fetch error: {e}")
+    return worries_list
+
+def get_all_worries():
+    """Retrieves all worries from the database."""
+    worries_list = []
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute("SELECT worry_text, timestamp FROM worries ORDER BY timestamp DESC") # No LIMIT here
+        worries_list = cursor.fetchall()
+        conn.close()
+    except sqlite3.Error as e:
+        print(f"SQLite fetch all error: {e}")
+    return worries_list
+
+# #----------------------------------------------------------------------------- database code #------------------------------------------------------------------------------------------
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        base_path = sys._MEIPASS  # used by PyInstaller
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+MUSIC_PATH = resource_path("Worry cloud game/Worry_cloud/calm_music.wav")
+RAIN_SOUND_PATH = resource_path("Worry cloud game/Worry_cloud/rain_sound.wav")
+BACKGROUND_IMG_PATH = resource_path("Worry cloud game/Worry_cloud/star_bg2.jpg")
+CLOUD_IMG_PATH = resource_path("Worry cloud game/Worry_cloud/cloud.png") #for the worry cloud
+CLOUD2_IMG_PATH = resource_path("Worry cloud game/Worry_cloud/cloud2.png") #for background clouds
 
 #play the ambient music.
 #first, check if the music file actually exists.
@@ -276,9 +351,9 @@ running = True #main loop flag
 while running:
     #handle all events (mouse clicks, key presses, etc.)
     for event in pygame.event.get():
-        if event.type == pygame.QUIT: #if i click the close button
+        if event.type == pygame.QUIT: #click the close button
             running = False
-
+        
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1: #left mouse button
                 if input_box.collidepoint(event.pos): #did i click inside the input box?
@@ -293,33 +368,138 @@ while running:
                     release_worry(text) #call the function to handle releasing
 
         elif event.type == pygame.KEYDOWN: #a key was pressed
-            if active: #only if the input box is active
-                if event.key == pygame.K_BACKSPACE:
-                    text = text[:-1] #delete last character
-                    cursor_timer = 0 #reset cursor blink
-                    cursor_visible = True
-                elif event.key == pygame.K_RETURN: #if i press enter
-                     # Check for Shift+Enter for new line, otherwise release
-                     # Note: This basic implementation doesn't visually wrap text in the box
-                     if event.mod & pygame.KMOD_SHIFT:
-                         # Add a newline character if within limit
-                         if len(text) < MAX_INPUT_CHARS:
-                              text += '\n'
-                         cursor_timer = 0
-                         cursor_visible = True
-                     elif text.strip(): # Only release if there's non-whitespace text
-                         release_worry(text) #call the function to handle releasing
+            if GAME_STATE == "MAIN_GAME":
+                if event.key == pygame.K_ESCAPE: #if the player presses the escape key
+                    running = False
+                if active: #only if the input box is active
+                    # Clear prompt when user types
+                    if show_prompts and current_prompt:
+                        current_prompt = ""
+                    
+                    if event.key == pygame.K_BACKSPACE:
+                        text = text[:-1] #delete last character
+                        cursor_timer = 0 #reset cursor blink
+                        cursor_visible = True
+                    elif event.key == pygame.K_RETURN: #if i press enter
+                        # Check for Shift+Enter for new line, otherwise release
+                        if event.mod & pygame.KMOD_SHIFT:
+                            # Add a newline character if within limit
+                            if len(text) < MAX_INPUT_CHARS:
+                                text += '\n'
+                            cursor_timer = 0
+                            cursor_visible = True
+                        elif text.strip(): # Only release if there's non-whitespace text
+                            release_worry(text) #call the function to handle releasing
+                            # After releasing, if prompts are enabled, immediately get a new one
+                            if show_prompts:
+                                get_new_prompt()
+                                prompt_display_timer = 0
 
-                else:
-                    #add typed character to my text, but limit length
-                    if len(text) < MAX_INPUT_CHARS: # Use the increased limit
-                        text += event.unicode
-                    cursor_timer = 0 #reset cursor blink
-                    cursor_visible = True
+                    else:
+                        #add typed character to my text, but limit length
+                        if len(text) < MAX_INPUT_CHARS: # Use the increased limit
+                            text += event.unicode
+                        cursor_timer = 0 #reset cursor blink
+                        cursor_visible = True
+                
+                # Toggle fullscreen with 'f' key, but only if input box is not active
+                if event.key == pygame.K_f and not active:
+                    toggle_fullscreen()
 
-            # Removed the music toggle ('m' key) functionality as requested
-            # if event.key == pygame.K_m: #'m' key for music toggle
-            #     ... (removed)
+            elif GAME_STATE == "HISTORY_SCREEN":
+                # Allow 'Escape' or 'Backspace' to go back from history
+                if event.key == pygame.K_ESCAPE or event.key == pygame.K_BACKSPACE:
+                    GAME_STATE = "MAIN_GAME"
+                # Scroll with Up/Down arrows
+                elif event.key == pygame.K_UP:
+                    history_scroll_offset = max(0, history_scroll_offset - 1)
+                elif event.key == pygame.K_DOWN:
+                    max_scroll_offset = max(0, len(all_worries_history) - int(HISTORY_DISPLAY_AREA.height / HISTORY_LINE_HEIGHT))
+                    history_scroll_offset = min(max_scroll_offset, history_scroll_offset + 1)
+
+
+        # handle window resize event
+        elif event.type == pygame.VIDEORESIZE:
+            if not is_fullscreen: # if not in fullscreen, assume manual resize
+                screen_width, screen_height = event.w, event.h
+                screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE) # Update screen object
+                
+                #recalculate scaling factors
+                scale_x = screen_width / original_screen_width
+                scale_y = screen_height / original_screen_height
+
+                background = pygame.transform.smoothscale(pygame.image.load(BACKGROUND_IMG_PATH).convert(), (screen_width, screen_height))
+                
+                # Re-scale fonts
+                try:
+                    font = pygame.font.Font(None, int(48 * min(scale_x, scale_y)))
+                    small_font = pygame.font.Font(None, int(36 * min(scale_x, scale_y)))
+                    input_text_font = pygame.font.Font(None, int(22 * min(scale_x, scale_y)))
+                    history_font = pygame.font.Font(None, int(20 * min(scale_x, scale_y)))
+                except pygame.error as e:
+                    print(f"problem loading default font during manual resize: {e}. using system font.")
+                    font = pygame.font.SysFont(None, int(48 * min(scale_x, scale_y)))
+                    small_font = pygame.font.SysFont(None, int(36 * min(scale_x, scale_y)))
+                    input_text_font = pygame.font.SysFont(None, int(22 * min(scale_x, scale_y)))
+                    history_font = pygame.font.SysFont(None, int(20 * min(scale_x, scale_y)))
+
+                # Re-position/re-size input box and button
+                input_box_width = int(500 * scale_x)
+                input_box_height = int(200 * scale_y)
+                input_box.update(
+                    (screen_width - input_box_width) // 2,
+                    (screen_height - input_box_height) // 2,
+                    input_box_width,
+                    input_box_height
+                )
+
+                button_width = int(150 * scale_x)
+                button_height = int(50 * scale_y)
+                button_rect.update(
+                    (screen_width - button_width) // 2,
+                    input_box.bottom + int(30 * scale_y),
+                    button_width,
+                    button_height
+                )
+                button_text_render = font.render("Release", True, black)
+
+                # Re-position/re-size View History Button
+                view_history_button_width = int(200 * scale_x)
+                view_history_button_height = int(50 * scale_y)
+                view_history_button_rect.update(
+                    int(screen_width * 0.05),
+                    screen_height - view_history_button_height - int(20 * scale_y),
+                    view_history_button_width,
+                    view_history_button_height
+                )
+                view_history_text_render = small_font.render("View History", True, black)
+
+                # Re-position/re-size Back Button
+                back_button_width = int(150 * scale_x)
+                back_button_height = int(50 * scale_y)
+                back_button_rect.update(
+                    int(screen_width * 0.05),
+                    int(20 * scale_y),
+                    back_button_width,
+                    back_button_height
+                )
+                back_button_text_render = small_font.render("Back", True, black)
+
+
+                # Re-initialize stars and background clouds for new scaled positions/speeds
+                stars = [Star() for _ in range(150)]
+                background_clouds = [BackgroundCloud() for _ in range(7)]
+                
+                # Update current prompt text if it's visible, to ensure it's re-rendered with new font size
+                if show_prompts and not active and not text.strip():
+                    get_new_prompt()
+                prompt_display_timer = 0
+                
+                # --- Database Integration: Re-fetch worries on resize ---
+                latest_worries_for_display = get_latest_worries()
+                update_history_display_variables()
+                if GAME_STATE == "HISTORY_SCREEN":
+                    all_worries_history = get_all_worries()
 
 
     #update blinking cursor logic
