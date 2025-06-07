@@ -6,6 +6,7 @@ import datetime
 import sqlite3
 import os
 import customtkinter as ctk
+import datetime
 
 mood_quotes = {
     "Happy": "Keep shining, the world needs your light!",
@@ -99,6 +100,30 @@ def save_mood():
         messagebox.showwarning("No Mood Selected", "Please select a mood before saving.")
         
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
+def clear_entry():
+    text_entry.delete("1.0", "end")
+    global selected_mood
+    selected_mood = ""
+    # Optionally reset background to default
+    root.configure(bg="#fdf6f0")
+    title.configure(bg="#fdf6f0")
+    ask_user_label.configure(bg="#fdf6f0")
+    label.configure(bg="#fdf6f0")
+    frame_button.configure(bg="#FCF8E8")
+    for button in emoji_buttons:
+        button.configure(bg="#ffe0e0")
+
+def show_help():
+    messagebox.showinfo("Help", "Select your mood by clicking an emoji or type your mood in the box. You can press the *Insert Timestamp* button to insert current time. Then click 'Save Mood'. Press Ctrl+F to toggle fullscreen.")
+
+def update_word_count(event=None):
+    text = text_entry.get("1.0", "end").strip()
+    words = len(text.split()) if text else 0
+    word_count_label.config(text=f"Words: {words}")
+
+def insert_timestamp():
+    now = datetime.datetime.now().strftime("%B %d, %Y")
+    text_entry.insert(tk.END, f"\n[{now}] ")
 
 #function to handle the button click
 def set_mood(mood):
@@ -134,6 +159,7 @@ def set_mood(mood):
     label.configure(bg=bg_colour)
     text_entry.configure(bg="white", fg="#000")  #keep text box simple
     frame_button.configure(bg=bg_colour)
+    word_count_label.configure(bg=bg_colour)
 
     #update all buttons to match the theme
     for button in emoji_buttons:
@@ -232,6 +258,12 @@ label=tk.Label(root,text="Choose a button or describe your mood inside the blank
 label.pack(pady=(7,5))      
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
+word_count_label = tk.Label(root, text="Words: 0", font=("Comic Sans MS", 10), bg="#fdf6f0", fg="#555")
+word_count_label.pack()
+
+text_entry.bind("<KeyRelease>", update_word_count)
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #save Button to save the mood
 save_button = tk.Button(root, text="Save Mood", font=("Comic Sans MS", 12), bg="white", relief="groove", command=save_mood)
@@ -268,6 +300,15 @@ exit_button = ctk.CTkButton(
     command=root.destroy
 )
 exit_button.place(relx=0.97, rely=0.04, anchor="ne")
+
+clear_button = tk.Button(root, text="Clear Entry", font=("Comic Sans MS", 10), bg="#ffd3d3", command=clear_entry)
+clear_button.place(relx=0.97, rely=0.19, anchor="ne")
+
+timestamp_button = tk.Button(root, text="Insert Timestamp", font=("Comic Sans MS", 10), command=insert_timestamp)
+timestamp_button.place(relx=0.97, rely=0.14, anchor="ne")
+
+help_button = ctk.CTkButton(root, text="❓ Help", font=("Segoe UI", 14), fg_color="#5A9BD5", hover_color="#7AB8FF", text_color="white", corner_radius=25, command=show_help)
+help_button.place(relx=0.97, rely=0.09, anchor="ne")
 #--------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #run the whole program

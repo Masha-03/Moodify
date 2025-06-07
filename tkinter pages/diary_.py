@@ -8,6 +8,7 @@ import sqlite3
 import os
 from PIL import Image, ImageTk
 import customtkinter as ctk
+from datetime import datetime
 
 #counts how many words are in the diary
 def word_count(event=None): #event=None:means it can be called with/without event
@@ -45,7 +46,23 @@ def update_font():
     chosen_font = selected_font.get()
     text_entry.configure(font=(chosen_font, 12))
     smalltitle_entry.configure(font=(chosen_font,12)) #let the smalltitle can change the font too
+
+def clear_entry():
+    text_entry.delete("1.0", "end")
+    smalltitle_entry.delete(0, "end")
+    word_count_label.config(text="0 words")
     
+def show_help():
+    messagebox.showinfo("Help", "Write your diary entry, choose a font, and click Save. Press Ctrl+F to toggle fullscreen.")
+
+def auto_save_reminder():
+    messagebox.showinfo("Reminder", "Don't forget to save your diary entry!")
+    root.after(600000, auto_save_reminder)  # every 10 minutes
+
+def insert_timestamp():
+    now = datetime.now().strftime("%B %d, %Y")
+    text_entry.insert(tk.END, f"\n[{now}] ")
+
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
 
 #Get profile from the database
@@ -192,6 +209,7 @@ promts_label.pack(side="left",pady=(10,10))
 refresh_button=tk.Button(prompts_frame, text="New Prompt", command=refresh_prompts, font=("Comic Sans MS",10), bg="#b5d5ff", fg="#333",relief="groove")
 refresh_button.pack(side="left")
 
+
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
 #About adjust the position of current date and weather
 
@@ -249,6 +267,12 @@ font_selection = tk.OptionMenu(font_frame, selected_font, *available_fonts, comm
 font_selection.config(font=("Times New Roman", 12)) #set the font of the optionmenu itself
 font_selection.pack(side="left", pady=(0,10))
 
+#------------------------------------------------------------------------------------------------------------------------------------------------#
+clear_button = tk.Button(font_frame, text="Clear Entry", command=clear_entry, font=("Comic Sans MS", 10), bg="#ffd3d3", fg="#333")
+clear_button.pack(side="left", padx=10, pady=(0,10))
+
+timestamp_button = tk.Button(font_frame, text="Insert Timestamp", font=("Comic Sans MS", 10), command=insert_timestamp)
+timestamp_button.pack(side="left", padx=10, pady=(0,10))
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
 #About main text entry
 
@@ -304,6 +328,12 @@ exit_button = ctk.CTkButton(
     command=root.destroy
 )
 exit_button.place(relx=0.97, rely=0.04, anchor="ne")
+
+help_button = tk.Button(root, text="Help ❓", command=show_help, font=("Comic Sans MS", 10), bg="#ff770e", fg="white")
+help_button.place(relx=0.97, rely=0.09, anchor="ne")
+
+# Start auto reminder
+root.after(600000, auto_save_reminder)
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
 
 #run the whole program

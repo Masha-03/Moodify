@@ -87,6 +87,9 @@ def get_image_path(filename):
     base_path = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base_path, filename)
 
+def scroll_to_top():
+    canvas.yview_moveto(0)
+
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #Tkinter instruction window
@@ -272,6 +275,18 @@ exit_button = ctk.CTkButton(
     command=root.destroy
 )
 exit_button.place(relx=0.97, rely=0.07, anchor="ne")
+
+back_to_top_btn = ctk.CTkButton(
+    root,
+    text="⬆ Back to Top",
+    font=("Segoe UI", 14),
+    fg_color="#48A9FF",
+    hover_color="#6FC8FF",
+    text_color="white",
+    corner_radius=25,
+    command=scroll_to_top
+)
+back_to_top_btn.place(relx=0.97, rely=0.84, anchor="se")
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Run the app
