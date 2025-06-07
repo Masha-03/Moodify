@@ -7,6 +7,7 @@ import tkinter.font as tkfont #use to import font module from tkinter library
 import sqlite3
 import os
 from PIL import Image, ImageTk
+import customtkinter as ctk
 
 #counts how many words are in the diary
 def word_count(event=None): #event=None:means it can be called with/without event
@@ -290,6 +291,19 @@ def toggle_fullscreen(event=None):
 # Bind the 'f' key (lowercase only)
 root.bind("<Control-f>", toggle_fullscreen)
 
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#exit button incase the ctrl+f key doesnt works
+exit_button = ctk.CTkButton(
+    root,
+    text="❌ Exit",
+    font=("Segoe UI", 14),
+    fg_color="#FF5151",
+    hover_color="#FF6A6A",
+    text_color="white",
+    corner_radius=25,
+    command=root.destroy
+)
+exit_button.place(relx=0.97, rely=0.04, anchor="ne")
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
 
 #run the whole program

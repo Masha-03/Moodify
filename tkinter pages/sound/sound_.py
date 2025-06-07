@@ -33,7 +33,9 @@ song_dict={
     "Ocean waves sounds": os.path.join(AUDIO_DIR, "ocean.mp3"),
     "Spring sounds": os.path.join(AUDIO_DIR, "bird.mp3"),
     "Clicking keyboard sounds": os.path.join(AUDIO_DIR, "keyboard.mp3"),
-    "Waterfall sounds": os.path.join(AUDIO_DIR, "waterfall.mp3")
+    "Waterfall sounds": os.path.join(AUDIO_DIR, "waterfall.mp3"),
+    "Morning in forest": os.path.join(AUDIO_DIR, "forest.mp3"),
+    "Calm piano": os.path.join(AUDIO_DIR, "calm_piano.mp3")
 }
 
 #----------------------------------------------------------------------------------------------------------------------#
@@ -53,7 +55,17 @@ def update_progress_bar():
     
     #check if a song is playing
     if is_playing:
-        current_position = pygame.mixer.music.get_pos()  #get the current position (in milliseconds)
+        current_position = pygame.mixer.music.get_pos()  # milliseconds
+
+        elapsed_seconds = int(current_position / 1000)
+        elapsed_minutes = elapsed_seconds // 60
+        elapsed_seconds = elapsed_seconds % 60
+
+        total_seconds = int(current_duration / 1000)
+        total_minutes = total_seconds // 60
+        total_seconds = total_seconds % 60
+
+        duration_label.config(text=f"{elapsed_minutes:02}:{elapsed_seconds:02} / {total_minutes:02}:{total_seconds:02}")
         
         #calculate progress percentage(the green line)(using ttk)
         if current_duration > 0: #check if current song has valid duration(greater than 0)
@@ -73,9 +85,12 @@ def update_progress_bar():
 
 #function for buttons
 def play_sound():
-        global current_duration,is_playing,current_postion,current_song
-        selected=playlist_box.get(tk.ACTIVE) #get current selected song name from listbox #from the playlist box to get active item,like if users clicked rain sounds then it would be an active item
-
+    global current_duration,is_playing,current_postion,current_song
+    selected=playlist_box.get(tk.ACTIVE) #get current selected song name from listbox #from the playlist box to get active item,like if users clicked rain sounds then it would be an active item
+    if not selected:
+        return
+    
+    try:
         #check if currently selected song is not same as the currently playing song
         if selected != current_song: #!=:not same
                pygame.mixer.music.load(song_dict[selected])  #loads mp3 file #load but doesn't playing yet
@@ -95,6 +110,10 @@ def play_sound():
 
         is_playing=True #sound is currently playing
         update_progress_bar()
+
+    except Exception as e:
+        label_now_playing.config(text=f"Error loading {selected}")
+        print(f"Error playing sound: {e}")
 
 def pause_sound():
         global is_playing,current_postion
@@ -167,6 +186,14 @@ bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 title=tk.Label(root,text="Relax Soothing Sound Player🎶", font=("Segoe UI", 18, "bold"),bg="#d9e9df",fg="black")
 title.pack(pady=(10,5)) #pady=(10,5)adds vertical spacing above and below.
 
+#------------------------------------------------------------------------------------------------------------------------#
+#tips label to let users know the keyboard shortcut
+tips_label = tk.Label(root, 
+                      text="Tip: 1. Use Left ← and Right → arrow keys to navigate sounds.\n"
+                           "2. Use Space to play and pause the sounds.",
+                      font=("Arial", 10, "italic"),bg="#d9e9df", fg="blue")
+tips_label.pack(pady=(5,0))
+
 #----------------------------------------------------------------------------------------------------------------------#
 
 #frame to hold center and volume(right)
@@ -181,7 +208,7 @@ playlist_button_frame.pack(side="left",expand=True,fill="both", anchor="center",
 
 #label for now playing(since now dont have song yet,so display"no sound is playing")
 label_now_playing=tk.Label(playlist_button_frame, text="No sound is playing.", bg="#d9e9df", font=("Segoe UI", 13,"bold"))
-label_now_playing.pack(pady=(3,7))
+label_now_playing.pack(pady=(0,7))
 
 #----------------------------------------------------------------------------------------------------------------------#
 #PLAYLIST
@@ -193,6 +220,7 @@ label_playlist.pack(pady=(0,5))
 #the listbox to show available sound
 playlist_box=tk.Listbox(playlist_button_frame, width=100, height=20, bg="white", fg="#1a237e",selectbackground="#a3d2ca", selectforeground="black",activestyle="none", font=("Segoe UI", 10, "italic"),bd=2, relief="groove",highlightthickness=2)
 playlist_box.pack(pady=(0,5),anchor="center")
+playlist_box.focus_set() #ensure listbox has keyboard focus
 
 #loop through each elements in the dictionary which is "song_dict"
 for song_name in song_dict: #each element is temporarily stored in variable "song_name" during each loop 
@@ -211,11 +239,8 @@ progress_bar.pack(side="left", expand=True, fill="x", padx=(5, 5))
 
 #----------------------------------------------------------------------------------------------------------------------#
 #Duration
-
-#label to display the sound duration
-duration_label = tk.Label(progress_frame, text="00:00", bg="#d9e9df", font=("Segoe UI", 10))
-duration_label.pack(side="left", padx=(5, 10))
-
+duration_label = tk.Label(progress_frame, text="00:00 / 00:00", bg="#d9e9df", font=("Segoe UI", 10))
+duration_label.pack(side="left", padx=5)
 #----------------------------------------------------------------------------------------------------------------------#
 #CONTROL BUTTON
 
@@ -273,6 +298,8 @@ volume_control = tk.Scale(volume_frame, from_=0, to=100, resolution=1, orient="v
 volume_control.set(50) #set default volume position to 50,like when users open this window the volume will be at 50
 volume_control.pack()
 
+# Set pygame mixer volume to default slider value
+pygame.mixer.music.set_volume(0.5)
 #----------------------------------------------------------------------------------------------------------------------#
 
 #Track fullscreen state
@@ -286,6 +313,31 @@ def toggle_fullscreen(event=None):
 # Bind the 'f' key (lowercase only)
 root.bind("<Control-f>", toggle_fullscreen)
 
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+# Keyboard shortcuts for playback controls
+def toggle_play_pause(event=None):
+    global is_playing
+    if is_playing:
+        pause_sound()
+    else:
+        play_sound()
+
+root.bind("<space>", toggle_play_pause)
+root.bind_all("<Right>", lambda event: next_sound())
+root.bind_all("<Left>", lambda event: prev_sound())
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#exit button incase the ctrl+f key doesnt works
+exit_button = ctk.CTkButton(
+    root,
+    text="❌ Exit",
+    font=("Segoe UI", 14),
+    fg_color="#FF5151",
+    hover_color="#FF6A6A",
+    text_color="white",
+    corner_radius=25,
+    command=root.destroy
+)
+exit_button.place(relx=0.97, rely=0.04, anchor="ne")
 #-----------------------------------------------------------------------------------------------------------------------#
 
 #the whole program run

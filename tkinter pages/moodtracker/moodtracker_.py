@@ -5,6 +5,7 @@ from PIL import Image,ImageTk #import pillow for image resizing
 import datetime
 import sqlite3
 import os
+import customtkinter as ctk
 
 mood_quotes = {
     "Happy": "Keep shining, the world needs your light!",
@@ -254,6 +255,19 @@ def toggle_fullscreen(event=None):
 # Bind the 'f' key (lowercase only)
 root.bind("<Control-f>", toggle_fullscreen)
 
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#exit button incase the ctrl+f key doesnt works
+exit_button = ctk.CTkButton(
+    root,
+    text="❌ Exit",
+    font=("Segoe UI", 14),
+    fg_color="#FF5151",
+    hover_color="#FF6A6A",
+    text_color="white",
+    corner_radius=25,
+    command=root.destroy
+)
+exit_button.place(relx=0.97, rely=0.04, anchor="ne")
 #--------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #run the whole program

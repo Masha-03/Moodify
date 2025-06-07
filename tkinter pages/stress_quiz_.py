@@ -6,17 +6,37 @@ import customtkinter as ctk
 import os
 from PIL import Image,ImageTk
 
+#-------------------------------------------------------------------------------------------------------------------------------------------------#
+
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 def get_image_path(filename):
     # This gets the path of the current Python file
     base_path = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base_path, filename)
 
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#auto scroll to bottom after receive new msg
+def scroll_to_bottom():
+    chat_canvas.update_idletasks()
+    chat_canvas.yview_moveto(1)
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+#disable option buttons immediately after one is clicked
+def on_option_click(opt, btn_frame):
+    for btn in btn_frame.winfo_children():
+        btn.configure(state="disabled")
+    display_next_question(opt)
+    btn_frame.destroy()
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 #main window
 root = tk.Tk()  #create the main app window
 root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}")  #full-screen size
 root.title("Stress Level Survey")
 root.configure(bg="#FFF8E1")  #change the background color of entire window
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Load and set background image
 base_dir = os.path.dirname(os.path.abspath(__file__)) 
@@ -205,7 +225,6 @@ chat_box.place(relx=0.5, rely=0.45, anchor="center", width=600, height=400) #rel
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-
 # Scrollbar inside the chat box
 scrollbar = ttk.Scrollbar(left_frame, orient="vertical")
 scrollbar.pack(side="right", fill="y")
@@ -303,6 +322,11 @@ def calculate_stress_level():
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
+def pop_button(button, initial_pady):
+    # Move up slightly (reduce pady to top)
+    button.pack_configure(pady=(initial_pady[0] - 2, initial_pady[1] + 2))
+    root.after(70, lambda: button.pack_configure(pady=initial_pady)) # Move back to original position
+
 #function to display next question
 def display_next_question(answer=None): #answer=None:parameter that stores the selected answer #if users selected a answer it will pass to a function
     global current_index #used to track which question in the quiz is currently being displayed
@@ -324,11 +348,14 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
                                       wraplength=380, justify="left")
         response_label.pack(padx=10, pady=5, anchor="e")
 
-    # Inside display_next_question(), after displaying the user response
-    # Timestamp for user message
-    timestamp = datetime.datetime.now().strftime("%I:%M %p")
-    time_label = ctk.CTkLabel(chat_frame, text=timestamp, font=ctk.CTkFont("Segoe UI", 11), text_color="#888888")
-    time_label.pack(anchor="e", padx=15, pady=(0, 5))
+        # Inside display_next_question(), after displaying the user response
+        # Timestamp for user message
+        timestamp = datetime.datetime.now().strftime("%I:%M %p")
+        time_label = ctk.CTkLabel(chat_frame, text=timestamp, font=ctk.CTkFont("Segoe UI", 11), text_color="#888888")
+        time_label.pack(anchor="e", padx=15, pady=(0, 5))
+
+        # Call scroll_to_bottom after the user response is added
+        root.after(100, scroll_to_bottom) # Use after to ensure widgets are drawn
 
     #move to the next question if there's a new answer
     if current_index < len(quiz_questions): #check if there are more question to display
@@ -363,12 +390,16 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
                                    font=ctk.CTkFont("Segoe UI", 15, "bold"),
                                    width=120, height=35)
             button.pack(side="left", padx=5)
+            root.after(100 + options.index(option) * 50, lambda b=button: pop_button(b, (5,5)))
         current_index += 1 #+1 and move to next question
         progress.set(current_index / TOTAL_QUESTIONS)
+        # Call scroll_to_bottom after the bot message and options are added
+        root.after(100, scroll_to_bottom) 
     else:
         calculate_stress_level()
+        root.after(100, scroll_to_bottom)
 
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Display an intro message before the first question
 intro_bubble_frame = ctk.CTkFrame(chat_frame, fg_color="#FFE0B2", corner_radius=15) # Light purple intro bubble
@@ -400,6 +431,20 @@ def toggle_fullscreen(event=None):
 
 # Bind the 'f' key (lowercase only)
 root.bind("<Control-f>", toggle_fullscreen)
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#exit button incase the ctrl+f key doesnt works
+exit_button = ctk.CTkButton(
+    root,
+    text="❌ Exit",
+    font=("Segoe UI", 14),
+    fg_color="#FF5151",
+    hover_color="#FF6A6A",
+    text_color="white",
+    corner_radius=25,
+    command=root.destroy
+)
+exit_button.place(relx=0.97, rely=0.04, anchor="ne")
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 

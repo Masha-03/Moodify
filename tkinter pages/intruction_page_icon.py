@@ -145,7 +145,7 @@ canvas.configure(yscrollcommand=scrollbar.set)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Auto scrollregion update
-def update_scrollregion(event):
+def update_scrollregion(event=None):
     canvas.configure(scrollregion=canvas.bbox("all"))
 
 scrollable_frame.bind("<Configure>", update_scrollregion)
@@ -188,7 +188,7 @@ instruction_text = (
         "• Tap the **emoji squad on the wall** to track your feels with the **MOOD TRACKER**.\n"
         "📅 Calendar\n"
         "• Tap the **calendar on the wall** to throwback to your past moods and diary entries.\n\n"
-        "🧘 **Mindfulness Tools**\n\n"
+        "🧘 **Mindfulness Tools**\n"
         "🎧 Chill Sounds\n"
         "• Tap the **radio by the books** to vibe out with **CHILL SOUNDS** — total zen.\n"
         "⏳ Breathing Exercise\n"
@@ -250,14 +250,28 @@ instruction_text_widget.config(state="disabled")
 #Track fullscreen state
 is_fullscreen = [False]
 
-# Toggle fullscreen using the 'f' key
 def toggle_fullscreen(event=None):
-    is_fullscreen[0] = not is_fullscreen[0]
-    root.attributes("-fullscreen", is_fullscreen[0])
+    is_fullscreen = root.attributes("-fullscreen")
+    root.attributes("-fullscreen", not is_fullscreen)
+    # After toggling fullscreen, update scrollregion to ensure scrolling works correctly
+    root.update_idletasks()
+    canvas.configure(scrollregion=canvas.bbox("all"))
 
-# Bind the 'f' key (lowercase only)
 root.bind("<Control-f>", toggle_fullscreen)
 
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#exit button incase the ctrl+f key doesnt works
+exit_button = ctk.CTkButton(
+    root,
+    text="❌ Exit",
+    font=("Segoe UI", 14),
+    fg_color="#FF5151",
+    hover_color="#FF6A6A",
+    text_color="white",
+    corner_radius=25,
+    command=root.destroy
+)
+exit_button.place(relx=0.97, rely=0.07, anchor="ne")
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Run the app
