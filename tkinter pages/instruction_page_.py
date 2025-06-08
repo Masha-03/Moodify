@@ -352,7 +352,7 @@ increase_font_button = ctk.CTkButton(
     corner_radius=25,
     width=60
 )
-increase_font_button.place(relx=0.07, rely=0.78)
+increase_font_button.place(relx=0.10, rely=0.78)
 
 decrease_font_button = ctk.CTkButton(
     root,
@@ -365,7 +365,7 @@ decrease_font_button = ctk.CTkButton(
     corner_radius=25,
     width=60
 )
-decrease_font_button.place(relx=0.07, rely=0.83)
+decrease_font_button.place(relx=0.04, rely=0.78)
 
 #---------------------------------------------------------------------------------------------------------------------------------------------#
 
