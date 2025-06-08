@@ -7,6 +7,7 @@ import sqlite3
 from datetime import datetime
 import os
 import sys
+from tkinter import messagebox
 
 #Get profile from the database
 def get_profile():
@@ -1152,6 +1153,15 @@ ctk.set_default_color_theme("blue")
 app = ctk.CTk()
 app.title("Breathing Exercise")
 
+def on_close():
+    if not app.winfo_exists():
+        return
+
+    #Forcefully terminate the application to prevent lingering events
+    sys.exit()
+
+app.protocol("WM_DELETE_WINDOW", on_close)
+
 #Fullscreen size
 app.update_idletasks()
 try:
@@ -1168,6 +1178,17 @@ def exit_fullscreen(event=None):
     app.attributes("-fullscreen", False)
 
 app.bind("<Escape>", exit_fullscreen)
+
+#Track fullscreen state
+is_fullscreen = [False]
+
+# Toggle fullscreen using the 'f' key
+def toggle_fullscreen(event=None):
+    is_fullscreen[0] = not is_fullscreen[0]
+    app.attributes("-fullscreen", is_fullscreen[0])
+    
+#Bind the 'f' key (lowercase only) (for fullscreen)
+app.bind("<Control-f>", toggle_fullscreen)
 
 #Main title (outside the frame, centered)
 title_label = ctk.CTkLabel(
@@ -1217,6 +1238,27 @@ button_style = {
     "font": ("Helvetica", 18, "bold")
 }
 
+#give users some tips
+def show_help():
+    messagebox.showinfo("Help", "Click on a breathing exercise based on your preference. Press Ctrl+F to toggle fullscreen.")
+
+#exit button
+exit_button = ctk.CTkButton(
+    app,
+    text="❌ Exit",
+    font=("Segoe UI", 14),
+    fg_color="#FF5151",
+    hover_color="#FF6A6A",
+    text_color="white",
+    corner_radius=25,
+    command=on_close
+)
+exit_button.place(relx=0.97, rely=0.04, anchor="ne")
+
+help_button = ctk.CTkButton(app, text="❓ Help", font=("Segoe UI", 14), fg_color="#5A9BD5", hover_color="#7AB8FF", text_color="white", corner_radius=25, command=show_help)
+help_button.place(relx=0.97, rely=0.09, anchor="ne")
+
+
 ################################################################################################################################################################################
 
 def clear_app_widgets():
@@ -1248,6 +1290,22 @@ def go_home():
 
     #Lower the label so it doesn’t cover other widgets
     bg_label.lower()
+    
+    #exit button
+    exit_button = ctk.CTkButton(
+        app,
+        text="❌ Exit",
+        font=("Segoe UI", 14),
+        fg_color="#FF5151",
+        hover_color="#FF6A6A",
+        text_color="white",
+        corner_radius=25,
+        command=on_close
+    )
+    exit_button.place(relx=0.97, rely=0.04, anchor="ne")
+
+    help_button = ctk.CTkButton(app, text="❓ Help", font=("Segoe UI", 14), fg_color="#5A9BD5", hover_color="#7AB8FF", text_color="white", corner_radius=25, command=show_help)
+    help_button.place(relx=0.97, rely=0.09, anchor="ne")
     
     title_label = ctk.CTkLabel(
         app,
@@ -1442,16 +1500,6 @@ create_icon_button(main_frame, img_calm, "4-7-4 Breathing Exercise", open_4_7_4)
 create_icon_button(main_frame, img_balance, "5-5 Breathing Exercise", open_5_5).grid(row=0, column=1, padx=40, pady=30)
 create_icon_button(main_frame, img_release, "4-7-8 Breathing Exercise", open_4_7_8).grid(row=1, column=0, padx=40, pady=30)
 create_icon_button(main_frame, img_relax, "2 to 1 Breathing Exercise", open_2to1).grid(row=1, column=1, padx=40, pady=30)
-
-#Debug
-def on_close():
-    if not app.winfo_exists():
-        return
-
-    #Forcefully terminate the application to prevent lingering events
-    sys.exit()
-
-app.protocol("WM_DELETE_WINDOW", on_close)
 
 #Run the app
 app.mainloop()
