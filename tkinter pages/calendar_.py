@@ -8,10 +8,16 @@ from tkinter import messagebox
 
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
+
+#Find the folder where the current Python file is
+base_dir = os.path.dirname(os.path.abspath(__file__))
+#Always save database in same folder
+db_path = os.path.join(base_dir, 'moodify_database.db')
+
 #Get profile from the database
 def get_profile():
     global profile
-    connect = sqlite3.connect('moodify_database.db')
+    connect = sqlite3.connect(db_path)
     cursor = connect.cursor()
     
     #Fetch the profile
@@ -29,7 +35,7 @@ def get_profile():
 def show_entry(selected_date):
     # Get the profile 
     get_profile() 
-    connect = sqlite3.connect('moodify_database.db')
+    connect = sqlite3.connect(db_path)
     cursor = connect.cursor()
 
     #Fetch entry for selected date, current profile, and join mood_entries table
