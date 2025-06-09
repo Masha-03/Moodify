@@ -57,7 +57,7 @@ def save_worry_to_db(worry_text):
         return
 
     try:
-        conn = sqlite3.connect(DB_NAME)
+        conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         cursor.execute("INSERT INTO worries (worry_text, profile) VALUES (?, ?)",
             (worry_text, profile))
@@ -70,7 +70,7 @@ def get_latest_worries(count=RECENT_WORRIES_DISPLAY_COUNT):
     """Retrieves the latest 'count' worries from the database."""
     worries_list = []
     try:
-        conn = sqlite3.connect(DB_NAME)
+        conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         cursor.execute("SELECT worry_text, timestamp FROM worries ORDER BY timestamp DESC LIMIT ?", (count,))
         worries_list = cursor.fetchall()
@@ -83,7 +83,7 @@ def get_all_worries():
     """Retrieves all worries from the database."""
     worries_list = []
     try:
-        conn = sqlite3.connect(DB_NAME)
+        conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         cursor.execute("SELECT worry_text, timestamp FROM worries ORDER BY timestamp DESC") # No LIMIT here
         worries_list = cursor.fetchall()
