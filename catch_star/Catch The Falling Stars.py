@@ -37,9 +37,9 @@ scale_x, scale_y = get_scale_factors(screen.get_width(), screen.get_height())
 # -----------------------------------------------------------------------------------------------------------------------------------
 # Load Background Images for Different Moods
 MOODS = {
-  "Calm Night": pygame.image.load(resource_path("catch_star/starrynight.png")).convert(),
-  "Peaceful Moonlight": pygame.image.load(resource_path("catch_star/moonlight.png")).convert(),
-  "Serene Aurora": pygame.image.load(resource_path("catch_star/aurora.png")).convert()
+  "Calm Night": pygame.image.load(resource_path("Moodify/catch_star/starrynight.png")).convert(),
+  "Peaceful Moonlight": pygame.image.load(resource_path("Moodify/catch_star/moonlight.png")).convert(),
+  "Serene Aurora": pygame.image.load(resource_path("Moodify/catch_star/aurora.png")).convert()
 } #.convert() --> change the pixel format of an image with no arguments, to create a copy that will draw more quickly on the screen
 current_mood = "Calm Night" #sets the initial background mood
 BACKGROUND = pygame.transform.scale(MOODS[current_mood], (screen.get_width(), screen.get_height())) #stretches/shrinks it to match the screen size. ########################################################
@@ -49,10 +49,10 @@ game_state = 'intro'
 
 # -----------------------------------------------------------------------------------------------------------------------------------
 # load sound effect
-CATCH_SOUND = pygame.mixer.Sound(resource_path("catch_star/catch_sound.wav")) # catching sound
+CATCH_SOUND = pygame.mixer.Sound(resource_path("Moodify/catch_star/catch_sound.wav")) # catching sound
 
 # Load background music
-pygame.mixer.music.load(resource_path("catch_star/background_music.wav"))
+pygame.mixer.music.load(resource_path("Moodify/catch_star/background_music.wav"))
 pygame.mixer.music.set_volume(0.5)
 pygame.mixer.music.play(-1) # Play in a loop (-1 means infinite loop)
 # -----------------------------------------------------------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ pygame.mixer.music.play(-1) # Play in a loop (-1 means infinite loop)
 # load catcher image
 PLAYER_WIDTH_RATIO = 225 / WIDTH # calculate the ratio of the basket original width to the current window width
 PLAYER_HEIGHT_RATIO = 190 / HEIGHT # calculate the ratio of the basket original height to the current window height
-PLAYER_IMAGE = pygame.image.load(resource_path("catch_star/catcher.png")).convert_alpha() #sincge the image has transparency bg, use alpha to avoid having solid color at the back
+PLAYER_IMAGE = pygame.image.load(resource_path("Moodify/catch_star/catcher.png")).convert_alpha() #sincge the image has transparency bg, use alpha to avoid having solid color at the back
 PLAYER_WIDTH = int(PLAYER_WIDTH_RATIO * screen.get_width()) # calculate the player width based on the screen size ###############################################################################
 PLAYER_HEIGHT = int(PLAYER_HEIGHT_RATIO * screen.get_height()) # calculate the player height based on the screen size ##############################################################################3
 SCALED_PLAYER = pygame.transform.scale(PLAYER_IMAGE, (PLAYER_WIDTH, PLAYER_HEIGHT)) # scale the player image
@@ -74,8 +74,8 @@ player_speed = 5 * scale_x # player speed based on the screen size
 
 # star properties
 STAR_IMAGES = [
-  pygame.image.load(resource_path("catch_star/star1.png")).convert_alpha(), # load the first star image
-  pygame.image.load(resource_path("catch_star/star2.png")).convert_alpha() # load the second star image
+  pygame.image.load(resource_path("Moodify/catch_star/star1.png")).convert_alpha(), # load the first star image
+  pygame.image.load(resource_path("Moodify/catch_star/star2.png")).convert_alpha() # load the second star image
 ]
 
 # scale the star images based on the current screen size
