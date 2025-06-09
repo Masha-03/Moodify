@@ -44,66 +44,67 @@ def show_entry(selected_date):
 
     #If there are entries for the selected date
     if result: 
-        title, content, mood, mood_desc = result[0]  # Get the title, content, mood, mood description
+        title, content, mood, mood_desc = result[0]  #Get the title, content, mood, mood description
 
-        # Update title
+        #Update title
         title_display.configure(text=title)
         
-        # Simulate spacing and indent for content_text
-        formatted_content = "\n" + content  # 1 empty line at top
-        indented_content = "\n".join("    " + line for line in formatted_content.splitlines())
+        #Simulate spacing and indent for content_text
+        formatted_content = "\n" + content  #Add 1 empty line at top
+        indented_content = "\n".join("    " + line for line in formatted_content.splitlines()) #Indents every line of the content with 4 spaces 
 
         # Update content
-        content_text.configure(state="normal")  # Enable editing to update
-        content_text.delete("1.0", tk.END)
-        content_text.insert(tk.END, indented_content)
+        content_text.configure(state="normal")  #Enable editing
+        content_text.delete("1.0", tk.END) #Clears existing text
+        content_text.insert(tk.END, indented_content) #Display content
         content_text.configure(state="normal")
         content_text.tag_add("top_space", "1.0", "1.0 lineend")  #First line only
-        content_text.tag_add("left_margin", "1.0", "end")
-        content_text.configure(state="disabled")  # Disable editing again
+        content_text.tag_add("left_margin", "1.0", "end") #For all lines
+        content_text.configure(state="disabled")  #Disable editing again
         
         # Update mood & mood description
         mood_display.configure(text=mood if mood else "No mood")
         
         mooddesc_text = mood_desc if mood_desc else "No mood description"
-        formatted_mooddesc = "\n" + mooddesc_text
-        indented_mooddesc = "\n".join("    " + line for line in formatted_mooddesc.splitlines())
+        formatted_mooddesc = "\n" + mooddesc_text #Add 1 empty line at top
+        indented_mooddesc = "\n".join("    " + line for line in formatted_mooddesc.splitlines()) #Indents every line of the content with 4 spaces 
         
-        mooddesc_display.configure(state="normal")
-        mooddesc_display.delete("1.0", tk.END)
-        mooddesc_display.tag_add("top_space", "1.0", "1.0 lineend")  # first line only
-        mooddesc_display.tag_add("left_margin", "1.0", "end")
+        mooddesc_display.configure(state="normal") #Enable editing
+        mooddesc_display.delete("1.0", tk.END) #Clears existing text
+        mooddesc_display.tag_add("top_space", "1.0", "1.0 lineend")  #First line only
+        mooddesc_display.tag_add("left_margin", "1.0", "end") #All lines
         mooddesc_display.insert(tk.END, indented_mooddesc)
-        mooddesc_display.configure(state="disabled")
+        mooddesc_display.configure(state="disabled") #Disable editing
         
     else:
+        #If no content to show
         title_display.configure(text="No title")
-        content_text.configure(state="normal")
-        content_text.delete("1.0", tk.END)
-        
+        content_text.configure(state="normal") #Enable editing
+        content_text.delete("1.0", tk.END) #Clears existing text
+
         no_entry_text = "No diary entry found for this date."
-        formatted_no_entry = "\n" + no_entry_text
-        indented_no_entry = "\n".join("    " + line for line in formatted_no_entry.splitlines())
+        formatted_no_entry = "\n" + no_entry_text #Add 1 empty line at top
+        indented_no_entry = "\n".join("    " + line for line in formatted_no_entry.splitlines()) #Indents every line of the content with 4 spaces 
         
         content_text.insert(tk.END, indented_no_entry)
-        content_text.tag_add("top_space", "1.0", "1.0 lineend")  # first line only
-        content_text.tag_add("left_margin", "1.0", "end")
-        content_text.configure(state="disabled")
+        content_text.tag_add("top_space", "1.0", "1.0 lineend")  #First line only
+        content_text.tag_add("left_margin", "1.0", "end") #All lines
+        content_text.configure(state="disabled") #Disable editing
         
         #Mood and mood description
         mood_display.configure(text="No mood")
-        mooddesc_display.configure(state="normal")
-        mooddesc_display.delete("1.0", tk.END)
+        mooddesc_display.configure(state="normal") #Enable editing
+        mooddesc_display.delete("1.0", tk.END) #Clears existing text
         
         
         no_mooddesc_text = "No mood description"
-        formatted_no_mooddesc = "\n" + no_mooddesc_text
-        indented_no_mooddesc = "\n".join("    " + line for line in formatted_no_mooddesc.splitlines())
+        formatted_no_mooddesc = "\n" + no_mooddesc_text #Add 1 empty line at top
+        indented_no_mooddesc = "\n".join("    " + line for line in formatted_no_mooddesc.splitlines()) #Indents every line of the content with 4 spaces 
     
         mooddesc_display.insert(tk.END, indented_no_mooddesc)
-        mooddesc_display.tag_add("top_space", "1.0", "1.0 lineend")  # first line only
-        mooddesc_display.tag_add("left_margin", "1.0", "end")
-        mooddesc_display.configure(state="disabled")
+        mooddesc_display.tag_add("top_space", "1.0", "1.0 lineend")  #First line only
+        mooddesc_display.tag_add("left_margin", "1.0", "end") #All lines
+        mooddesc_display.configure(state="disabled") #Disable editing
    
     connect.close()
 #----------------------------------------------------------------------------------------------------------------------------------------------------#

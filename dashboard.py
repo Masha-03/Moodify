@@ -1,18 +1,23 @@
 import tkinter as tk
 from tkinter import ttk
+import customtkinter as ctk
 from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import sqlite3
 import os
+import sys
 from datetime import datetime, timedelta
 import matplotlib.dates as mdates
 from collections import defaultdict, Counter
 import numpy as np
-from matplotlib.patches import Patch
+from tkinter import messagebox
 
-plt.style.use('fivethirtyeight') 
+plt.style.use('fivethirtyeight')
+
+#Global list to track all charts
+charts = [] 
 
 def get_profile():
     connect = sqlite3.connect('moodify_database.db')
@@ -168,8 +173,8 @@ def create_weekly_charts(profile, container, bg_photo):
     dates_diary, diary_counts = get_diary_data(profile, range_list)
     dates_stress, stress_levels = get_stress_data(profile, range_list)
     moods, mood_counts = get_mood_data(profile, range_list)
-        
-    charts = []
+    
+    charts=[]
 
     # Chart 1: Breathing Exercise - Bar Chart
     plt.style.use('fivethirtyeight')
@@ -207,7 +212,7 @@ def create_weekly_charts(profile, container, bg_photo):
     ax2.set_title(f"Mood Distribution - {month_year}", fontsize=18) 
     date_range_str = f"{start_date.strftime('%d %b')} – {end_date.strftime('%d %b %Y')}"
     #Add descriptive text below, centered 
-    fig2.text(0.5, 0.03, f"Data from {date_range_str}", ha='center', fontsize=10, color='gray')
+    fig2.text(0.5, 0.03, f"Data from {date_range_str}", ha='center', fontsize=12, color='gray')
     fig2.tight_layout() #Make sure doesn't overlap
     charts.append(fig2) #Save chart
 
@@ -294,8 +299,8 @@ def create_monthly_charts(profile, container, bg_photo):
         dates_stress, stress_levels = zip(*filtered_session_2) #Unzips list back into 2 separate list
     else:
         dates, sessions = [], []
-
-    charts = [] 
+    
+    charts=[]
     
     #Chart 1: Breathing Exercise - Bar Chart
     fig1, ax1 = plt.subplots(figsize=(5, 4))
@@ -309,7 +314,7 @@ def create_monthly_charts(profile, container, bg_photo):
     ax1.set_ylabel("Number of Sessions", fontsize=12, color='gray')
      #Only show the day
     ax1.xaxis.set_major_formatter(mdates.DateFormatter('%d'))
-    plt.setp(ax1.get_xticklabels(), rotation=0, fontsize=14)
+    plt.setp(ax1.get_xticklabels(), rotation=0, fontsize=12)
     fig1.tight_layout() #Make sure nothing overlaps
     charts.append(fig1) #Save chart to list
 
@@ -326,7 +331,7 @@ def create_monthly_charts(profile, container, bg_photo):
     month_year = now.strftime('%B %Y')#Month and year rn
     ax2.set_title(f"Mood Distribution - {month_year}", fontsize=18)
     #Add descriptive text below, centered 
-    fig2.text(0.5, 0.03, f"Data from {month_year}", ha='center', fontsize=10, color='gray')
+    fig2.text(0.5, 0.03, f"Data from {month_year}", ha='center', fontsize=12, color='gray')
     fig2.tight_layout() #Make sure not overlap
     charts.append(fig2) #Save chart to list
 
@@ -450,7 +455,7 @@ def create_annual_charts(profile, container, bg_photo):
     mood_dates, mood_levels = get_annual_mood_data(profile, range_list)
     moods, mood_counts = get_mood_data(profile, range_list)
     
-    charts = []
+    charts=[]
     
     # Chart 1: Breathing Sessions - Bar Chart
     months, avg_sessions = calculate_monthly_average(dates, sessions)
@@ -463,11 +468,11 @@ def create_annual_charts(profile, container, bg_photo):
     ax1.set_ylabel("Average Number of Sessions", fontsize=12, color='gray')
     ax1.set_xlabel("Month", fontsize=12, color='gray')
     ax1.set_xticks(range(len(months)))
-    ax1.set_xticklabels(months, fontsize=10)
+    ax1.set_xticklabels(months, fontsize=12)
     fig1.tight_layout() #Make sure no overlapping
     charts.append(fig1) #Save chart to list
 
-    # Chart 2: Mood Distribution - Pie Chart
+    # Chart 2: Mood Tracker - Pie Chart
     fig2, ax2 = plt.subplots(figsize=(5, 4))
     color_map = {
         "Happy": '#FFD700', "Sad": '#87CEEB', "Angry": '#FF6347',
@@ -480,7 +485,7 @@ def create_annual_charts(profile, container, bg_photo):
     year = now.strftime('%Y') #Year rn
     ax2.set_title(f"Mood Distribution -{year}")
     #Add descriptive text below, centered 
-    fig2.text(0.5, 0.03, f"Data from {year}", ha='center', fontsize=10, color='gray')
+    fig2.text(0.5, 0.03, f"Data from {year}", ha='center', fontsize=12, color='gray')
     fig2.tight_layout() #Make sure no overlapping
     charts.append(fig2) #Save chart to list
 
@@ -495,7 +500,7 @@ def create_annual_charts(profile, container, bg_photo):
     ax3.set_ylabel("Average Number of Entries",fontsize=12, color='gray')
     ax3.set_xlabel("Month", fontsize=12, color='gray')
     ax3.set_xticks(range(len(months)))
-    ax3.set_xticklabels(months, fontsize=10)
+    ax3.set_xticklabels(months, fontsize=12)
     fig3.tight_layout() #Make sure no overlapping
     charts.append(fig3) #Save chart
     
@@ -519,7 +524,7 @@ def create_annual_charts(profile, container, bg_photo):
     high_counts = [monthly_stress[m][3] for m in months_order]
     severe_counts = [monthly_stress[m][4] for m in months_order]
     
-    #Returns array for y-axis (month)
+    #Creates array for y-axis (month), then show as text
     ind = np.arange(len(months_order))
     fig4, ax4 = plt.subplots(figsize=(5, 4))
     #Plot stacked bars horizontally
@@ -563,12 +568,37 @@ def main():
     root.state("zoomed")
     root.configure(bg='white')
     
+    #Solve issue of not closing properly
+    def on_close():
+        for fig in charts:
+            plt.close(fig)
+            plt.close('all')  #Just incase to close anything left open
+
+        #Forcefully terminate the application to prevent lingering events
+        sys.exit()
+    
     #Background picture
     base_dir = os.path.dirname(os.path.abspath(__file__)) 
     bg_image_path = os.path.join(base_dir, "tkinter pages", "dashboard_bg.png") 
     bg_image = Image.open(bg_image_path)  #Open the image first
     bg_photo = ImageTk.PhotoImage(bg_image)  #Convert to PhotoImage
 
+    #Track fullscreen state
+    is_fullscreen = [False]
+
+    # Toggle fullscreen using the 'f' key
+    def toggle_fullscreen(event=None):
+        is_fullscreen[0] = not is_fullscreen[0]
+        root.attributes("-fullscreen", is_fullscreen[0])
+        
+    #Bind the 'f' key (lowercase only) (for fullscreen)
+    root.bind("<Control-f>", toggle_fullscreen)
+    
+    # ESC to exit fullscreen
+    def exit_fullscreen(event=None):
+        root.attributes("-fullscreen", False)
+
+    root.bind("<Escape>", exit_fullscreen)
 
     #Wrap sidebar and main_area in a content frame
     content_frame = tk.Frame(root, bg="white")
@@ -581,7 +611,37 @@ def main():
     tab_label = tk.Label(sidebar, text="VIEW BY", fg="#ffffff", bg="#545454", font=("Segoe UI", 14, "bold"))
     tab_label.pack(pady=20)
     
-    #Main area for charts
+    #Help with tips
+    def show_help():
+        messagebox.showinfo("Help", "Click on different views to get statistic on your app usage. There are 3 views: weekly, monthy and annual. You can find breathing session chart, mood distribution chart, diary entry chart and stress level chart.")
+
+    #Exit button (bottom left in sidebar)
+    exit_button = ctk.CTkButton(
+        sidebar,
+        text="❌ Exit",
+        font=("Segoe UI", 14),
+        fg_color="#FF5151",
+        hover_color="#FF6A6A",
+        text_color="white",
+        corner_radius=25,
+        command=on_close
+    )
+    exit_button.pack(side="bottom", anchor="w", padx=10, pady=(0, 10))  #Bottom-left with spacing
+
+    #Help button (above exit)
+    help_button = ctk.CTkButton(
+        sidebar,
+        text="❓ Help",
+        font=("Segoe UI", 14),
+        fg_color="#5A9BD5",
+        hover_color="#7AB8FF",
+        text_color="white",
+        corner_radius=25,
+        command=show_help
+    )
+    help_button.pack(side="bottom", anchor="w", padx=10, pady=(0, 10))  #Bottom-left, slightly above exit
+    
+    #Main area for charts (right)
     main_area = tk.Frame(content_frame, bg="white")
     main_area.pack(side="right", expand=True, fill="both")
     
@@ -593,14 +653,19 @@ def main():
         width = main_area.winfo_width()
         height = main_area.winfo_height()
 
+        #Prevent error
         if width < 10 or height < 10:
+            #If size too small retry after 100ms
             root.after(100, set_main_bg)
             return
 
+        #Resize to fit main area
         resized = bg_image.resize((width, height))
+        #Convert to tkinter
         bg_photo_resized = ImageTk.PhotoImage(resized)
+        #Create label for picture
         bg_label = tk.Label(main_area, image=bg_photo_resized)
-        bg_label.image = bg_photo_resized  # Keep reference
+        bg_label.image = bg_photo_resized  #Keep reference
         bg_label.place(x=0, y=0, relwidth=1, relheight=1)
         #Lower the label so it doesn’t cover other widgets
         bg_label.lower()
@@ -626,10 +691,13 @@ def main():
             elif tab.lower() == "monthly":
                 btn.config(command=lambda: create_monthly_charts(profile, main_area, bg_photo))
             elif tab.lower() == "annual":
-                btn.config(command=lambda: create_annual_charts(profile, main_area, bg_photo))
+                btn.config(command=lambda: create_annual_charts(profile, main_area, bg_photo)) #lambda=delay execution till button is actually clicked
 
     # Load default view
     load_weekly()
+    
+    #Close all figures to resolve memory issue
+    root.protocol("WM_DELETE_WINDOW", on_close)
 
     root.mainloop()
 
