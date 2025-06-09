@@ -564,8 +564,10 @@ def main():
     root.configure(bg='white')
     
     #Background picture
-    bg_image = Image.open("tkinter pages/dashboard_bg.png")  #load pic
-    bg_photo = ImageTk.PhotoImage(bg_image)
+    base_dir = os.path.dirname(os.path.abspath(__file__)) 
+    bg_image_path = os.path.join(base_dir, "tkinter pages", "dashboard_bg.png") 
+    bg_image = Image.open(bg_image_path)  #Open the image first
+    bg_photo = ImageTk.PhotoImage(bg_image)  #Convert to PhotoImage
 
 
     #Wrap sidebar and main_area in a content frame

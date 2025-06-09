@@ -58,7 +58,7 @@ def show_entry(selected_date):
         content_text.delete("1.0", tk.END)
         content_text.insert(tk.END, indented_content)
         content_text.configure(state="normal")
-        content_text.tag_add("top_space", "1.0", "1.0 lineend")  # first line only
+        content_text.tag_add("top_space", "1.0", "1.0 lineend")  #First line only
         content_text.tag_add("left_margin", "1.0", "end")
         content_text.configure(state="disabled")  # Disable editing again
         
