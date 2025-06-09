@@ -227,7 +227,7 @@ frame_button.pack(pady=20)
 emoji_buttons=[]
 
 # Load images using relative paths
-happy_image = resize_image(get_image_path("happy.png"))
+happy_image = resize_image(get_image_path("Moodify","tkinter pages","moodtracker","happy.png"))
 sad_image = resize_image(get_image_path("sad.png"))
 angry_image = resize_image(get_image_path("angry.png"))
 excited_image = resize_image(get_image_path("excited.png"))

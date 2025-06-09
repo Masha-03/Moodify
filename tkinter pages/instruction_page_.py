@@ -141,7 +141,7 @@ bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # Title Label
-title_label = tk.Label(root,text="🌼 Welcome to Moodify! 🌼",font=("Segoe UI", 20, "bold"),bg="#fbe4ff",fg="#4A4A4A",pady=20)
+title_label = tk.Label(root,text="🌼 Welcome to Moodify! 🌼",font=("Segoe UI", 18, "bold"),bg="#fbe4ff",fg="#4A4A4A",pady=20)
 title_label.pack(pady=(10, 10))
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -279,8 +279,8 @@ highlight_text(instruction_text_widget, "plant next to the TV", "plant_tag", col
 instruction_text_widget.config(state="disabled")
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-button_frame = tk.Frame(root)
-button_frame.pack(side='bottom', pady=(0,20))
+button_frame = tk.Frame(root,bg="#fbe4ff")
+button_frame.pack(side='bottom', pady=(0,10))
 
 start_button = ctk.CTkButton(button_frame,
     text="✨ Start Moodify ✨",
@@ -292,7 +292,7 @@ start_button = ctk.CTkButton(button_frame,
     height=60,
     command=start_game
 )
-start_button.pack() # Center bottom
+start_button.pack(pady=(45,0)) # Center bottom
 
 #for animation of button
 def start_bob_safe():

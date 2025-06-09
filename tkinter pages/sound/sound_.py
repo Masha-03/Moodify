@@ -219,7 +219,7 @@ root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}") #full-s
 root.title("Soothing Sound Player")
 
 # Load and set background image
-bg_image = Image.open(get_image_path("sound_bg.png"))  # Replace with your image file
+bg_image = Image.open(get_image_path("Moodify","sound_bg.png"))  # Replace with your image file
 bg_image = bg_image.resize((root.winfo_screenwidth(), root.winfo_screenheight()), Image.Resampling.LANCZOS)
 bg_photo = ImageTk.PhotoImage(bg_image)
 bg_label = tk.Label(root, image=bg_photo)
