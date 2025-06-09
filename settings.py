@@ -16,6 +16,11 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
+#Find the folder where the current Python file is
+base_dir = os.path.dirname(os.path.abspath(__file__))
+#Always save database in same folder
+db_path = os.path.join(base_dir, 'moodify_database.db')
+
 # Constants for screen dimension and colors
 BG_COLOR = (245, 235, 220)
 SETTINGS_BG = (210, 180, 140)
@@ -66,7 +71,7 @@ profile_name_confirmed = False # added profile_name_confirmed.  not used until d
 #Get profile from the database
 def get_profile():
     global profile
-    connect = sqlite3.connect('moodify_database.db')
+    connect = sqlite3.connect(db_path)
     cursor = connect.cursor()
     
     #Fetch the profile
@@ -81,7 +86,7 @@ def get_profile():
         
 #Database connection 
 def connect_db():
-    connect = sqlite3.connect("moodify_database.db")
+    connect = sqlite3.connect(db_path)
     return connect
 
 def get_user_data():

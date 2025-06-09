@@ -8,13 +8,18 @@ pygame.init()
 
 # #------------------------------------------------------------------------------------------ database code #------------------------------------------------------------------------------
 
-DB_NAME = "moodify_database.db"
+#Find the folder where the current Python file is
+base_dir = os.path.dirname(os.path.abspath(__file__))
+#Always save database in same folder
+db_path = os.path.join(base_dir, 'moodify_database.db')
+
+DB_NAME = db_path
 RECENT_WORRIES_DISPLAY_COUNT = 3
 
 #Get profile from the database
 def get_profile():
     global profile
-    connect = sqlite3.connect('moodify_database.db')
+    connect = sqlite3.connect(db_path)
     cursor = connect.cursor()
     
     #Fetch the profile
@@ -30,7 +35,7 @@ def get_profile():
 def setup_database():
     """Connects to the SQLite database and creates the worries table if it doesn't exist."""
     try:
-        conn = sqlite3.connect(DB_NAME)
+        conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         cursor.execute('''
            CREATE TABLE IF NOT EXISTS worries (
