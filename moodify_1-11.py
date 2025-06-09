@@ -45,11 +45,13 @@ root.state('zoomed')
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
 
-#Load and resize image to fill the screen
-bg_image = Image.open("graphics/intro_bg.png")
-bg_image = bg_image.resize((screen_width, screen_height))
-#Converts image into a format Tkinter can use
+#Load and set the background image
+base_dir = os.path.dirname(os.path.abspath(__file__)) 
+bg_image_path = os.path.join(base_dir,"graphics", "intro_bg.png") 
+bg_image=Image.open(bg_image_path)
+bg_image = bg_image.resize((root.winfo_screenwidth(), root.winfo_screenheight()))  # Resize to fullscreen
 bg_photo = ImageTk.PhotoImage(bg_image)
+
 #Image is put on a label
 bg_label = tk.Label(root, image=bg_photo)
 bg_label.image = bg_photo  #Keep a reference to avoid it disappering randomly
