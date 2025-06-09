@@ -180,6 +180,8 @@ def create_weekly_charts(profile, container, bg_photo):
     first_date = date_objects[0] #First date in list
     month_year = first_date.strftime('%B %Y')  #Month and year rn
     ax1.set_title(f"Breathing Sessions - {month_year}", fontsize=18) #Title
+    ax1.set_xlabel("Date", fontsize=12, color='gray')
+    ax1.set_ylabel("Number of Sessions", fontsize=12, color='gray')
     #Only show the day
     ax1.xaxis.set_major_formatter(mdates.DateFormatter('%d'))
     plt.setp(ax1.get_xticklabels(), rotation=0, fontsize=14)
@@ -218,6 +220,8 @@ def create_weekly_charts(profile, container, bg_photo):
     first_date =date_objects[0] #First entry date
     month_year = first_date.strftime('%B %Y')  #Month and year rn
     ax3.set_title(f"Diary Entries - {month_year}", fontsize=18)
+    ax3.set_xlabel("Date", fontsize=12, color='gray')
+    ax3.set_ylabel("Number of Entries", fontsize=12, color='gray')
     #Only show the day
     ax3.xaxis.set_major_formatter(mdates.DateFormatter('%d'))
     plt.setp(ax3.get_xticklabels(), rotation=0, fontsize=14)
@@ -239,6 +243,9 @@ def create_weekly_charts(profile, container, bg_photo):
     ax4.set_xlim(0.5, 3.5)  #Centers ticks on bars
     ax4.set_xticks([1, 2, 3])
     ax4.set_xticklabels(['Low', 'Medium', 'High']) #Changes numbers to strings
+    ax4.set_xlabel("Stress Level", fontsize=12, color='gray')
+    ax4.set_ylabel("Date", fontsize=12, color='gray')
+    ax4.invert_yaxis() #Show recent date at top
     fig4.tight_layout() #Make sure doesn't overlap
     charts.append(fig4) #Save chart to list
 
@@ -298,6 +305,8 @@ def create_monthly_charts(profile, container, bg_photo):
     month_year = now.strftime('%B %Y') #Month and year rn
     ax1.set_title(f"Breathing Sessions - {month_year}", fontsize=18)
     ax1.set_xticks(range(len(dates)))
+    ax1.set_xlabel("Date", fontsize=12, color='gray')
+    ax1.set_ylabel("Number of Sessions", fontsize=12, color='gray')
      #Only show the day
     ax1.xaxis.set_major_formatter(mdates.DateFormatter('%d'))
     plt.setp(ax1.get_xticklabels(), rotation=0, fontsize=14)
@@ -329,6 +338,8 @@ def create_monthly_charts(profile, container, bg_photo):
     month_year = now.strftime('%B %Y')#Month and year rn
     ax3.set_title(f"Diary Entries - {month_year}", fontsize=18)
     ax3.set_xticks(range(len(dates_diary)))
+    ax3.set_xlabel("Date", fontsize=12, color='gray')
+    ax3.set_ylabel("Number of Entries", fontsize=12, color='gray')
     #Only show the day
     ax3.xaxis.set_major_formatter(mdates.DateFormatter('%d'))
     plt.setp(ax3.get_xticklabels(), rotation=0, fontsize=8)
@@ -348,6 +359,9 @@ def create_monthly_charts(profile, container, bg_photo):
     ax4.set_xlim(0.5, 3.5) #Centers bar
     ax4.set_xticks([1, 2, 3])
     ax4.set_xticklabels(['Low', 'Medium', 'High']) #Change numbers to text
+    ax4.set_xlabel("Stress Level", fontsize=12, color='gray')
+    ax4.set_ylabel("Date", fontsize=12, color='gray')
+    ax4.invert_yaxis() #Show recent date at top
     fig4.tight_layout() #Make sure no overlap
     charts.append(fig4) #Save chart to list
 
@@ -446,6 +460,8 @@ def create_annual_charts(profile, container, bg_photo):
     now = datetime.now() 
     year = now.strftime('%Y') #Year rn
     ax1.set_title(f"Breathing Sessions - {year}")
+    ax1.set_ylabel("Average Number of Sessions", fontsize=12, color='gray')
+    ax1.set_xlabel("Month", fontsize=12, color='gray')
     ax1.set_xticks(range(len(months)))
     ax1.set_xticklabels(months, fontsize=10)
     fig1.tight_layout() #Make sure no overlapping
@@ -476,53 +492,53 @@ def create_annual_charts(profile, container, bg_photo):
     now = datetime.now() 
     year = now.strftime('%Y') #Year rn
     ax3.set_title(f"Diary Entries - {year}")
+    ax3.set_ylabel("Average Number of Entries",fontsize=12, color='gray')
+    ax3.set_xlabel("Month", fontsize=12, color='gray')
     ax3.set_xticks(range(len(months)))
     ax3.set_xticklabels(months, fontsize=10)
     fig3.tight_layout() #Make sure no overlapping
     charts.append(fig3) #Save chart
     
     # Chart 4: Stress Quiz - Horizontal Bar Chart
-    #Group stress levels by month
+    #Create dictionary that counts monthly_stress of each
     monthly_stress = defaultdict(lambda: Counter())
 
+    #Combine date and stress level together
     for date_str, level in zip(dates_stress, stress_levels):
-        month = datetime.strptime(date_str, '%Y-%m-%d').strftime('%b')
+        #Convert string to datetime object
+        month = datetime.strptime(date_str, '%Y-%m-%d').strftime('%b') #Gets month abbreviation
         monthly_stress[month][level] += 1
-    
-    color_map = {
-    1: 'green',
-    2: 'orange',
-    3: 'red',
-    4: 'maroon'}
-    
+        
     months_order = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    stress_labels = ['Low', 'Moderate', 'High', 'Severe']
     
+    #Prepare count for each stress level per month
+    low_counts = [monthly_stress[m][1] for m in months_order]
+    moderate_counts = [monthly_stress[m][2] for m in months_order]
+    high_counts = [monthly_stress[m][3] for m in months_order]
+    severe_counts = [monthly_stress[m][4] for m in months_order]
+    
+    #Returns array for y-axis (month)
+    ind = np.arange(len(months_order))
     fig4, ax4 = plt.subplots(figsize=(5, 4))
-    # Plot each month as a horizontal row of segments
-    y_pos = 0
-    height = 0.8
-    for month in months_order:
-        levels = monthly_stress[month]
-        for i, level in enumerate(levels):
-            ax4.broken_barh([(i, 1)], (y_pos, height), facecolors=color_map.get(level, 'gray'))
-        y_pos += 1
+    #Plot stacked bars horizontally
+    ax4.barh(ind, low_counts, color='green', label='Low') #low bar
+    ax4.barh(ind, moderate_counts, left=low_counts, color='orange', label='Moderate') #moderate bar, starts after green ends
+    ax4.barh(ind, high_counts, left=[i+j for i,j in zip(low_counts, moderate_counts)], color='red', label='High') #high bar, calculates how far to the right (after green, orange) 
+    ax4.barh(ind, severe_counts, left=[i+j+k for i,j,k in zip(low_counts, moderate_counts, high_counts)], color='maroon', label='Severe') #severe bar, starts after green, orange, red
     
     #Date and time now
     now = datetime.now() 
     year = now.strftime('%Y') #Year rn
     ax4.set_title(f"Stress Levels - {year}")
-    ax4.set_xlabel("Frequency")
-    ax4.set_yticks(np.arange(len(months_order)))
+    ax4.set_ylabel("Month", fontsize=12, color='gray')
+    ax4.set_xlabel("Frequency", fontsize=12, color='gray')
+    ax4.set_yticks(ind)
     ax4.set_yticklabels(months_order)
     ax4.invert_yaxis()  #Show Jan at top
     ax4.set_xlim(0.5, 3.5) #Centers bart
-    legend_patches = [
-    Patch(color='green', label='Low'),
-    Patch(color='orange', label='Moderate'),
-    Patch(color='red', label='High'),
-    Patch(color='maroon', label='Severe')]
-    ax4.legend(handles=legend_patches)
+    ax4.legend() #Show what ech colour represents
     fig4.tight_layout() #Make sure no overlapping
     charts.append(fig4) #Save chart
 
@@ -532,7 +548,6 @@ def create_annual_charts(profile, container, bg_photo):
         container.grid_rowconfigure(i // 2, weight=1)
         container.grid_columnconfigure(i % 2, weight=1)
         embed_chart(fig, frame)
-
 
 ################################################################################################################################################################################
 
@@ -549,8 +564,10 @@ def main():
     root.configure(bg='white')
     
     #Background picture
-    bg_image = Image.open("tkinter pages/dashboard_bg.png")  #load pic
-    bg_photo = ImageTk.PhotoImage(bg_image)
+    base_dir = os.path.dirname(os.path.abspath(__file__)) 
+    bg_image_path = os.path.join(base_dir, "tkinter pages", "dashboard_bg.png") 
+    bg_image = Image.open(bg_image_path)  #Open the image first
+    bg_photo = ImageTk.PhotoImage(bg_image)  #Convert to PhotoImage
 
 
     #Wrap sidebar and main_area in a content frame
@@ -605,7 +622,7 @@ def main():
             btn.bind("<Enter>", on_hover)
             btn.bind("<Leave>", on_leave)
             if tab.lower() == "weekly":
-                btn.config(command=lambda: create_weekly_charts(profile, main_area, bg_photo))
+                btn.config(command=lambda: create_weekly_charts(profile, main_area, bg_photo)) #weekly button
             elif tab.lower() == "monthly":
                 btn.config(command=lambda: create_monthly_charts(profile, main_area, bg_photo))
             elif tab.lower() == "annual":
