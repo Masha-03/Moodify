@@ -9,10 +9,15 @@ import os
 import sys
 from tkinter import messagebox
 
+#Find the folder where the current Python file is
+base_dir = os.path.dirname(os.path.abspath(__file__))
+#Always save database in same folder
+db_path = os.path.join(base_dir, 'moodify_database.db')
+
 #Get profile from the database
 def get_profile():
     global profile
-    connect = sqlite3.connect('moodify_database.db')
+    connect = sqlite3.connect(db_path)
     cursor = connect.cursor()
     
     #Fetch the profile
@@ -53,7 +58,7 @@ class Timer474(ctk.CTkFrame):
         #Initialise table
         def initialise_table(): 
                 #Connect to database
-                connect = sqlite3.connect('moodify_database.db')
+                connect = sqlite3.connect(db_path)
                 #Create cursor
                 cursor = connect.cursor()
                 
@@ -278,7 +283,7 @@ class Timer474(ctk.CTkFrame):
         current_date = datetime.now().strftime("%Y-%m-%d")
 
         #Connect to the database
-        connect = sqlite3.connect('moodify_database.db')
+        connect = sqlite3.connect(db_path)
         cursor = connect.cursor()
 
        #Check if an entry for the current date and profile already exists
@@ -335,7 +340,7 @@ class Timer478(ctk.CTkFrame):
         #Initialise table
         def initialise_table(): 
                 #Connect to database
-                connect = sqlite3.connect('moodify_database.db')
+                connect = sqlite3.connect(db_path)
                 #Create cursor
                 cursor = connect.cursor()
                 
@@ -560,7 +565,7 @@ class Timer478(ctk.CTkFrame):
         current_date = datetime.now().strftime("%Y-%m-%d")
 
         #Connect to the database
-        connect = sqlite3.connect('moodify_database.db')
+        connect = sqlite3.connect(db_path)
         cursor = connect.cursor()
 
        #Check if an entry for the current date and profile already exists
@@ -616,7 +621,7 @@ class Timer2to1(ctk.CTkFrame):
         #Initialise table
         def initialise_table(): 
                 #Connect to database
-                connect = sqlite3.connect('moodify_database.db')
+                connect = sqlite3.connect(db_path)
                 #Create cursor
                 cursor = connect.cursor()
                 
@@ -837,7 +842,7 @@ class Timer2to1(ctk.CTkFrame):
         current_date = datetime.now().strftime("%Y-%m-%d")
 
         #Connect to the database
-        connect = sqlite3.connect('moodify_database.db')
+        connect = sqlite3.connect(db_path)
         cursor = connect.cursor()
 
        #Check if an entry for the current date and profile already exists
@@ -893,7 +898,7 @@ class Timer5_5(ctk.CTkFrame):
         #Initialise table
         def initialise_table(): 
                 #Connect to database
-                connect = sqlite3.connect('moodify_database.db')
+                connect = sqlite3.connect(db_path)
                 #Create cursor
                 cursor = connect.cursor()
                 
@@ -1114,7 +1119,7 @@ class Timer5_5(ctk.CTkFrame):
         current_date = datetime.now().strftime("%Y-%m-%d")
 
         #Connect to the database
-        connect = sqlite3.connect('moodify_database.db')
+        connect = sqlite3.connect(db_path)
         cursor = connect.cursor()
 
        #Check if an entry for the current date and profile already exists

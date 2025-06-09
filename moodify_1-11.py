@@ -8,16 +8,15 @@ import sys
 import subprocess
 import time
 
-# Find the folder where the current Python file is
+#Find the folder where the current Python file is
 base_dir = os.path.dirname(os.path.abspath(__file__))
-# Always save database in same folder
+#Always save database in same folder
 db_path = os.path.join(base_dir, 'moodify_database.db')
-connect = sqlite3.connect(db_path)
 
 #Initialise shared database
 def initialise_table(): 
         #Connect to database
-        connect = sqlite3.connect('moodify_database.db')
+        connect = sqlite3.connect(db_path)
         #Create cursor
         cursor = connect.cursor()
         
@@ -40,6 +39,23 @@ root.title("Moodify")
 
 #Window fullscreen
 root.state('zoomed')
+
+#Track fullscreen state
+is_fullscreen = [False]
+
+# Toggle fullscreen using the 'f' key
+def toggle_fullscreen(event=None):
+        is_fullscreen[0] = not is_fullscreen[0]
+        root.attributes("-fullscreen", is_fullscreen[0])
+
+#Bind the 'f' key (lowercase only) (for fullscreen)
+root.bind("<Control-f>", toggle_fullscreen)
+
+# ESC to exit fullscreen
+def exit_fullscreen(event=None):
+        root.attributes("-fullscreen", False)
+
+root.bind("<Escape>", exit_fullscreen)
 
 #Get actual screen width and height
 screen_width = root.winfo_screenwidth()
@@ -104,7 +120,7 @@ def enter_data():
         gender = gender_combobox.get()
         
         #Connect to database
-        connect = sqlite3.connect('moodify_database.db')
+        connect = sqlite3.connect(db_path)
         #Create cursor
         cursor = connect.cursor()
         

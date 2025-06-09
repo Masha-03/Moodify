@@ -19,8 +19,13 @@ plt.style.use('fivethirtyeight')
 #Global list to track all charts
 charts = [] 
 
+#Find the folder where the current Python file is
+base_dir = os.path.dirname(os.path.abspath(__file__))
+#Always save database in same folder
+db_path = os.path.join(base_dir, 'moodify_database.db')
+
 def get_profile():
-    connect = sqlite3.connect('moodify_database.db')
+    connect = sqlite3.connect(db_path)
     cursor = connect.cursor()
     cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1")
     result = cursor.fetchone()
@@ -30,7 +35,7 @@ def get_profile():
 #Get profile from the database
 def get_profile():
     global profile
-    connect = sqlite3.connect('moodify_database.db')
+    connect = sqlite3.connect(db_path)
     cursor = connect.cursor()
     
     #Fetch the profile
@@ -78,7 +83,7 @@ def date_range(view_mode):
         return []
 
 def get_breathing_data(profile, date_range_list):
-    connect = sqlite3.connect('moodify_database.db')
+    connect = sqlite3.connect(db_path)
     cursor = connect.cursor()
     sessions = []
     for day in date_range_list:
@@ -92,7 +97,7 @@ def get_breathing_data(profile, date_range_list):
     return date_range_list, sessions
 
 def get_mood_data(profile, date_range_list):
-    connect = sqlite3.connect("moodify_database.db")
+    connect = sqlite3.connect(db_path)
     cursor = connect.cursor()
     start_date = date_range_list[0]
     #Count how many mood for the mood selected
@@ -114,7 +119,7 @@ def get_mood_data(profile, date_range_list):
     return list(filtered.keys()), list(filtered.values()) #split mood and count into 2 different list
 
 def get_diary_data(profile, date_range_list):
-    connect = sqlite3.connect("moodify_database.db")
+    connect = sqlite3.connect(db_path)
     cursor = connect.cursor()
     #Count how many diary entries for each day
     counts = []
@@ -129,7 +134,7 @@ def get_diary_data(profile, date_range_list):
     return date_range_list, counts
 
 def get_stress_data(profile, date_range_list):
-    connect = sqlite3.connect("moodify_database.db")
+    connect = sqlite3.connect(db_path)
     cursor = connect.cursor()
     placeholders = ','.join(['?'] * len(date_range_list))
 
@@ -381,7 +386,7 @@ def create_monthly_charts(profile, container, bg_photo):
        
 #Get mood entries for annual average calculation
 def get_annual_mood_data(profile, date_list):
-    connect = sqlite3.connect("moodify_database.db")
+    connect = sqlite3.connect(db_path)
     cursor = connect.cursor()
     placeholders = ','.join('?' * len(date_list))
     cursor.execute(f'''
