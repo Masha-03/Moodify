@@ -10,7 +10,7 @@ pygame.init()
 
 #Find the folder where the current Python file is
 #Always save database in same folder
-db_path = os.path.join('moodify_database.db')
+db_path = os.path.join('database','moodify_database.db')
 
 DB_NAME = db_path
 RECENT_WORRIES_DISPLAY_COUNT = 3
