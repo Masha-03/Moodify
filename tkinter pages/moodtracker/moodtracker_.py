@@ -22,30 +22,29 @@ mood_quotes = {
 
 def get_db_path():
     base_dir = None
-    db_file_name = 'moodify_database.db'
-    
     if getattr(sys, 'frozen', False):
-        # We are running in a bundle (e.g., PyInstaller)
-        # In PyInstaller, sys._MEIPASS is the path to the temporary folder where your bundled data files are extracted.
-        # You need to configure PyInstaller to include the 'database' folder.
-        base_dir = sys._MEIPASS
-        print(f"Running in frozen mode. Base directory: {base_dir}")
-        
-        # When using PyInstaller, you'd typically put your database file directly into the sys._MEIPASS directory (or a subfolder you specify in the .spec).
-        # For simplicity, if you bundle the whole 'database' folder relative to your script, it will often end up directly in sys._MEIPASS or a subfolder there.
-        db_path = os.path.join(base_dir, 'database', db_file_name) 
-        
+        # When frozen (e.g., PyInstaller), sys._MEIPASS is the root where bundled files are.
+        # If your 'database' folder is alongside the executable in the *final distributed package*,
+        # you might need to adjust this depending on your PyInstaller --add-data configuration.
+        # For now, let's assume the database folder is at the same level as the executable.
+        app_root = sys._MEIPASS
     else:
-        # We are running in a normal Python environment (during development)
-        # The script is in 'YourMainAppFolder/your_main_app.py'
-        # The database is in 'YourMainAppFolder/database/moodify_database.db'
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        print(f"Running in unfrozen mode. Base directory: {base_dir}")
-        
-        # Construct the path relative to the script's directory
-        db_path = os.path.join(base_dir, 'database', db_file_name)
+        # In unfrozen mode, base_dir is 'c:\Users\Coshi\Moodify\tkinter pages'.
+        # We need to go up one level to 'c:\Users\Coshi\Moodify'.
+        script_dir = os.path.dirname(os.path.abspath(__file__)) # This is 'c:\Users\Coshi\Moodify\tkinter pages'
+        app_root = os.path.dirname(script_dir) # This steps up to 'c:\Users\Coshi\Moodify'
 
+    db_file_name = 'moodify_database.db'
+    db_folder_name = 'database'
+
+    # Now, join the app_root with the database folder and the file name
+    db_path = os.path.join(app_root, db_folder_name, db_file_name)
+
+    print(f"Running in {'frozen' if getattr(sys, 'frozen', False) else 'unfrozen'} mode.")
+    print(f"Detected script directory: {os.path.dirname(os.path.abspath(__file__))}")
+    print(f"Calculated application root: {app_root}")
     print(f"Calculated database path: {db_path}")
+
     return db_path
 
 database_file_path = get_db_path()
