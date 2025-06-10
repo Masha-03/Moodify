@@ -163,8 +163,10 @@ is_fullscreen = [False]
 
 # Toggle fullscreen using the 'f' key
 def toggle_fullscreen(event=None):
-    is_fullscreen[0] = not is_fullscreen[0]
-    app.attributes("-fullscreen", is_fullscreen[0])
+    if app.attributes('-fullscreen'):
+        app.attributes('-fullscreen', False)
+    else:
+        app.attributes('-fullscreen', True)
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -199,6 +201,7 @@ def grab_date():
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
 app = ctk.CTk()
+
 #Fullscreen size
 app.update_idletasks()
 try:
@@ -221,8 +224,8 @@ app.bind("<Control-f>", toggle_fullscreen)
 base_dir = os.path.dirname(os.path.abspath(__file__)) 
 bg_image_path = os.path.join(base_dir, "calendar_bg.png") 
 bg_image=Image.open(bg_image_path)
-bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
-bg_photo = ImageTk.PhotoImage(bg_image)
+bg_image_resized = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
+bg_photo = ImageTk.PhotoImage(bg_image_resized)
 
 #Label to display the background image
 bg_label = tk.Label(app, image=bg_photo)
