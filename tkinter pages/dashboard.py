@@ -27,7 +27,7 @@ def resource_path(*relative_path_parts):
         base_path = sys._MEIPASS
     except AttributeError:
         # Not running as a PyInstaller executable, use current script directory
-        base_path = os.path.dirname(os.path.abspath(_file_))
+        base_path = os.path.dirname(os.path.abspath(__file__))
 
     return os.path.join(base_path, *relative_path_parts)
 
