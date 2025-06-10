@@ -19,13 +19,51 @@ plt.style.use('fivethirtyeight')
 #Global list to track all charts
 charts = [] 
 
-#Find the folder where the current Python file is
-base_dir = os.path.dirname(os.path.abspath(__file__))
-#Always save database in same folder
-db_path = os.path.join(base_dir, 'moodify_database.db')
+def get_db_path():
+    base_dir = None
+    db_file_name = 'moodify_database.db'
+    
+    if getattr(sys, 'frozen', False):
+        # We are running in a bundle (e.g., PyInstaller)
+        # In PyInstaller, sys._MEIPASS is the path to the temporary folder where your bundled data files are extracted.
+        # You need to configure PyInstaller to include the 'database' folder.
+        base_dir = sys._MEIPASS
+        print(f"Running in frozen mode. Base directory: {base_dir}")
+        
+        # When using PyInstaller, you'd typically put your database file directly into the sys._MEIPASS directory (or a subfolder you specify in the .spec).
+        # For simplicity, if you bundle the whole 'database' folder relative to your script, it will often end up directly in sys._MEIPASS or a subfolder there.
+        db_path = os.path.join(base_dir, 'database', db_file_name) 
+        
+    else:
+        # We are running in a normal Python environment (during development)
+        # The script is in 'YourMainAppFolder/your_main_app.py'
+        # The database is in 'YourMainAppFolder/database/moodify_database.db'
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        print(f"Running in unfrozen mode. Base directory: {base_dir}")
+        
+        # Construct the path relative to the script's directory
+        db_path = os.path.join(base_dir, 'database', db_file_name)
+
+    print(f"Calculated database path: {db_path}")
+    return db_path
+
+database_file_path = get_db_path()
+
+# Check if the database file exists at the calculated path
+if os.path.exists(database_file_path):
+    print(f"Database file FOUND at: {database_file_path}")
+else:
+    print(f"Database file NOT FOUND at: {database_file_path}")
+    print("WARNING: A new database file will likely be created here.")
+    # Create the 'database' folder if it doesn't exist
+    try:
+        os.makedirs(os.path.dirname(database_file_path), exist_ok=True)
+        print(f"Created directory: {os.path.dirname(database_file_path)}")
+    except OSError as e:
+        print(f"Error creating directory: {e}")
 
 def get_profile():
-    connect = sqlite3.connect(db_path)
+    connect = sqlite3.connect(database_file_path)
     cursor = connect.cursor()
     cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1")
     result = cursor.fetchone()
@@ -35,7 +73,7 @@ def get_profile():
 #Get profile from the database
 def get_profile():
     global profile
-    connect = sqlite3.connect(db_path)
+    connect = sqlite3.connect(database_file_path)
     cursor = connect.cursor()
     
     #Fetch the profile
@@ -83,7 +121,7 @@ def date_range(view_mode):
         return []
 
 def get_breathing_data(profile, date_range_list):
-    connect = sqlite3.connect(db_path)
+    connect = sqlite3.connect(database_file_path)
     cursor = connect.cursor()
     sessions = []
     for day in date_range_list:
@@ -97,7 +135,7 @@ def get_breathing_data(profile, date_range_list):
     return date_range_list, sessions
 
 def get_mood_data(profile, date_range_list):
-    connect = sqlite3.connect(db_path)
+    connect = sqlite3.connect(database_file_path)
     cursor = connect.cursor()
     start_date = date_range_list[0]
     #Count how many mood for the mood selected
@@ -119,7 +157,7 @@ def get_mood_data(profile, date_range_list):
     return list(filtered.keys()), list(filtered.values()) #split mood and count into 2 different list
 
 def get_diary_data(profile, date_range_list):
-    connect = sqlite3.connect(db_path)
+    connect = sqlite3.connect(database_file_path)
     cursor = connect.cursor()
     #Count how many diary entries for each day
     counts = []
@@ -134,7 +172,7 @@ def get_diary_data(profile, date_range_list):
     return date_range_list, counts
 
 def get_stress_data(profile, date_range_list):
-    connect = sqlite3.connect(db_path)
+    connect = sqlite3.connect(database_file_path)
     cursor = connect.cursor()
     placeholders = ','.join(['?'] * len(date_range_list))
 
@@ -386,7 +424,7 @@ def create_monthly_charts(profile, container, bg_photo):
        
 #Get mood entries for annual average calculation
 def get_annual_mood_data(profile, date_list):
-    connect = sqlite3.connect(db_path)
+    connect = sqlite3.connect(database_file_path)
     cursor = connect.cursor()
     placeholders = ','.join('?' * len(date_list))
     cursor.execute(f'''

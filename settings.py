@@ -16,13 +16,48 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
-#Find the folder where the current Python file is
-base_dir = os.path.dirname(os.path.abspath(__file__))
-#Always save database in same folder
-db_path = os.path.join(base_dir, 'moodify_database.db')
+def get_db_path():
+    base_dir = None
+    db_file_name = 'moodify_database.db'
+    
+    if getattr(sys, 'frozen', False):
+        # We are running in a bundle (e.g., PyInstaller)
+        # In PyInstaller, sys._MEIPASS is the path to the temporary folder where your bundled data files are extracted.
+        # You need to configure PyInstaller to include the 'database' folder.
+        base_dir = sys._MEIPASS
+        print(f"Running in frozen mode. Base directory: {base_dir}")
+        
+        # When using PyInstaller, you'd typically put your database file directly into the sys._MEIPASS directory (or a subfolder you specify in the .spec).
+        # For simplicity, if you bundle the whole 'database' folder relative to your script, it will often end up directly in sys._MEIPASS or a subfolder there.
+        db_path = os.path.join(base_dir, 'database', db_file_name) 
+        
+    else:
+        # We are running in a normal Python environment (during development)
+        # The script is in 'YourMainAppFolder/your_main_app.py'
+        # The database is in 'YourMainAppFolder/database/moodify_database.db'
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        print(f"Running in unfrozen mode. Base directory: {base_dir}")
+        
+        # Construct the path relative to the script's directory
+        db_path = os.path.join(base_dir, 'database', db_file_name)
 
-if not os.path.exists(db_path):
-    print("Database file missing at", db_path)
+    print(f"Calculated database path: {db_path}")
+    return db_path
+
+database_file_path = get_db_path()
+
+# Check if the database file exists at the calculated path
+if os.path.exists(database_file_path):
+    print(f"Database file FOUND at: {database_file_path}")
+else:
+    print(f"Database file NOT FOUND at: {database_file_path}")
+    print("WARNING: A new database file will likely be created here.")
+    # Create the 'database' folder if it doesn't exist
+    try:
+        os.makedirs(os.path.dirname(database_file_path), exist_ok=True)
+        print(f"Created directory: {os.path.dirname(database_file_path)}")
+    except OSError as e:
+        print(f"Error creating directory: {e}")
 
 # Constants for screen dimension and colors
 BG_COLOR = (245, 235, 220)
@@ -74,7 +109,7 @@ profile_name_confirmed = False # added profile_name_confirmed.  not used until d
 #Get profile from the database
 def get_profile():
     global profile
-    connect = sqlite3.connect(db_path)
+    connect = sqlite3.connect(database_file_path)
     cursor = connect.cursor()
     
     #Fetch the profile
@@ -89,7 +124,7 @@ def get_profile():
         
 #Database connection 
 def connect_db():
-    connect = sqlite3.connect(db_path)
+    connect = sqlite3.connect(database_file_path)
     return connect
 
 def get_user_data():
