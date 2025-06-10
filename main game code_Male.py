@@ -290,8 +290,12 @@ def sofa_speech():
     speech = random.choice(speech_forsofa)
     return speech 
 
-def asset(*path_parts): #means the function can take any num of strings as argument
-    return os.path.join(os.path.dirname(__file__), *path_parts)
+def asset(*path_parts):
+    if getattr(sys, 'frozen', False):  # If running from a PyInstaller EXE
+        base_path = sys._MEIPASS
+    else:  # If running as a normal .py script
+        base_path = os.path.dirname(__file__)
+    return os.path.join(base_path, *path_parts)
 
 #using a virtual screen so can do fullscreen
 VIRTUAL_WIDTH = 1280
