@@ -610,6 +610,9 @@ def main():
     root.state("zoomed")
     root.configure(bg='white')
     
+    # Ensure window is fully opaque (explicitly set, even if not needed)
+    root.attributes('-alpha', 1.0) 
+    
     #Solve issue of not closing properly
     def on_close():
         for fig in charts:
