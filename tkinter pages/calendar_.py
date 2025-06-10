@@ -224,7 +224,7 @@ app.bind("<Control-f>", toggle_fullscreen)
 base_dir = os.path.dirname(os.path.abspath(__file__)) 
 bg_image_path = os.path.join(base_dir, "calendar_bg.png") 
 bg_image=Image.open(bg_image_path)
-bg_image_resized = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
+bg_image_resized = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()), Image.LANCZOS)  # Resize to fullscreen
 bg_photo = ImageTk.PhotoImage(bg_image_resized)
 
 #Label to display the background image
