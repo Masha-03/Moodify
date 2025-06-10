@@ -18,7 +18,7 @@ RECENT_WORRIES_DISPLAY_COUNT = 3
 #Get profile from the database
 def get_profile():
     global profile
-    connect = sqlite3.connect(db_path)
+    connect = sqlite3.connect(os.path.join('database','moodify_database.db'))
     cursor = connect.cursor()
     
     #Fetch the profile
