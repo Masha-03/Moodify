@@ -202,18 +202,8 @@ ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
 app = ctk.CTk()
 
-#Fullscreen size
-app.update_idletasks()
-try:
-    app.state('zoomed')  # Works on Windows
-    app.update()
-    if app.winfo_width() < 300:  # If it didn't zoom properly
-        raise Exception("Zoom failed")
-except:
-    # Fallback: manually set to full screen size
-    screen_width = app.winfo_screenwidth()
-    screen_height = app.winfo_screenheight()
-    app.geometry(f"{screen_width}x{screen_height}")
+app.geometry(f"{app.winfo_screenwidth()}x{app.winfo_screenheight()}") #Full-screen size
+   
 app.title("Calendar")
 app.configure(bg="#FFF8F0") #change the background color of entire window
 
@@ -224,8 +214,8 @@ app.bind("<Control-f>", toggle_fullscreen)
 base_dir = os.path.dirname(os.path.abspath(__file__)) 
 bg_image_path = os.path.join(base_dir, "calendar_bg.png") 
 bg_image=Image.open(bg_image_path)
-bg_image_resized = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()), Image.LANCZOS)  # Resize to fullscreen
-bg_photo = ImageTk.PhotoImage(bg_image_resized)
+bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()), Image.Resampling.LANCZOS)  # Resize to fullscreen
+bg_photo = ImageTk.PhotoImage(bg_image)
 
 #Label to display the background image
 bg_label = tk.Label(app, image=bg_photo)
