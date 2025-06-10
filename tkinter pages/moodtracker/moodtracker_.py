@@ -21,21 +21,27 @@ mood_quotes = {
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
 
 def get_db_path():
-    base_dir = None
-    if getattr(sys, 'frozen', False):
-        # When frozen (e.g., PyInstaller), sys._MEIPASS is the root where bundled files are.
-        # If your 'database' folder is alongside the executable in the *final distributed package*,
-        # you might need to adjust this depending on your PyInstaller --add-data configuration.
-        # For now, let's assume the database folder is at the same level as the executable.
-        app_root = sys._MEIPASS
-    else:
-        # In unfrozen mode, base_dir is 'c:\Users\Coshi\Moodify\tkinter pages'.
-        # We need to go up one level to 'c:\Users\Coshi\Moodify'.
-        script_dir = os.path.dirname(os.path.abspath(__file__)) # This is 'c:\Users\Coshi\Moodify\tkinter pages'
-        app_root = os.path.dirname(script_dir) # This steps up to 'c:\Users\Coshi\Moodify'
-
     db_file_name = 'moodify_database.db'
     db_folder_name = 'database'
+
+    if getattr(sys, 'frozen', False):
+        # We are running in a bundle (e.g., PyInstaller)
+        # In this scenario, sys._MEIPASS typically points to the root of the extracted bundle.
+        # If your 'database' folder is placed directly inside that root by PyInstaller,
+        # then os.path.join(sys._MEIPASS, db_folder_name, db_file_name) is correct.
+        # Ensure your PyInstaller --add-data includes the 'database' folder at the root.
+        app_root = sys._MEIPASS
+    else:
+        # We are running in a normal Python environment (unfrozen)
+        # Current script location: c:\Users\Coshi\Moodify\tkinter pages\mood tracker\your_script.py
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        # script_dir will be: c:\Users\Coshi\Moodify\tkinter pages\mood tracker
+
+        # To get to 'c:\Users\Coshi\Moodify', we need to go up two levels:
+        # 1. From 'mood tracker' to 'tkinter pages'
+        # 2. From 'tkinter pages' to 'Moodify'
+        intermediate_dir = os.path.dirname(script_dir) # Goes up to 'c:\Users\Coshi\Moodify\tkinter pages'
+        app_root = os.path.dirname(intermediate_dir) # Goes up to 'c:\Users\Coshi\Moodify'
 
     # Now, join the app_root with the database folder and the file name
     db_path = os.path.join(app_root, db_folder_name, db_file_name)
