@@ -8,6 +8,23 @@ import os
 from PIL import Image,ImageTk
 import time
 
+# --- Asset Helper Function (for PyInstaller compatibility) ---
+def resource_path(*relative_path_parts):
+    """
+    Returns the absolute path to a resource, whether running as a script
+    or as a PyInstaller bundled executable.
+    """
+    try:
+        # PyInstaller creates a temp folder and sets _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # Not running as a PyInstaller executable, use current script directory
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+    return os.path.join(base_path, *relative_path_parts)
+
+profile=None
+
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 #Get profile from the database
 def get_profile():

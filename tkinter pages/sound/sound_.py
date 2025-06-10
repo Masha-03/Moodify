@@ -5,6 +5,24 @@ import pygame #for pygame.mixer and inside the progress bar(handle audio playbac
 import os
 import customtkinter as ctk
 from tkinter import messagebox
+import sys
+
+# --- Asset Helper Function (for PyInstaller compatibility) ---
+def resource_path(*relative_path_parts):
+    """
+    Returns the absolute path to a resource, whether running as a script
+    or as a PyInstaller bundled executable.
+    """
+    try:
+        # PyInstaller creates a temp folder and sets _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # Not running as a PyInstaller executable, use current script directory
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+    return os.path.join(base_path, *relative_path_parts)
+
+profile=None
 
 #initialize pygame mixer
 pygame.mixer.init()
@@ -219,7 +237,7 @@ root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}") #full-s
 root.title("Soothing Sound Player")
 
 # Load and set background image
-bg_image = Image.open(get_image_path("Moodify","sound_bg.png"))  # Replace with your image file
+bg_image = Image.open(get_image_path("sound_bg.png"))  # Replace with your image file
 bg_image = bg_image.resize((root.winfo_screenwidth(), root.winfo_screenheight()), Image.Resampling.LANCZOS)
 bg_photo = ImageTk.PhotoImage(bg_image)
 bg_label = tk.Label(root, image=bg_photo)
