@@ -406,7 +406,7 @@ moodtracker_rect.x= 350
 moodtracker_rect.y= 70
 moodtracker_process = None
 
-play_button_img = pygame.image.load(asset("Moodify","graphics","play button.png"))
+play_button_img = pygame.image.load(asset("graphics","play button.png"))
 play_button_rect = play_button_img.get_rect()
 play_button_rect.x = 550
 play_button_rect.y = 400
