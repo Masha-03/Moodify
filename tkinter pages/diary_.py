@@ -7,6 +7,8 @@ import tkinter.font as tkfont #use to import font module from tkinter library
 import sqlite3
 import os
 from PIL import Image, ImageTk
+import os
+import sys
 import customtkinter as ctk
 from datetime import datetime
 from tkinter import simpledialog,messagebox

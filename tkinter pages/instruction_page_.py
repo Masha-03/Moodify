@@ -5,6 +5,7 @@ import sys
 import sqlite3
 import subprocess #Open new window
 import os
+import sys
 from PIL import Image,ImageTk
 import time
 

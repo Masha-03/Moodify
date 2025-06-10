@@ -6,6 +6,7 @@ import datetime
 import sqlite3
 import os
 import customtkinter as ctk
+import sys
 import datetime
 
 mood_quotes = {
