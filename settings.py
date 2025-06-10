@@ -21,6 +21,9 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 #Always save database in same folder
 db_path = os.path.join(base_dir, 'moodify_database.db')
 
+if not os.path.exists(db_path):
+    print("Database file missing at", db_path)
+
 # Constants for screen dimension and colors
 BG_COLOR = (245, 235, 220)
 SETTINGS_BG = (210, 180, 140)
