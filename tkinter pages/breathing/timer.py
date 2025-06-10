@@ -54,7 +54,7 @@ else:
 #Get profile from the database
 def get_profile():
     global profile
-    connect = sqlite3.connect(db_path)
+    connect = sqlite3.connect(database_file_path)
     cursor = connect.cursor()
     
     #Fetch the profile
