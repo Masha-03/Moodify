@@ -359,13 +359,13 @@ exit_button.place(relx=0.97, rely=0.04, anchor="ne")
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-clear_button = tk.Button(root, text="Clear Entry", font=("Comic Sans MS", 10), bg="#ffd3d3", command=clear_entry)
-clear_button.place(relx=0.97, rely=0.19, anchor="ne")
+clear_button = ctk.CTkButton(root, text="Clear Entry", font=("Segoe UI", 14), hover_color="#FFA9FF", text_color="black",fg_color="#ffd3d3", corner_radius=25,command=clear_entry)
+clear_button.place(relx=0.03, rely=0.13, anchor="w")
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-timestamp_button = tk.Button(root, text="Insert Timestamp", font=("Comic Sans MS", 10), command=insert_timestamp)
-timestamp_button.place(relx=0.97, rely=0.14, anchor="ne")
+timestamp_button = ctk.CTkButton(root, text="Insert Timestamp",fg_color="#ffadad", hover_color="#F7CDFF", font=("Segoe UI", 14),text_color="black", corner_radius=25,command=insert_timestamp)
+timestamp_button.place(relx=0.03, rely=0.08, anchor="w")
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
