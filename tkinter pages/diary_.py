@@ -13,6 +13,21 @@ import customtkinter as ctk
 from datetime import datetime
 from tkinter import simpledialog,messagebox
 
+# --- Asset Helper Function (for PyInstaller compatibility) ---
+def resource_path(*relative_path_parts):
+    """
+    Returns the absolute path to a resource, whether running as a script
+    or as a PyInstaller bundled executable.
+    """
+    try:
+        # PyInstaller creates a temp folder and sets _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # Not running as a PyInstaller executable, use current script directory
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+    return os.path.join(base_path, *relative_path_parts)
+
 #counts how many words are in the diary
 def word_count(event=None): #event=None:means it can be called with/without event
     content = text_entry.get("1.0", "end-1c")  #get full text from text widget #1.0=start from line 1,character 0(very beginning) #end-1c=means up to one character before the end 
