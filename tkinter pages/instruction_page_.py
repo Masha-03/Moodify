@@ -100,7 +100,7 @@ else:
 #Get profile from the database
 def get_profile():
     global profile
-    connect = sqlite3.connect('moodify_database.db')
+    connect = sqlite3.connect(database_file_path)
     cursor = connect.cursor()
     
     #Fetch the profile
@@ -116,7 +116,7 @@ def get_profile():
 def get_gender():
     if profile is None:
         return None
-    connect = sqlite3.connect('moodify_database.db')
+    connect = sqlite3.connect(database_file_path)
     cursor = connect.cursor()
     cursor.execute("SELECT gender FROM user_info WHERE profile = ? LIMIT 1", (profile,))
     result = cursor.fetchone()
