@@ -106,7 +106,6 @@ else:
         print(f"Error creating directory: {e}")
 
 #Get profile from the database
-profile = None # Initialize global profile variable
 def get_profile():
     global profile
     try:
@@ -168,7 +167,7 @@ def start_game():
         #Close the current Tkinter window
         root.destroy()
 
-#--------------------------------------------------------------masha---------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
 
 def run_game(): # This function seems unused in your current flow
     pygame.init()

@@ -28,60 +28,8 @@ profile=None
 #for alignment
 bg_photo_tk = None #hold PhotoImage object #keep a reference
 bg_photo_id = None #to modify the existing image 
-#--------------------------------------------------------------masha---------------------------------------------------------------------------------#
-#Get profile from the database
-def get_profile():
-    global profile
-    connect = sqlite3.connect('moodify_database.db')
-    cursor = connect.cursor()
-    
-    #Fetch the profile
-    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
-    result = cursor.fetchone()
-    
-    connect.close() #Close connection
-    if result:
-        profile = result[0]  #Store the profile 
-    else:
-        profile = None  #Set profile to None if no profile found
         
-def get_gender():
-    if profile is None:
-        return None
-    connect = sqlite3.connect('moodify_database.db')
-    cursor = connect.cursor()
-    cursor.execute("SELECT gender FROM user_info WHERE profile = ? LIMIT 1", (profile,))
-    result = cursor.fetchone()
-    connect.close()
-    if result:
-        return result[0]
-    else:
-        return None
-    
-def start_game():
-    get_profile()
-    gender = get_gender()
-    
-    if gender is None:
-        tk.messagebox.showerror("Error", "No gender found for profile.")
-        return
-    
-    gender = gender.strip().lower()
-    
-    if gender == "female":
-        subprocess.Popen([sys.executable, "main game code.py"])
-        #Wait for 3 seconds before closing the window
-        time.sleep(3)
-        #Close the current Tkinter window
-        root.destroy()
-    elif gender == "male":
-        subprocess.Popen([sys.executable, "main game code_Male.py"])
-        #Wait for 3 seconds before closing the window
-        time.sleep(3)
-        #Close the current Tkinter window
-        root.destroy()
-        
-#--------------------------------------------------------------masha---------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------------------------------------------------------#
 
 def run_game():
     pygame.init()
