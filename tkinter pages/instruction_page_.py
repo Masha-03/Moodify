@@ -183,8 +183,16 @@ def scroll_to_top():
 
 #Tkinter instruction window
 root = tk.Tk()
-root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}")
+root.update_idletasks()  # ensures window is updated
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+root.geometry(f"{screen_width}x{screen_height}")
 root.title("Moodify Instructions")
+
+VIRTUAL_WIDTH = 1280
+VIRTUAL_HEIGHT = 720
+scale_x = screen_width / VIRTUAL_WIDTH
+scale_y = screen_height / VIRTUAL_HEIGHT
 
 current_font_size = tk.IntVar(value=13)  # starting font size
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -193,7 +201,7 @@ current_font_size = tk.IntVar(value=13)  # starting font size
 base_dir = os.path.dirname(os.path.abspath(__file__)) 
 bg_image_path = os.path.join(base_dir, "instruction_page_bg.png") 
 bg_image=Image.open(bg_image_path)
-bg_image = bg_image.resize((root.winfo_screenwidth(), root.winfo_screenheight()), Image.Resampling.LANCZOS)
+bg_image = bg_image.resize((screen_width, screen_height), Image.Resampling.LANCZOS)
 bg_photo = ImageTk.PhotoImage(bg_image)
 
 bg_label = tk.Label(root, image=bg_photo)
