@@ -215,7 +215,9 @@ def enter_data():
         #Close connection
         connect.close()
 
-        subprocess.Popen([sys.executable, "tkinter pages/instruction_page_.py"])
+        instruction_script_path = resource_path("tkinter pages", "instruction_page_.py")
+        subprocess.Popen([sys.executable, instruction_script_path])
+        
         #Wait for 3 seconds before closing the window
         time.sleep(3)
         #Close the current Tkinter window

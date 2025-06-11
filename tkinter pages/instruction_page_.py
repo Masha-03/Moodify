@@ -5,9 +5,25 @@ import sys
 import sqlite3
 import subprocess #Open new window
 import os
-import sys
 from PIL import Image,ImageTk
 import time
+
+# --- Asset Helper Function (for PyInstaller compatibility) ---
+def resource_path(*relative_path_parts):
+    """
+    Returns the absolute path to a resource, whether running as a script
+    or as a PyInstaller bundled executable.
+    """
+    try:
+        # PyInstaller creates a temp folder and sets _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # Not running as a PyInstaller executable, use current script directory
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+    return os.path.join(base_path, *relative_path_parts)
+
+profile=None
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------#
 #for animation of the button
@@ -40,53 +56,10 @@ def decrease_font_size():
         instruction_text_widget.configure(font=("Segoe UI", current_font_size.get()))
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
-
-def get_db_path():
-    base_dir = None
-    if getattr(sys, 'frozen', False):
-        # When frozen (e.g., PyInstaller), sys._MEIPASS is the root where bundled files are.
-        # If your 'database' folder is alongside the executable in the *final distributed package*,
-        # you might need to adjust this depending on your PyInstaller --add-data configuration.
-        # For now, let's assume the database folder is at the same level as the executable.
-        app_root = sys._MEIPASS
-    else:
-        # In unfrozen mode, base_dir is 'c:\Users\Coshi\Moodify\tkinter pages'.
-        # We need to go up one level to 'c:\Users\Coshi\Moodify'.
-        script_dir = os.path.dirname(os.path.abspath(__file__)) # This is 'c:\Users\Coshi\Moodify\tkinter pages'
-        app_root = os.path.dirname(script_dir) # This steps up to 'c:\Users\Coshi\Moodify'
-
-    db_file_name = 'moodify_database.db'
-    db_folder_name = 'database'
-
-    # Now, join the app_root with the database folder and the file name
-    db_path = os.path.join(app_root, db_folder_name, db_file_name)
-
-    print(f"Running in {'frozen' if getattr(sys, 'frozen', False) else 'unfrozen'} mode.")
-    print(f"Detected script directory: {os.path.dirname(os.path.abspath(__file__))}")
-    print(f"Calculated application root: {app_root}")
-    print(f"Calculated database path: {db_path}")
-
-    return db_path
-
-database_file_path = get_db_path()
-
-# Check if the database file exists at the calculated path
-if os.path.exists(database_file_path):
-    print(f"Database file FOUND at: {database_file_path}")
-else:
-    print(f"Database file NOT FOUND at: {database_file_path}")
-    print("WARNING: A new database file will likely be created here.")
-    # Create the 'database' folder if it doesn't exist
-    try:
-        os.makedirs(os.path.dirname(database_file_path), exist_ok=True)
-        print(f"Created directory: {os.path.dirname(database_file_path)}")
-    except OSError as e:
-        print(f"Error creating directory: {e}")
-
 #Get profile from the database
 def get_profile():
     global profile
-    connect = sqlite3.connect(database_file_path)
+    connect = sqlite3.connect('moodify_database.db')
     cursor = connect.cursor()
     
     #Fetch the profile
@@ -102,7 +75,7 @@ def get_profile():
 def get_gender():
     if profile is None:
         return None
-    connect = sqlite3.connect(database_file_path)
+    connect = sqlite3.connect('moodify_database.db')
     cursor = connect.cursor()
     cursor.execute("SELECT gender FROM user_info WHERE profile = ? LIMIT 1", (profile,))
     result = cursor.fetchone()
@@ -123,13 +96,15 @@ def start_game():
     gender = gender.strip().lower()
     
     if gender == "female":
-        subprocess.Popen([sys.executable, "main game code.py"])
+        script_path = resource_path("..", "main game code.py")
+        subprocess.Popen([sys.executable, script_path])
         #Wait for 3 seconds before closing the window
         time.sleep(3)
         #Close the current Tkinter window
         root.destroy()
     elif gender == "male":
-        subprocess.Popen([sys.executable, "main game code_Male.py"])
+        script_path = resource_path("..", "main game code_Male.py")
+        subprocess.Popen([sys.executable, script_path])
         #Wait for 3 seconds before closing the window
         time.sleep(3)
         #Close the current Tkinter window
@@ -280,7 +255,8 @@ instruction_text = (
         "🛋️ Sofa & Friends\n"
         "• Bonus fun: Click the **sofa, cockroach, teddy bear, or pirate** for random cute bubble convos!\n"
         "💻 Hidden Games\n"
-        "Oh — and there are *3 HIDDEN GAMES* inside the TV. Go find 'em 👀\n\n"
+        "Oh — and there are *3 HIDDEN GAMES* inside the TV. Go find 'em 👀\n"
+        "Press escape to exit the games window\n\n"
         "🔊 You can adjust or mute the background music anytime by clicking the **SETTINGS** icon.\n\n"
         "🌟 This app is your chill zone. Take a break, have fun, and treat yourself!"
     )
