@@ -80,7 +80,7 @@ scale_size = 0.75
 
 male_frames = [
     pygame.transform.scale_by(
-        pygame.image.load(resource_path(os.path.join(f"Moodify/male/boy_pixil_frame_{i}.png"))), scale_size)
+        pygame.image.load(resource_path(os.path.join(f"Moodify\male\boy_pixil_frame_{i}.png"))), scale_size)
     for i in range(4)]
 
 female_frames = [

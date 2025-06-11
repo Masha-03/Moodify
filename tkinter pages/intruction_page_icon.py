@@ -20,11 +20,14 @@ def resource_path(*relative_path_parts):
     except AttributeError:
         # Not running as a PyInstaller executable, use current script directory
         base_path = os.path.dirname(os.path.abspath(__file__))
-
     return os.path.join(base_path, *relative_path_parts)
 
 profile=None
 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------#
+#for alignment
+bg_photo_tk = None #hold PhotoImage object #keep a reference
+bg_photo_id = None #to modify the existing image 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 #Get profile from the database
 def get_profile():
@@ -99,108 +102,165 @@ def run_game():
     sys.exit()
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-def get_image_path(filename):
-    # This gets the path of the current Python file
-    base_path = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(base_path, filename)
+# Enable scrolling with the mouse wheel
+def on_mousewheel(event):
+    if event.num == 4:
+        instruction_canvas.yview_scroll(-1, "units")
+    elif event.num == 5:
+        instruction_canvas.yview_scroll(1, "units")
+    else:
+        instruction_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 def scroll_to_top():
-    canvas.yview_moveto(0)
+    instruction_canvas.yview_moveto(0)
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 def increase_font_size():
     size = current_font_size.get()
     if size < 20:  # max size limit
         current_font_size.set(size + 1)
         instruction_text_widget.configure(font=("Segoe UI", current_font_size.get()))
+        instruction_canvas.update_idletasks()
+        instruction_canvas.configure(scrollregion=instruction_canvas.bbox("all"))
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 def decrease_font_size():
     size = current_font_size.get()
     if size > 10:  # min size limit
         current_font_size.set(size - 1)
         instruction_text_widget.configure(font=("Segoe UI", current_font_size.get()))
+        instruction_canvas.update_idletasks()
+        instruction_canvas.configure(scrollregion=instruction_canvas.bbox("all"))
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #Tkinter instruction window
 root = tk.Tk()
-root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}")
 root.title("Moodify Instructions")
+root.geometry("1280x720")
 
 current_font_size = tk.IntVar(value=13) 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Load and set background image
-base_dir = os.path.dirname(os.path.abspath(__file__)) 
-bg_image_path = os.path.join(base_dir, "instruction_page_bg.png") 
-bg_image=Image.open(bg_image_path)
-bg_image = bg_image.resize((root.winfo_screenwidth(), root.winfo_screenheight()), Image.Resampling.LANCZOS)
-bg_photo = ImageTk.PhotoImage(bg_image)
+base_dir = os.path.dirname(os.path.abspath(__file__))
+bg_image_path = os.path.join(base_dir, "instruction_page_bg.png")
+try:
+    bg_image_original = Image.open(bg_image_path)
+except FileNotFoundError:
+    tk.messagebox.showerror("Error", f"Background image not found: {bg_image_path}")
+    root.destroy()
+    sys.exit()
 
-bg_label = tk.Label(root, image=bg_photo)
-bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
+main_canvas = tk.Canvas(root, highlightthickness=0)
+main_canvas.pack(fill="both", expand=True)
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#for alignment
+outer_frame_window_id=None
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#for alignment
+def resize_layout(event=None):
+    global bg_photo_tk, bg_photo_id, outer_frame_window_id
+
+    #get current width and height of main_canvas
+    current_width = main_canvas.winfo_width()
+    current_height = main_canvas.winfo_height()
+
+    #safeguard
+    if current_width == 1 or current_height == 1:
+        return
+
+#Resizing and placing background image
+    resized_bg_image = bg_image_original.resize((current_width, current_height), Image.Resampling.LANCZOS) #takes bg_image_original and resizes it to match current height and width
+    bg_photo_tk = ImageTk.PhotoImage(resized_bg_image) #convert pillow image into PhotoImage
+
+    #Checks if the background image has already been placed on the canvas before
+    if bg_photo_id:
+        main_canvas.itemconfig(bg_photo_id, image=bg_photo_tk) #if  image is already on the canvas,this updates the existing image item with the new bg_photo_tk
+    else:
+        bg_photo_id = main_canvas.create_image(0, 0, image=bg_photo_tk, anchor="nw")  #If bg_photo_id is None (first time the function runs), it creates the image 
+    main_canvas.tag_lower(bg_photo_id) #This ensures the background image stays at the very bottom layer of the canvas
+
+#Positioning Outer Frame (Instruction Box Container)
+    #relative percentage-They mean the outer_frame(instruction box's container)
+    rel_outer_frame_width = 0.8 
+    rel_outer_frame_height = 0.7
+
+    outer_frame_abs_width = int(current_width * rel_outer_frame_width) #Calculates the actual pixel width for the outer_frame based on the canvas's current width and the relative percentage. 
+    outer_frame_abs_height = int(current_height * rel_outer_frame_height) #Calculates the actual pixel height for the outer_frame based on the canvas's current height and the relative percentage. 
+    outer_frame_x = (current_width - outer_frame_abs_width) / 2 #a formula to center an object horizontally
+
+    rel_outer_frame_y = 0.15 #outer_frame will start 15% down from the top of the canvas
+    outer_frame_y = current_height * rel_outer_frame_y #Calculates the absolute pixel Y coordinate.
+
+    if outer_frame_window_id is None: #Checks if the outer_frame has been placed on the canvas before.
+        outer_frame_window_id = main_canvas.create_window(outer_frame_x, outer_frame_y, window=outer_frame, anchor="nw",
+                                                          width=outer_frame_abs_width, height=outer_frame_abs_height)
+    else: #If the outer_frame_window_id already exists, these lines update the position and size of the existing outer_frame item on the canvas.
+        main_canvas.coords(outer_frame_window_id, outer_frame_x, outer_frame_y)
+        main_canvas.itemconfigure(outer_frame_window_id, width=outer_frame_abs_width, height=outer_frame_abs_height)
+
+    #This ensures that the instruction_canvas and its contents (scrollable_frame, instruction_text_widget) have their correct, updated sizes before you try to calculate the scroll region.
+    root.update_idletasks() 
+    instruction_canvas.update_idletasks()
+    #This line tells the instruction_canvas to set its scrollable area (scrollregion) to encompass "all" of its contents.
+    instruction_canvas.configure(scrollregion=instruction_canvas.bbox("all"))
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # Title Label
 title_label = tk.Label(root,text="🌼 Welcome to Moodify! 🌼",font=("Segoe UI", 20, "bold"),bg="#fbe4ff",fg="#4A4A4A",pady=20)
-title_label.pack(pady=(10, 10))
+title_label.place(relx=0.5, rely=0.05, anchor="n")
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-
 # Outer frame (holds the framed instruction box)
 outer_frame = tk.Frame(root, bg="#fbe4ff")
-outer_frame.pack(pady=(0,10), padx=30, fill="both", expand=True)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Inner box frame with visible border
 box_frame = tk.Frame(outer_frame, bg="#FFEFE1", bd=3, relief="ridge",width=1100,height=420)
-box_frame.pack(fill="x", expand=False,padx=20,pady=10)
-box_frame.pack_propagate(False)
+box_frame.pack(fill="both", expand=True,padx=20,pady=20)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Canvas inside the box
-canvas = tk.Canvas(box_frame, bg="#FFEFE1", highlightthickness=0)
-canvas.pack(side="left", fill="y")
-canvas.configure(height=420,width=1100)
+instruction_canvas = tk.Canvas(box_frame, bg="#FFEFE1", highlightthickness=0)
+instruction_canvas.pack(side="left", fill="both", expand=True)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 #SCROLLBAR
 # Scrollbar INSIDE the box
-scrollbar = tk.Scrollbar(box_frame, orient="vertical", command=canvas.yview)
+scrollbar = tk.Scrollbar(box_frame, orient="vertical", command=instruction_canvas.yview)
 scrollbar.pack(side="right", fill="y", padx=(0, 5), pady=5)
+instruction_canvas.configure(yscrollcommand=scrollbar.set)
 
 # Frame inside canvas for content
-scrollable_frame = tk.Frame(canvas, bg="#FFEFE1")
-canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-canvas.configure(yscrollcommand=scrollbar.set)
+scrollable_frame = tk.Frame(instruction_canvas, bg="#FFEFE1")
+instruction_canvas.create_window((0, 0), window=scrollable_frame, anchor="nw",tags="scrollable_frame")
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Auto scrollregion update
 def update_scrollregion(event=None):
-    canvas.configure(scrollregion=canvas.bbox("all"))
+    instruction_canvas.configure(scrollregion=instruction_canvas.bbox("all"))
+    canvas_width = instruction_canvas.winfo_width()
+    if canvas_width > 0:
+        instruction_canvas.itemconfig("scrollable_frame", width=canvas_width)
 
 scrollable_frame.bind("<Configure>", update_scrollregion)
-
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-
-# Enable scrolling with the mouse wheel
-def on_mousewheel(event):
-    canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-
-# Bind mouse wheel to canvas (Windows and Linux)
-canvas.bind_all("<MouseWheel>", on_mousewheel) #everytime the mouse wheel scrolled,call on_mousewheel event
-
-# Bind mouse wheel for macOS (uses different event name)
-canvas.bind_all("<Button-4>", lambda event: canvas.yview_scroll(-1, "units"))
-canvas.bind_all("<Button-5>", lambda event: canvas.yview_scroll(1, "units"))
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # Instruction Text
 
 # Instruction Text (using Text widget for styling)
 instruction_text_widget = tk.Text(scrollable_frame, font=("Segoe UI", 13), bg="#FFF2E6", fg="#333333", wrap="word", padx=40, pady=20, height=20, width=100)
-instruction_text_widget.pack(pady=(0, 20))
+instruction_text_widget.pack(fill="both",expand=True)
 
 # Insert the bold, bigger "How to Use:" heading
 instruction_text_widget.insert("1.0", "💡 How to Use:\n\n")
@@ -241,6 +301,8 @@ instruction_text = (
     )
 
 instruction_text_widget.insert("end", instruction_text)
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #Highlight keywords
 def highlight_text(text_widget, keyword, tag_name, color="red", font_weight="bold"):
@@ -283,11 +345,9 @@ instruction_text_widget.config(state="disabled")
 is_fullscreen = [False]
 
 def toggle_fullscreen(event=None):
-    is_fullscreen = root.attributes("-fullscreen")
-    root.attributes("-fullscreen", not is_fullscreen)
-    # After toggling fullscreen, update scrollregion to ensure scrolling works correctly
-    root.update_idletasks()
-    canvas.configure(scrollregion=canvas.bbox("all"))
+    current_fullscreen_state = root.attributes("-fullscreen")
+    root.attributes("-fullscreen", not current_fullscreen_state)
+    is_fullscreen[0] = not current_fullscreen_state
 
 root.bind("<Control-f>", toggle_fullscreen)
 
@@ -305,6 +365,8 @@ exit_button = ctk.CTkButton(
 )
 exit_button.place(relx=0.97, rely=0.07, anchor="ne")
 
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 back_to_top_btn = ctk.CTkButton(
     root,
     text="⬆ Back to Top",
@@ -315,7 +377,9 @@ back_to_top_btn = ctk.CTkButton(
     corner_radius=25,
     command=scroll_to_top
 )
-back_to_top_btn.place(relx=0.97, rely=0.84, anchor="se")
+back_to_top_btn.place(relx=0.97, rely=0.93, anchor="se")
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 increase_font_button = ctk.CTkButton(
     root,
@@ -328,7 +392,7 @@ increase_font_button = ctk.CTkButton(
     corner_radius=25,
     width=60
 )
-increase_font_button.place(relx=0.10, rely=0.78)
+increase_font_button.place(relx=0.10, rely=0.88)
 
 decrease_font_button = ctk.CTkButton(
     root,
@@ -341,7 +405,18 @@ decrease_font_button = ctk.CTkButton(
     corner_radius=25,
     width=60
 )
-decrease_font_button.place(relx=0.04, rely=0.78)
+decrease_font_button.place(relx=0.04, rely=0.88)
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+# --- Initial setup calls ---
+root.attributes("-fullscreen", True) # Start in fullscreen
+root.bind("<Configure>", resize_layout)
+root.after(100, resize_layout)
+
+root.bind_all("<MouseWheel>", on_mousewheel)
+root.bind_all("<Button-4>", on_mousewheel)
+root.bind_all("<Button-5>", on_mousewheel)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Run the app

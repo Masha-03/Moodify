@@ -24,35 +24,33 @@ def resource_path(*relative_path_parts):
     return os.path.join(base_path, *relative_path_parts)
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------#
-#for animation of the button
-original_y = None # Define at the top of your file
+#for the animation of the start button
+# New global variables to manage bobbing animation state
+bob_initial_pady = 10 # This is the initial pady value from start_button.pack(pady=(10,0))
+current_bob_pady = bob_initial_pady
+bob_direction = 1 # 1 for increasing pady (down), -1 for decreasing pady (up)
 
-def bob(widget, direction=1):
-    global original_y
-    # Ensure original_y is set for the first time if not already
-    if original_y is None:
-        try:
-            widget.update_idletasks() # Ensure widget is fully rendered
-            original_y = widget.winfo_y()
-        except tk.TclError:
-            # Widget might not be mapped yet, skip this frame or set a default
-            return
+def bob_packed_widget(widget):
+    global current_bob_pady, bob_direction
 
     try:
-        y = widget.winfo_y() + direction
-        widget.place_configure(y=y)
+        # Calculate new pady for the animation
+        current_bob_pady += bob_direction
 
-        if y >= original_y + 5:
-            direction = -1
-        elif y <= original_y - 5:
-            direction = 1
+        # Apply new pady to the widget using pack_configure
+        widget.pack_configure(pady=(current_bob_pady, 0)) # Assuming 0 for bottom pady
 
-        # Use root.after instead of widget.after for more consistent animation scheduling
-        root.after(100, lambda: bob(widget, direction))
+        # Reverse direction if limits are reached (bobbing range: initial_pady +/- 5 pixels)
+        if current_bob_pady >= bob_initial_pady + 5: # Bob down limit
+            bob_direction = -1
+        elif current_bob_pady <= bob_initial_pady - 5: # Bob up limit
+            bob_direction = 1
+
+        # Schedule the next animation frame
+        widget.after(100, lambda: bob_packed_widget(widget))
     except tk.TclError:
-        # Catch error if widget is destroyed while animation is active
+        # Catch error if widget is destroyed (e.g., window closed)
         pass
-
 
 def increase_font_size():
     size = current_font_size.get()
@@ -407,7 +405,7 @@ decrease_font_button = ctk.CTkButton(
 )
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
-
+#alignment
 # --- Define the responsive layout function ---
 def resize_layout(event=None):
     global bg_photo_tk, bg_photo_id, title_window_id, outer_frame_window_id, button_frame_window_id, \
@@ -467,7 +465,7 @@ def resize_layout(event=None):
     # Correct X: For anchor="n" (top-center), the X should be the horizontal center of the canvas.
     button_frame_x = current_width / 2
 
-    visual_horizontal_offset = 15 # Experiment with this value (e.g., 5, 10, 15, 20)
+    visual_horizontal_offset = 0 # Experiment with this value (e.g., 5, 10, 15, 20)
     button_frame_x += visual_horizontal_offset
 
     rel_button_frame_y = 0.85 # 85% from the top (or 15% from bottom)
@@ -552,19 +550,15 @@ root.update_idletasks()
 # Call resize_layout once to set up the initial responsive layout
 resize_layout()
 
-# Start animation for the button
 def start_bob_safe():
-    global original_y
-    # This is crucial: ensure the widget is rendered and has a position
-    root.update_idletasks()
-    # Check if the widget is still valid and mapped (visible)
+    root.update_idletasks() # Ensure widget is fully rendered
     if start_button.winfo_exists() and start_button.winfo_ismapped():
-        # Only set original_y if it hasn't been set, or if we want to reset it on first call
-        if original_y is None:
-            original_y = start_button.winfo_y()
-        bob(start_button)
+        # Initialize current_bob_pady to its base value (10) for the bobbing animation start
+        global current_bob_pady
+        current_bob_pady = bob_initial_pady
+        bob_packed_widget(start_button)
     else:
-        # If not mapped, try again after a short delay
+        # If not ready, retry after a short delay
         root.after(100, start_bob_safe)
 
 root.after(500, start_bob_safe) # Start animation after the window has had some time to render
