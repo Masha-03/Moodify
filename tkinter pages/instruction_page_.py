@@ -3,9 +3,9 @@ import pygame
 import customtkinter as ctk
 import sys
 import sqlite3
-import subprocess #Open new window
+import subprocess
 import os
-from PIL import Image,ImageTk
+from PIL import Image, ImageTk
 import time
 
 # --- Asset Helper Function (for PyInstaller compatibility) ---
@@ -25,21 +25,34 @@ def resource_path(*relative_path_parts):
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------#
 #for animation of the button
-original_y = None  # Define at the top of your file
+original_y = None # Define at the top of your file
 
 def bob(widget, direction=1):
     global original_y
+    # Ensure original_y is set for the first time if not already
     if original_y is None:
-        original_y = widget.winfo_y()
-    y = widget.winfo_y() + direction
-    widget.place_configure(y=y)
+        try:
+            widget.update_idletasks() # Ensure widget is fully rendered
+            original_y = widget.winfo_y()
+        except tk.TclError:
+            # Widget might not be mapped yet, skip this frame or set a default
+            return
 
-    if y >= original_y + 5:
-        direction = -1
-    elif y <= original_y - 5:
-        direction = 1
+    try:
+        y = widget.winfo_y() + direction
+        widget.place_configure(y=y)
 
-    widget.after(100, lambda: bob(widget, direction))
+        if y >= original_y + 5:
+            direction = -1
+        elif y <= original_y - 5:
+            direction = 1
+
+        # Use root.after instead of widget.after for more consistent animation scheduling
+        root.after(100, lambda: bob(widget, direction))
+    except tk.TclError:
+        # Catch error if widget is destroyed while animation is active
+        pass
+
 
 def increase_font_size():
     size = current_font_size.get()
@@ -59,9 +72,6 @@ def get_db_path():
     base_dir = None
     if getattr(sys, 'frozen', False):
         # When frozen (e.g., PyInstaller), sys._MEIPASS is the root where bundled files are.
-        # If your 'database' folder is alongside the executable in the *final distributed package*,
-        # you might need to adjust this depending on your PyInstaller --add-data configuration.
-        # For now, let's assume the database folder is at the same level as the executable.
         app_root = sys._MEIPASS
     else:
         # In unfrozen mode, base_dir is 'c:\Users\Coshi\Moodify\tkinter pages'.
@@ -98,62 +108,71 @@ else:
         print(f"Error creating directory: {e}")
 
 #Get profile from the database
+profile = None # Initialize global profile variable
 def get_profile():
     global profile
-    connect = sqlite3.connect(database_file_path)
-    cursor = connect.cursor()
-    
-    #Fetch the profile
-    cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
-    result = cursor.fetchone()
-    
-    connect.close() #Close connection
-    if result:
-        profile = result[0]  #Store the profile 
-    else:
-        profile = None  #Set profile to None if no profile found
-        
+    try:
+        connect = sqlite3.connect(database_file_path)
+        cursor = connect.cursor()
+
+        #Fetch the profile
+        cursor.execute("SELECT profile FROM user_info ORDER BY ROWID DESC LIMIT 1") #Fetch latest profile
+        result = cursor.fetchone()
+
+        connect.close() #Close connection
+        if result:
+            profile = result[0]  #Store the profile
+        else:
+            profile = None  #Set profile to None if no profile found
+    except sqlite3.Error as e:
+        print(f"Database error in get_profile: {e}")
+        profile = None # Ensure profile is None on error
+
 def get_gender():
     if profile is None:
         return None
-    connect = sqlite3.connect(database_file_path)
-    cursor = connect.cursor()
-    cursor.execute("SELECT gender FROM user_info WHERE profile = ? LIMIT 1", (profile,))
-    result = cursor.fetchone()
-    connect.close()
-    if result:
-        return result[0]
-    else:
+    try:
+        connect = sqlite3.connect(database_file_path)
+        cursor = connect.cursor()
+        cursor.execute("SELECT gender FROM user_info WHERE profile = ? LIMIT 1", (profile,))
+        result = cursor.fetchone()
+        connect.close()
+        if result:
+            return result[0]
+        else:
+            return None
+    except sqlite3.Error as e:
+        print(f"Database error in get_gender: {e}")
         return None
-    
+
 def start_game():
     get_profile()
     gender = get_gender()
-    
+
     if gender is None:
-        tk.messagebox.showerror("Error", "No gender found for profile.")
+        tk.messagebox.showerror("Error", "No gender found for profile or database error.")
         return
-    
+
     gender = gender.strip().lower()
-    
+
     if gender == "female":
         script_path = resource_path("..", "main game code.py")
         subprocess.Popen([sys.executable, script_path])
-        #Wait for 3 seconds before closing the window
-        time.sleep(3)
+        #Wait for 1 second before closing the window
+        time.sleep(1) # Reduced sleep for better user experience
         #Close the current Tkinter window
         root.destroy()
     elif gender == "male":
         script_path = resource_path("..", "main game code_Male.py")
         subprocess.Popen([sys.executable, script_path])
-        #Wait for 3 seconds before closing the window
-        time.sleep(3)
+        #Wait for 1 second before closing the window
+        time.sleep(1) # Reduced sleep for better user experience
         #Close the current Tkinter window
         root.destroy()
-        
+
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 
-def run_game():
+def run_game(): # This function seems unused in your current flow
     pygame.init()
     screen = pygame.display.set_mode((800, 600))
     pygame.display.set_caption("Moodify Game")
@@ -172,104 +191,79 @@ def run_game():
     sys.exit()
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-def get_image_path(filename):
-    # This gets the path of the current Python file
-    base_path = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(base_path, filename)
+# Helper for mousewheel scrolling
+def on_mousewheel(event):
+    instruction_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
-def scroll_to_top():
-    canvas.yview_moveto(0)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-
 #Tkinter instruction window
 root = tk.Tk()
-root.update_idletasks()  # ensures window is updated
-screen_width = root.winfo_screenwidth()
-screen_height = root.winfo_screenheight()
-root.geometry(f"{screen_width}x{screen_height}")
 root.title("Moodify Instructions")
 
-VIRTUAL_WIDTH = 1280
-VIRTUAL_HEIGHT = 720
-scale_x = screen_width / VIRTUAL_WIDTH
-scale_y = screen_height / VIRTUAL_HEIGHT
+# Create a single canvas to hold the background image and all other widgets
+main_canvas = tk.Canvas(root, bg="white") # Set a default background for the canvas
+main_canvas.pack(fill="both", expand=True)
 
 current_font_size = tk.IntVar(value=13)  # starting font size
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-# Load and set background image
-base_dir = os.path.dirname(os.path.abspath(__file__)) 
-bg_image_path = os.path.join(base_dir, "instruction_page_bg.png") 
-bg_image=Image.open(bg_image_path)
-bg_image = bg_image.resize((screen_width, screen_height), Image.Resampling.LANCZOS)
-bg_photo = ImageTk.PhotoImage(bg_image)
+# Load background image once
+base_dir = os.path.dirname(os.path.abspath(__file__))
+bg_image_original = Image.open(os.path.join(base_dir, "instruction_page_bg.png"))
+bg_photo_id = None # Store the canvas item ID for the background image
+bg_photo_tk = None # Store the PhotoImage object reference
 
-bg_label = tk.Label(root, image=bg_photo)
-bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+# Keep references to the window IDs for dynamic positioning
+# Initialize to None, these will hold the IDs returned by main_canvas.create_window
+title_window_id = None
+outer_frame_window_id = None
+button_frame_window_id = None
+exit_button_window_id = None
+back_to_top_btn_window_id = None
+increase_font_button_window_id = None
+decrease_font_button_window_id = None
 
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#----------------------------------------------------------------------------------------------------------------------------------------------------------#
+# --- Define Widgets (before resize_layout, but don't pack/place them on root) ---
+# These widgets will be managed by main_canvas.create_window()
+
 # Title Label
-title_label = tk.Label(root,text="🌼 Welcome to Moodify! 🌼",font=("Segoe UI", 18, "bold"),bg="#fbe4ff",fg="#4A4A4A",pady=20)
-title_label.pack(pady=(10, 10))
-
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+title_label = tk.Label(main_canvas, text="🌼 Welcome to Moodify! 🌼", font=("Segoe UI", 18, "bold"), bg="#fbe4ff", fg="#4A4A4A", pady=20)
 
 # Outer frame (holds the framed instruction box)
-outer_frame = tk.Frame(root, bg="#fbe4ff")
-outer_frame.pack(pady=(0,10), padx=30, fill="both", expand=True)
+outer_frame = tk.Frame(main_canvas, bg="#fbe4ff")
 
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+# Inner box frame with visible border (packed inside outer_frame)
+box_frame = tk.Frame(outer_frame, bg="#FFEFE1", bd=3, relief="ridge")
+box_frame.pack(fill="both", expand=True, padx=20, pady=10) # Fill the outer_frame
 
-# Inner box frame with visible border
-box_frame = tk.Frame(outer_frame, bg="#FFEFE1", bd=3, relief="ridge",width=1100,height=420)
-box_frame.pack(fill="x", expand=False,padx=20,pady=10)
-box_frame.pack_propagate(False)
+# Canvas inside the box (this is the one that contains the scrollable text)
+instruction_canvas = tk.Canvas(box_frame, bg="#FFEFE1", highlightthickness=0)
+instruction_canvas.pack(side="left", fill="both", expand=True)
 
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-
-# Canvas inside the box
-canvas = tk.Canvas(box_frame, bg="#FFEFE1", highlightthickness=0)
-canvas.pack(side="left", fill="y")
-canvas.configure(height=420,width=1100)
-
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-#SCROLLBAR
 # Scrollbar INSIDE the box
-scrollbar = tk.Scrollbar(box_frame, orient="vertical", command=canvas.yview)
+scrollbar = tk.Scrollbar(box_frame, orient="vertical", command=instruction_canvas.yview)
 scrollbar.pack(side="right", fill="y", padx=(0, 5), pady=5)
 
-# Frame inside canvas for content
-scrollable_frame = tk.Frame(canvas, bg="#FFEFE1")
-canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-canvas.configure(yscrollcommand=scrollbar.set)
-
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+# Frame inside instruction_canvas for content
+scrollable_frame = tk.Frame(instruction_canvas, bg="#FFEFE1")
+instruction_canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+instruction_canvas.configure(yscrollcommand=scrollbar.set)
 
 # Auto scrollregion update
 def update_scrollregion(event=None):
-    canvas.configure(scrollregion=canvas.bbox("all"))
+    # This might need to be called on outer_frame configure event or instruction_canvas resize
+    instruction_canvas.configure(scrollregion=instruction_canvas.bbox("all"))
+scrollable_frame.bind("<Configure>", update_scrollregion) # Bind to inner frame
 
-scrollable_frame.bind("<Configure>", update_scrollregion)
-
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-
-# Enable scrolling with the mouse wheel
-def on_mousewheel(event):
-    canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-
-# Bind mouse wheel to canvas (Windows and Linux)
-canvas.bind_all("<MouseWheel>", on_mousewheel) #everytime the mouse wheel scrolled,call on_mousewheel event
-
+# Bind mouse wheel to canvas (Windows and Linux) - global binding for root
+root.bind_all("<MouseWheel>", on_mousewheel)
 # Bind mouse wheel for macOS (uses different event name)
-canvas.bind_all("<Button-4>", lambda event: canvas.yview_scroll(-1, "units"))
-canvas.bind_all("<Button-5>", lambda event: canvas.yview_scroll(1, "units"))
-
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-# Instruction Text
+root.bind_all("<Button-4>", lambda event: instruction_canvas.yview_scroll(-1, "units"))
+root.bind_all("<Button-5>", lambda event: instruction_canvas.yview_scroll(1, "units"))
 
 # Instruction Text (using Text widget for styling)
-instruction_text_widget = tk.Text(scrollable_frame, font=("Segoe UI", 13), bg="#FFF2E6", fg="#333333", wrap="word", padx=40, pady=20, height=20, width=100)
-instruction_text_widget.pack(pady=(0, 20))
+instruction_text_widget = tk.Text(scrollable_frame, font=("Segoe UI", 13), bg="#FFF2E6", fg="#333333", wrap="word", padx=40, pady=20)
+instruction_text_widget.pack(pady=(0, 20), fill="both", expand=True) # Ensure it expands within scrollable_frame
 
 # Insert the bold, bigger "How to Use:" heading
 instruction_text_widget.insert("1.0", "💡 How to Use:\n\n")
@@ -278,7 +272,7 @@ instruction_text_widget.tag_config("title", font=("Segoe UI", 20, "bold"), foreg
 
 instruction_text = (
         "🎮 **Controls**:\n"
-        "• Move: Arrow Keys\n"  
+        "• Move: Arrow Keys\n"
         "• Toggle Fullscreen: Ctrl + f\n"
         "• Quit: ESC\n\n"
         "👀 There are *8 COOL FEATURES* waiting for you to explore:\n\n"
@@ -299,7 +293,7 @@ instruction_text = (
         "🎉 **Fun Extras**\n"
         "📊 Statistics\n"
         "• Tap the **graph beside the calendar** to explore the **STATISTICS** feature and review your data.\n"
-        "🌱 Growing Plant\n"  
+        "🌱 Growing Plant\n"
         "• Tap the **plant next to the TV** to water it — help it grow like your inner peace.\n"
         "🛋️ Sofa & Friends\n"
         "• Bonus fun: Click the **sofa, cockroach, teddy bear, or pirate** for random cute bubble convos!\n"
@@ -347,47 +341,24 @@ highlight_text(instruction_text_widget, "plant next to the TV", "plant_tag", col
 # Disable editing
 instruction_text_widget.config(state="disabled")
 
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-button_frame = tk.Frame(root,bg="#fbe4ff")
-button_frame.pack(side='bottom', pady=(0,10))
+# Button frame (will be placed on main_canvas later)
+button_frame = tk.Frame(main_canvas,bg="#fbe4ff")
 
 start_button = ctk.CTkButton(button_frame,
     text="✨ Start Moodify ✨",
     font=("Segoe UI", 25, "bold"),
-    fg_color="#B98EDC",         # background color
-    hover_color="#9B59B6",      # on hover
-    text_color="#F2E6FF",        # text color
-    corner_radius=35,           # roundness
+    fg_color="#B98EDC",
+    hover_color="#9B59B6",
+    text_color="#F2E6FF",
+    corner_radius=35,
     height=60,
     command=start_game
 )
-start_button.pack(pady=(45,0)) # Center bottom
+start_button.pack(pady=(10,0)) # Pack inside button_frame
 
-#for animation of button
-def start_bob_safe():
-    global original_y
-    original_y = start_button.winfo_y()
-    bob(start_button)
-
-root.after(500, start_bob_safe)    # Start animation
-
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-
-#Track fullscreen state
-is_fullscreen = [False]
-
-def toggle_fullscreen(event=None):
-    is_fullscreen = root.attributes("-fullscreen")
-    root.attributes("-fullscreen", not is_fullscreen)
-    # After toggling fullscreen, update scrollregion to ensure scrolling works correctly
-    root.update_idletasks()
-    canvas.configure(scrollregion=canvas.bbox("all"))
-
-root.bind("<Control-f>", toggle_fullscreen)
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-#exit button incase the ctrl+f key doesnt works
+# Exit Button (will be placed on main_canvas later)
 exit_button = ctk.CTkButton(
-    root,
+    main_canvas, # Parent set to main_canvas
     text="❌ Exit",
     font=("Segoe UI", 14),
     fg_color="#FF5151",
@@ -396,22 +367,22 @@ exit_button = ctk.CTkButton(
     corner_radius=25,
     command=root.destroy
 )
-exit_button.place(relx=0.97, rely=0.07, anchor="ne")
 
+# Back to Top Button (will be placed on main_canvas later)
 back_to_top_btn = ctk.CTkButton(
-    root,
+    main_canvas, # Parent set to main_canvas
     text="⬆ Back to Top",
     font=("Segoe UI", 14),
     fg_color="#48A9FF",
     hover_color="#6FC8FF",
     text_color="white",
     corner_radius=25,
-    command=scroll_to_top
+    command=lambda: instruction_canvas.yview_moveto(0) # Ensure this scrolls the instruction_canvas
 )
-back_to_top_btn.place(relx=0.97, rely=0.84, anchor="se")
 
+# Increase Font Button (will be placed on main_canvas later)
 increase_font_button = ctk.CTkButton(
-    root,
+    main_canvas, # Parent set to main_canvas
     text="🔍 A+",
     font=("Segoe UI", 14),
     fg_color="#B0E0E6",
@@ -421,10 +392,10 @@ increase_font_button = ctk.CTkButton(
     corner_radius=25,
     width=60
 )
-increase_font_button.place(relx=0.10, rely=0.78)
 
+# Decrease Font Button (will be placed on main_canvas later)
 decrease_font_button = ctk.CTkButton(
-    root,
+    main_canvas, # Parent set to main_canvas
     text="🔽 A-",
     font=("Segoe UI", 14),
     fg_color="#DDA0DD",
@@ -434,9 +405,169 @@ decrease_font_button = ctk.CTkButton(
     corner_radius=25,
     width=60
 )
-decrease_font_button.place(relx=0.04, rely=0.78)
 
-#---------------------------------------------------------------------------------------------------------------------------------------------#
+#----------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+# --- Define the responsive layout function ---
+def resize_layout(event=None):
+    global bg_photo_tk, bg_photo_id, title_window_id, outer_frame_window_id, button_frame_window_id, \
+           exit_button_window_id, back_to_top_btn_window_id, \
+           increase_font_button_window_id, decrease_font_button_window_id
+
+    # Get current window dimensions
+    current_width = root.winfo_width()
+    current_height = root.winfo_height()
+
+    if current_width == 1 or current_height == 1: # Avoid issues when minimizing window or before full rendering
+        return
+
+    # Resize background image to current window size
+    resized_bg_image = bg_image_original.resize((current_width, current_height), Image.Resampling.LANCZOS)
+    bg_photo_tk = ImageTk.PhotoImage(resized_bg_image) # Keep reference
+
+    if bg_photo_id:
+        main_canvas.itemconfig(bg_photo_id, image=bg_photo_tk) # Update existing image
+    else:
+        bg_photo_id = main_canvas.create_image(0, 0, image=bg_photo_tk, anchor="nw") # Create if first time
+
+    # --- Position and Size Widgets Dynamically ---
+
+    # Title Label
+    rel_title_y = 0.05 # 5% from the top
+    title_x = current_width / 2
+    title_y = current_height * rel_title_y
+    if title_window_id:
+        main_canvas.coords(title_window_id, title_x, title_y)
+    else:
+        title_label.update_idletasks() # Ensure widget has calculated its initial size
+        title_window_id = main_canvas.create_window(title_x, title_y, window=title_label, anchor="n")
+
+    # Outer Frame (Instruction Box Container)
+    rel_outer_frame_width = 0.8 # 80% of screen width
+    rel_outer_frame_height = 0.6 # 60% of screen height
+    outer_frame_abs_width = int(current_width * rel_outer_frame_width)
+    outer_frame_abs_height = int(current_height * rel_outer_frame_height)
+    outer_frame_x = (current_width - outer_frame_abs_width) / 2 # Center horizontally
+    rel_outer_frame_y = 0.15 # 15% from the top
+    outer_frame_y = current_height * rel_outer_frame_y
+
+    if outer_frame_window_id:
+        main_canvas.coords(outer_frame_window_id, outer_frame_x, outer_frame_y)
+        main_canvas.itemconfigure(outer_frame_window_id, width=outer_frame_abs_width, height=outer_frame_abs_height)
+    else:
+        outer_frame.update_idletasks()
+        outer_frame_window_id = main_canvas.create_window(outer_frame_x, outer_frame_y, window=outer_frame, anchor="nw",
+                                                          width=outer_frame_abs_width, height=outer_frame_abs_height)
+
+    # Button Frame (Start Button Container)
+    rel_button_frame_width = 0.5
+    button_frame_abs_width = int(current_width * rel_button_frame_width)
+    button_frame_height = 100 # Fixed height, or make it relative too if needed
+    
+    # Correct X: For anchor="n" (top-center), the X should be the horizontal center of the canvas.
+    button_frame_x = current_width / 2
+
+    visual_horizontal_offset = 15 # Experiment with this value (e.g., 5, 10, 15, 20)
+    button_frame_x += visual_horizontal_offset
+
+    rel_button_frame_y = 0.85 # 85% from the top (or 15% from bottom)
+    button_frame_y = current_height * rel_button_frame_y
+
+    if button_frame_window_id:
+        main_canvas.coords(button_frame_window_id, button_frame_x, button_frame_y)
+        main_canvas.itemconfigure(button_frame_window_id, width=button_frame_abs_width, height=button_frame_height)
+    else:
+        button_frame.update_idletasks()
+        button_frame_window_id = main_canvas.create_window(button_frame_x, button_frame_y, window=button_frame, anchor="n",
+                                                           width=button_frame_abs_width, height=button_frame_height)
+
+    # Exit Button
+    rel_exit_x = 0.97
+    rel_exit_y = 0.07
+    exit_x = current_width * rel_exit_x
+    exit_y = current_height * rel_exit_y
+    if exit_button_window_id:
+        main_canvas.coords(exit_button_window_id, exit_x, exit_y)
+    else:
+        exit_button.update_idletasks()
+        exit_button_window_id = main_canvas.create_window(exit_x, exit_y, window=exit_button, anchor="ne")
+
+    # Back to Top Button
+    rel_back_to_top_x = 0.97
+    rel_back_to_top_y = 0.84
+    back_to_top_x = current_width * rel_back_to_top_x
+    back_to_top_y = current_height * rel_back_to_top_y
+    if back_to_top_btn_window_id:
+        main_canvas.coords(back_to_top_btn_window_id, back_to_top_x, back_to_top_y)
+    else:
+        back_to_top_btn.update_idletasks()
+        back_to_top_btn_window_id = main_canvas.create_window(back_to_top_x, back_to_top_y, window=back_to_top_btn, anchor="se")
+
+    # Font Size Increase Button
+    rel_increase_font_x = 0.10
+    rel_increase_font_y = 0.78
+    increase_font_x = current_width * rel_increase_font_x
+    increase_font_y = current_height * rel_increase_font_y
+    if increase_font_button_window_id:
+        main_canvas.coords(increase_font_button_window_id, increase_font_x, increase_font_y)
+    else:
+        increase_font_button.update_idletasks()
+        increase_font_button_window_id = main_canvas.create_window(increase_font_x, increase_font_y, window=increase_font_button, anchor="nw")
+
+    # Font Size Decrease Button
+    rel_decrease_font_x = 0.04
+    rel_decrease_font_y = 0.78
+    decrease_font_x = current_width * rel_decrease_font_x
+    decrease_font_y = current_height * rel_decrease_font_y
+    if decrease_font_button_window_id:
+        main_canvas.coords(decrease_font_button_window_id, decrease_font_x, decrease_font_y)
+    else:
+        decrease_font_button.update_idletasks()
+        decrease_font_button_window_id = main_canvas.create_window(decrease_font_x, decrease_font_y, window=decrease_font_button, anchor="nw")
+
+    # IMPORTANT: After resizing, ensure the instruction_canvas's scrollregion is updated
+    # This is critical for scrolling to work correctly after a resize.
+    instruction_canvas.update_idletasks() # Ensures scrollable_frame has correct size
+    instruction_canvas.configure(scrollregion=instruction_canvas.bbox("all"))
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------#
+# Track fullscreen state
+is_fullscreen = [False] # Using a list to allow modification within function scope
+
+def toggle_fullscreen(event=None):
+    current_fullscreen_state = root.attributes("-fullscreen")
+    root.attributes("-fullscreen", not current_fullscreen_state)
+    is_fullscreen[0] = not current_fullscreen_state # Update state tracker
+    # After toggling fullscreen, force a layout update to ensure elements reposition correctly
+    root.update_idletasks() # Ensure window size is updated
+    resize_layout() # Call resize_layout to adjust elements
+
+root.bind("<Control-f>", toggle_fullscreen)
+
+# --- Initial calls after all widgets are defined but before mainloop ---
+# Set the window to fullscreen initially
+root.attributes("-fullscreen", True)
+# Update idletasks to ensure the window's dimensions are correct after fullscreen is set
+root.update_idletasks()
+# Call resize_layout once to set up the initial responsive layout
+resize_layout()
+
+# Start animation for the button
+def start_bob_safe():
+    global original_y
+    # This is crucial: ensure the widget is rendered and has a position
+    root.update_idletasks()
+    # Check if the widget is still valid and mapped (visible)
+    if start_button.winfo_exists() and start_button.winfo_ismapped():
+        # Only set original_y if it hasn't been set, or if we want to reset it on first call
+        if original_y is None:
+            original_y = start_button.winfo_y()
+        bob(start_button)
+    else:
+        # If not mapped, try again after a short delay
+        root.after(100, start_bob_safe)
+
+root.after(500, start_bob_safe) # Start animation after the window has had some time to render
 
 # Run the app
 root.mainloop()
