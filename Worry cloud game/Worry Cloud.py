@@ -70,7 +70,7 @@ def get_latest_worries(count=RECENT_WORRIES_DISPLAY_COUNT):
     try:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
-        cursor.execute("SELECT worry_text, timestamp FROM worries ORDER BY timestamp DESC LIMIT ?", (count,))
+        cursor.execute("SELECT worry_text, timestamp FROM worries WHERE profile = ? ORDER BY timestamp DESC LIMIT ?", (profile, count))
         worries_list = cursor.fetchall()
         conn.close()
     except sqlite3.Error as e:
@@ -83,7 +83,7 @@ def get_all_worries():
     try:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
-        cursor.execute("SELECT worry_text, timestamp FROM worries ORDER BY timestamp DESC") # No LIMIT here
+        cursor.execute("SELECT worry_text, timestamp FROM worries WHERE profile = ? ORDER BY timestamp DESC", (profile,))
         worries_list = cursor.fetchall()
         conn.close()
     except sqlite3.Error as e:
