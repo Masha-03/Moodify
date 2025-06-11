@@ -303,10 +303,12 @@ def handle_event(event, rects):
                             
                             #Launch the new gender window then open settings 
                             if selected_gender.lower().lower() == "male":
-                                subprocess.Popen([sys.executable, "main game code_Male.py", "--open-settings"])
+                                script_path = resource_path("main game code_Male.py")
+                                subprocess.Popen([sys.executable, script_path, "--open-settings"])
                             else:
-                                subprocess.Popen([sys.executable, "main game code.py", "--open-settings"])
-                                
+                                script_path = resource_path("main game code.py")
+                                subprocess.Popen([sys.executable, script_path, "--open-settings"])
+
                             #Wait for 3 seconds before closing the window
                             time.sleep(3)
                             #Close current Pygame window
