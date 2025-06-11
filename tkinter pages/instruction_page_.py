@@ -5,7 +5,6 @@ import sys
 import sqlite3
 import subprocess #Open new window
 import os
-import sys
 from PIL import Image,ImageTk
 import time
 
@@ -101,7 +100,7 @@ else:
 #Get profile from the database
 def get_profile():
     global profile
-    connect = sqlite3.connect(database_file_path)
+    connect = sqlite3.connect('moodify_database.db')
     cursor = connect.cursor()
     
     #Fetch the profile
@@ -117,7 +116,7 @@ def get_profile():
 def get_gender():
     if profile is None:
         return None
-    connect = sqlite3.connect(database_file_path)
+    connect = sqlite3.connect('moodify_database.db')
     cursor = connect.cursor()
     cursor.execute("SELECT gender FROM user_info WHERE profile = ? LIMIT 1", (profile,))
     result = cursor.fetchone()
@@ -297,7 +296,8 @@ instruction_text = (
         "🛋️ Sofa & Friends\n"
         "• Bonus fun: Click the **sofa, cockroach, teddy bear, or pirate** for random cute bubble convos!\n"
         "💻 Hidden Games\n"
-        "Oh — and there are *3 HIDDEN GAMES* inside the TV. Go find 'em 👀\n\n"
+        "Oh — and there are *3 HIDDEN GAMES* inside the TV. Go find 'em 👀\n"
+        "Press escape to exit the games window\n\n"
         "🔊 You can adjust or mute the background music anytime by clicking the **SETTINGS** icon.\n\n"
         "🌟 This app is your chill zone. Take a break, have fun, and treat yourself!"
     )
