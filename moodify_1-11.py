@@ -181,6 +181,11 @@ def enter_data():
         if not profile or not gender:
                 #Warning box
                 messagebox.showwarning("Incomplete Information", "Please fill in both Profile Name and Gender")
+                #Clear field after profile input
+                profile_entry.delete(0, tk.END)
+                profile_entry.focus_set()  #Puts the cursor back in the profile box
+                #Reset gender to blank
+                gender_combobox.set("")
                 return
         
         #Display received data
@@ -193,7 +198,12 @@ def enter_data():
         #If profile name is already taken
         if result:
                 #Pop up box to inform
-                tk.messagebox.showwarning("Duplicate Entry", "Heyyy, sorry, pick a different profile name XD")
+                messagebox.showwarning("Retry", "Hey sorry, pick a different profile name XD")
+                #Clear field after profile input
+                profile_entry.delete(0, tk.END)
+                profile_entry.focus_set()  #Puts the cursor back in the profile box
+                #Reset gender to blank
+                gender_combobox.set("")
         else:
                 #Insert only if no duplicate profile name
                 data_insert_query = """ INSERT INTO user_info
@@ -202,28 +212,27 @@ def enter_data():
                 data_insert_tuple = (profile, gender)
                 connect.execute(data_insert_query, data_insert_tuple)
                 #Successful pop up box
-                tk.messagebox.showinfo("Success", "Lesgooo! Profile saved successfully!")
-        
+                messagebox.showinfo("Success", "Lesgooo! Profile saved successfully!")
+                
+                #Connect to next page after succesful entry
+                instruction_script_path = resource_path("tkinter pages", "instruction_page_.py")
+                subprocess.Popen([sys.executable, instruction_script_path])
+                
+                #Wait for 3 seconds before closing the window
+                time.sleep(3)
+                #Close the current Tkinter window
+                root.destroy()
+                sys.exit()
+                
         #Clear field after profile input
         profile_entry.delete(0, tk.END)
-        profile_entry.focus_set()  #Puts the cursor back in the profile box
         #Reset gender to blank
         gender_combobox.set("")
 
         #Save data, update
         connect.commit()
         #Close connection
-        connect.close()
-
-        instruction_script_path = resource_path("tkinter pages", "instruction_page_.py")
-        subprocess.Popen([sys.executable, instruction_script_path])
-        
-        #Wait for 3 seconds before closing the window
-        time.sleep(3)
-        #Close the current Tkinter window
-        root.destroy()
-        sys.exit()
-          
+        connect.close()    
     
 #Submit button   
 button = tk.Button(main_frame, text="SUBMIT",font=label_font, bg=button_color, width=20, command= enter_data)  
