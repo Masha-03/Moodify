@@ -80,7 +80,7 @@ scale_size = 0.75
 
 male_frames = [
     pygame.transform.scale_by(
-        pygame.image.load(resource_path(os.path.join(f"Moodify\male\boy_pixil_frame_{i}.png"))), scale_size)
+        pygame.image.load(resource_path(os.path.join(f"Moodify/male/boy_pixil_frame_{i}.png"))), scale_size)
     for i in range(4)]
 
 female_frames = [
@@ -303,10 +303,10 @@ def handle_event(event, rects):
                             
                             #Launch the new gender window then open settings 
                             if selected_gender.lower().lower() == "male":
-                                script_path = resource_path("main game code_Male.py")
+                                script_path = resource_path("Moodify/main game code_Male.py")
                                 subprocess.Popen([sys.executable, script_path, "--open-settings"])
                             else:
-                                script_path = resource_path("main game code.py")
+                                script_path = resource_path("Moodify/main game code.py")
                                 subprocess.Popen([sys.executable, script_path, "--open-settings"])
 
                             #Wait for 3 seconds before closing the window

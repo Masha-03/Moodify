@@ -328,7 +328,7 @@ night_background = pygame.image.load(asset("graphics","night.png")).convert()
 sunny_background = pygame.image.load(asset("graphics","sunny day background.png")).convert()
 
 #background image
-background_surface =pygame.image.load(asset("graphics","main game page no window.png")).convert_alpha()
+background_surface =pygame.image.load(asset("graphics","bg for boy.png")).convert_alpha()
 # to scale background image on the virtual surface
 background_surface = scale_bg()
 
