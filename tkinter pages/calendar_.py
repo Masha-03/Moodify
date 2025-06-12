@@ -216,7 +216,12 @@ ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
 app = ctk.CTk()
 
-app.geometry(f"{app.winfo_screenwidth()}x{app.winfo_screenheight()}") #Full-screen size
+# Make app truly full screen and responsive
+screen_width = app.winfo_screenwidth()
+screen_height = app.winfo_screenheight()
+app.geometry(f"{screen_width}x{screen_height}")
+app.rowconfigure(0, weight=1)
+app.columnconfigure(0, weight=1)
    
 app.title("Calendar")
 app.configure(bg="#FFF8F0") #change the background color of entire window
@@ -233,7 +238,7 @@ bg_photo = ImageTk.PhotoImage(bg_image)
 
 #Label to display the background image
 bg_label = tk.Label(app, image=bg_photo)
-bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Stretch it across the window
+bg_label.place(relx=0, rely=0, relwidth=1, relheight=1)  # Stretch it across the window
 bg_label.image = bg_photo  # Keep a reference to avoid garbage collection
 
 #Lower the label so it doesn’t cover other widgets
@@ -241,21 +246,29 @@ bg_label.lower()
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
+# Master frame
+main_frame = ctk.CTkFrame(app, fg_color="transparent")
+main_frame.grid(row=0, column=0, sticky="nsew")
+main_frame.rowconfigure(0, weight=1)
+main_frame.columnconfigure(0, weight=0)  #left frame
+main_frame.columnconfigure(1, weight=1)  #right frame
+
 #Title label
 title_label = ctk.CTkLabel(app, text="My History 🧸", font=ctk.CTkFont("Helvetica", 26, weight="bold"), text_color="#333", fg_color="#e9e2d0")
-title_label.pack(pady=(20, 10)) #pack()=Places the widget inside the window or frame. Pady=Adds () pixels of vertical space around the widget.
+title_label.grid(row=0, column=0, columnspan=2, pady=(20, 10), sticky="n")
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #frame for left side #create this frame is because pack and grid cannot use at the same time,need to seperate them
 left_frame = ctk.CTkFrame(app, width=300, height=200, fg_color="transparent")
-left_frame.pack(side="left", fill="y", padx=40, pady=20) #pack=geometry manager #padx=add horizontal padding #pady=add vertical padding
+left_frame.grid(row=1, column=0, sticky="ns", padx=(40, 10), pady=20)
+left_frame.grid_propagate(False)
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #add a label for the title
 label=ctk.CTkLabel(left_frame, text="Choose on a date to view your diary", font=("Helvetica", 15), text_color="#777")
-label.grid(row=0, column=0, padx=50, pady=(5, 10), sticky="w") #sticky="w" means stick to the west
+label.grid(row=0, column=0, padx=10, pady=(5, 10), sticky="w")#sticky="w" means stick to the west
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -293,21 +306,25 @@ date_label.grid(row=4, column=0, pady=(10, 20), sticky="n")
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 # History Frame
 history_frame = ctk.CTkFrame(app, corner_radius=15, fg_color="#E6D6B8")
-history_frame.pack(expand=True, fill="both", padx=40, pady=40)
+history_frame.grid(row=1, column=1, sticky="nsew", padx=(10, 40), pady=20)
+history_frame.rowconfigure(0, weight=1)
+history_frame.columnconfigure(0, weight=1)
 
 # Container
 container = ctk.CTkFrame(history_frame, fg_color="#E6D6B8", corner_radius=15)
-container.pack(expand=True, fill="both", padx=20, pady=10)
+container.grid(row=0, column=0, sticky="nsew", padx=20, pady=10)
+container.rowconfigure((1, 3, 5, 7), weight=1)  #Make text areas flexible
+container.columnconfigure(0, weight=1)
 
 # Diary Title
 ctk.CTkLabel(container, text="Title:", font=ctk.CTkFont(size=15, weight="bold")).pack(anchor="w", pady=(10, 5))
 title_display = ctk.CTkLabel(container, text="", fg_color="white", corner_radius=6, anchor="w")
-title_display.pack(fill="x", pady=(0, 10))
+title_display.grid(row=1, column=0, sticky="ew", pady=(0, 10))
 
 # Diary Entry
 ctk.CTkLabel(container, text="Entry:", font=ctk.CTkFont(size=15, weight="bold")).pack(anchor="w", pady=(5, 5))
 content_frame = ctk.CTkFrame(container, fg_color="white", corner_radius=6)
-content_frame.pack(fill="x", pady=(0, 10))
+content_frame.grid(row=3, column=0, sticky="nsew", pady=(0, 10))
 
 content_text = ctk.CTkTextbox(content_frame, wrap="word", fg_color="white", corner_radius=0, height=100, font=ctk.CTkFont(size=14))
 content_text.pack(side="left", fill="both", expand=True)
