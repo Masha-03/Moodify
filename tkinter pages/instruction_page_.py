@@ -97,13 +97,13 @@ if os.path.exists(database_file_path):
     print(f"Database file FOUND at: {database_file_path}")
 else:
     print(f"Database file NOT FOUND at: {database_file_path}")
-#     print("WARNING: A new database file will likely be created here.")
-#     # Create the 'database' folder if it doesn't exist
-#     try:
-#         os.makedirs(os.path.dirname(database_file_path), exist_ok=True)
-#         print(f"Created directory: {os.path.dirname(database_file_path)}")
-#     except OSError as e:
-#         print(f"Error creating directory: {e}")
+#   print("WARNING: A new database file will likely be created here.")
+#   # Create the 'database' folder if it doesn't exist
+#   try:
+#       os.makedirs(os.path.dirname(database_file_path), exist_ok=True)
+#       print(f"Created directory: {os.path.dirname(database_file_path)}")
+#   except OSError as e:
+#       print(f"Error creating directory: {e}")
 
 #Get profile from the database
 def get_profile():
@@ -167,7 +167,7 @@ def start_game():
         #Close the current Tkinter window
         root.destroy()
 
-#-----------------------------------------------------------------------------------------------------------------------------------------------#
+#--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 
 def run_game(): # This function seems unused in your current flow
     pygame.init()
@@ -211,6 +211,7 @@ bg_photo_tk = None # Store the PhotoImage object reference
 
 # Keep references to the window IDs for dynamic positioning
 # Initialize to None, these will hold the IDs returned by main_canvas.create_window
+#for alignment
 title_window_id = None
 outer_frame_window_id = None
 button_frame_window_id = None

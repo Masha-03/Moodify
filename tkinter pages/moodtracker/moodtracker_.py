@@ -9,6 +9,21 @@ import customtkinter as ctk
 import sys
 import datetime
 
+# --- Asset Helper Function (for PyInstaller compatibility) ---
+def resource_path(*relative_path_parts):
+    """
+    Returns the absolute path to a resource, whether running as a script
+    or as a PyInstaller bundled executable.
+    """
+    try:
+        # PyInstaller creates a temp folder and sets _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # Not running as a PyInstaller executable, use current script directory
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+    return os.path.join(base_path, *relative_path_parts)
+
 mood_quotes = {
     "Happy": "Keep shining, the world needs your light!",
     "Sad": "It's okay to be not okay. Better days are coming.",
@@ -60,13 +75,13 @@ if os.path.exists(database_file_path):
     print(f"Database file FOUND at: {database_file_path}")
 else:
     print(f"Database file NOT FOUND at: {database_file_path}")
-    # print("WARNING: A new database file will likely be created here.")
-    # # Create the 'database' folder if it doesn't exist
-    # try:
-    #     os.makedirs(os.path.dirname(database_file_path), exist_ok=True)
-    #     print(f"Created directory: {os.path.dirname(database_file_path)}")
-    # except OSError as e:
-    #     print(f"Error creating directory: {e}")
+#    print("WARNING: A new database file will likely be created here.")
+#    # Create the 'database' folder if it doesn't exist
+#    try:
+#        os.makedirs(os.path.dirname(database_file_path), exist_ok=True)
+#        print(f"Created directory: {os.path.dirname(database_file_path)}")
+#    except OSError as e:
+#        print(f"Error creating directory: {e}")
 
 #Get profile from the database
 def get_profile():
@@ -381,5 +396,4 @@ help_button.place(relx=0.97, rely=0.09, anchor="ne")
 
 #run the whole program
 root.mainloop()
-
 
