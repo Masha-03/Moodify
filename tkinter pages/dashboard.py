@@ -68,13 +68,13 @@ if os.path.exists(database_file_path):
     print(f"Database file FOUND at: {database_file_path}")
 else:
     print(f"Database file NOT FOUND at: {database_file_path}")
-    print("WARNING: A new database file will likely be created here.")
-    # Create the 'database' folder if it doesn't exist
-    try:
-        os.makedirs(os.path.dirname(database_file_path), exist_ok=True)
-        print(f"Created directory: {os.path.dirname(database_file_path)}")
-    except OSError as e:
-        print(f"Error creating directory: {e}")
+    # print("WARNING: A new database file will likely be created here.")
+    # # Create the 'database' folder if it doesn't exist
+    # try:
+    #     os.makedirs(os.path.dirname(database_file_path), exist_ok=True)
+    #     print(f"Created directory: {os.path.dirname(database_file_path)}")
+    # except OSError as e:
+    #     print(f"Error creating directory: {e}")
 
 def get_profile():
     connect = sqlite3.connect(database_file_path)
