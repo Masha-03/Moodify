@@ -34,6 +34,15 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 AUDIO_DIR = BASE_DIR
 IMAGE_DIR = BASE_DIR
 
+# --- Global variables for responsive layout and fullscreen management ---
+resize_job_id = None # For debouncing the resize event
+last_width = 1280 # Default non-fullscreen width
+last_height = 720 # Default non-fullscreen height
+last_x = None # Will store the x position of the non-fullscreen window
+last_y = None # Will store the y position of the non-fullscreen window
+is_fullscreen = [True] # Start in fullscreen (note: it's a list so it can be modified within functions)
+bg_photo = None # Global reference for the background image ImageTk.PhotoImage object
+
 #----------------------------------------------------------------------------------------------------------------------#
 
 #load and resize the image using PIL 
@@ -225,38 +234,31 @@ def enter(event): #when mouse enter a widget(eg.button) it changes the widget's 
 def leave(event): #when mouse leave the widget, background colour returns to bg="#FFFFFF"
     event.widget.config(bg="#b8daae",width=40, height=40)#when mouse went out of the button,the button will reset to original size
 
-def get_image_path(filename):
-    # This gets the path of the current Python file
-    base_path = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(base_path, filename)
 #----------------------------------------------------------------------------------------------------------------------#
 
 #main window
 root=tk.Tk()
-root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}") #full-screen sized
+root.attributes("-fullscreen", True) # Start in true fullscreen
 root.title("Soothing Sound Player")
 
-# Load and set background image
-bg_image = Image.open(get_image_path("sound_bg.png"))  # Replace with your image file
-bg_image = bg_image.resize((root.winfo_screenwidth(), root.winfo_screenheight()), Image.Resampling.LANCZOS)
-bg_photo = ImageTk.PhotoImage(bg_image)
-bg_label = tk.Label(root, image=bg_photo)
-bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+# --- Main Canvas to manage all UI elements for responsive layout ---
+main_canvas = tk.Canvas(root, highlightthickness=0, bg="#d9e9df")
+main_canvas.pack(fill="both", expand=True)
+
+# Placeholder for background image on canvas
+bg_label_on_canvas = main_canvas.create_image(0, 0, anchor="nw", image=None) # Image will be set in resize_layout
 #----------------------------------------------------------------------------------------------------------------------#
 
 #title
-title=tk.Label(root,text="Relax Soothing Sound Player🎶", font=("Segoe UI", 18, "bold"),bg="#d9e9df",fg="black")
-title.pack(pady=(10,5)) #pady=(10,5)adds vertical spacing above and below.
+title=tk.Label(main_canvas,text="Relax Soothing Sound Player🎶", font=("Segoe UI", 18, "bold"),bg="#d9e9df",fg="black")
 
 #----------------------------------------------------------------------------------------------------------------------#
 
 #frame to hold center and volume(right)
-center_volume_frame=tk.Frame(root, bg="#d9e9df")
-center_volume_frame.pack(expand=True,fill="both",padx=30,pady=20)
+center_volume_frame=tk.Frame(main_canvas, bg="#d9e9df")
 
 #frame to hold playlist and buttons(left)
 playlist_button_frame=tk.Frame(center_volume_frame,bg="#d9e9df")
-playlist_button_frame.pack(side="left",expand=True,fill="both", anchor="center",padx=(150,0))
 
 #----------------------------------------------------------------------------------------------------------------------#
 
@@ -272,8 +274,8 @@ label_playlist=tk.Label(playlist_button_frame, text="Playlist🎧", bg="#d9e9df"
 label_playlist.pack(pady=(0,5))
 
 #the listbox to show available sound
-playlist_box=tk.Listbox(playlist_button_frame, width=100, height=20, bg="white", fg="#1a237e",selectbackground="#a3d2ca", selectforeground="black",activestyle="none", font=("Segoe UI", 10, "italic"),bd=2, relief="groove",highlightthickness=2)
-playlist_box.pack(pady=(0,5),anchor="center")
+playlist_box=tk.Listbox(playlist_button_frame, bg="white", fg="#1a237e",selectbackground="#a3d2ca", selectforeground="black",activestyle="none", font=("Segoe UI", 10, "italic"),bd=2, relief="groove",highlightthickness=2)
+playlist_box.pack(pady=(0,5),anchor="center",fill="both",expand=True)
 playlist_box.focus_set() #ensure listbox has keyboard focus
 
 #loop through each elements in the dictionary which is "song_dict"
@@ -348,7 +350,6 @@ create_tooltip(button_previous, "Previous sound")
 #VOLUME CONTROL
 
 volume_frame = tk.Frame(center_volume_frame, bg="#d9e9df")
-volume_frame.pack(side="right",anchor="n", padx=40)
 
 volume_label = tk.Label(volume_frame, text="Volume 🔊", bg="#d9e9df", fg="#5e7f68", font=("Segoe UI", 12))
 volume_label.pack()
@@ -368,33 +369,52 @@ button_mute.bind("<Leave>", lambda e: button_mute.config(bg="#78a45c"))
 pygame.mixer.music.set_volume(0.5)
 #----------------------------------------------------------------------------------------------------------------------#
 
-#Track fullscreen state
-is_fullscreen = [False]
-
-# Toggle fullscreen using the 'f' key
-def toggle_fullscreen(event=None):
-    is_fullscreen[0] = not is_fullscreen[0]
-    root.attributes("-fullscreen", is_fullscreen[0])
-
-# Bind the 'f' key (lowercase only)
-root.bind("<Control-f>", toggle_fullscreen)
-
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-# Keyboard shortcuts for playback controls
-def toggle_play_pause(event=None):
-    global is_playing
-    if is_playing:
-        pause_sound()
-    else:
-        play_sound()
+# Function to toggle fullscreen mode
+def toggle_fullscreen(event=None):
+    global last_width, last_height, last_x, last_y, is_fullscreen
 
-root.bind("<space>", toggle_play_pause)
-root.bind_all("<Right>", lambda event: next_sound())
-root.bind_all("<Left>", lambda event: prev_sound())
+    if is_fullscreen[0]: # Currently fullscreen, going to non-fullscreen
+        root.attributes("-fullscreen", False)
+        # Restore to last known non-fullscreen size and position
+        if last_x is not None and last_y is not None:
+            root.geometry(f"{last_width}x{last_height}+{last_x}+{last_y}")
+        else:
+            # If no non-fullscreen size was ever stored (e.g., app started fullscreen),
+            # default to 1280x720 centered.
+            target_width = 1280
+            target_height = 720
+            
+            screen_width = root.winfo_screenwidth()
+            screen_height = root.winfo_screenheight()
+            
+            # Center the window based on the desired target size
+            center_x = (screen_width - target_width) // 2
+            center_y = (screen_height - target_height) // 2
+            
+            root.geometry(f"{target_width}x{target_height}+{center_x}+{center_y}")
+            
+            # Store these default values for subsequent toggles
+            last_width = target_width
+            last_height = target_height
+            last_x = center_x
+            last_y = center_y
+
+    else: # Currently non-fullscreen, going to fullscreen
+        # Store current window geometry BEFORE going fullscreen
+        last_width = root.winfo_width()
+        last_height = root.winfo_height()
+        last_x = root.winfo_x()
+        last_y = root.winfo_y()
+        root.attributes("-fullscreen", True)
+
+    is_fullscreen[0] = not is_fullscreen[0]
+    # Immediately re-layout after fullscreen toggle
+    _perform_resize_layout()
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 #exit button incase the ctrl+f key doesnt works
 exit_button = ctk.CTkButton(
-    root,
+    main_canvas,
     text="❌ Exit",
     font=("Segoe UI", 14),
     fg_color="#FF5151",
@@ -403,12 +423,89 @@ exit_button = ctk.CTkButton(
     corner_radius=25,
     command=root.destroy
 )
-exit_button.place(relx=0.97, rely=0.04, anchor="ne")
 
-help_button = ctk.CTkButton(root, text="❓ Help", font=("Segoe UI", 14), fg_color="#5A9BD5", hover_color="#7AB8FF", text_color="white", corner_radius=25, command=show_help)
-help_button.place(relx=0.85, rely=0.04, anchor="ne")
+help_button = ctk.CTkButton(main_canvas, text="❓ Help", font=("Segoe UI", 14), fg_color="#5A9BD5", hover_color="#7AB8FF", text_color="white", corner_radius=25, command=show_help)
 
 #-----------------------------------------------------------------------------------------------------------------------#
+
+# Keyboard shortcuts for playback controls
+def toggle_play_pause(event=None):
+    global is_playing
+    if is_playing:
+        pause_sound()
+    else:
+        # If no song is selected, select the first one when space is pressed
+        if not playlist_box.curselection() and playlist_box.size() > 0:
+            playlist_box.selection_set(0)
+            playlist_box.activate(0)
+        play_sound()
+
+root.bind("<space>", toggle_play_pause)
+root.bind_all("<Right>", lambda event: next_sound())
+root.bind_all("<Left>", lambda event: prev_sound())
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+# Function to perform the actual layout adjustments
+def _perform_resize_layout(event=None):
+    global resize_job_id, bg_photo
+    
+    current_canvas_width = main_canvas.winfo_width()
+    current_canvas_height = main_canvas.winfo_height()
+
+    if current_canvas_width <= 1 or current_canvas_height <= 1: # Avoid division by zero or tiny windows
+        return
+
+    # Resize and update background image
+    try:
+        bg_image_raw = Image.open(resource_path("sound_bg.png"))
+        bg_image_resized = bg_image_raw.resize((current_canvas_width, current_canvas_height), Image.Resampling.LANCZOS)
+        bg_photo = ImageTk.PhotoImage(bg_image_resized)
+        main_canvas.itemconfig(bg_label_on_canvas, image=bg_photo)
+    except FileNotFoundError:
+        print(f"Error: sound_bg.png not found at {resource_path('sound_bg.png')}")
+        # Optionally set canvas background color if image is missing
+        main_canvas.configure(bg="#d9e9df")
+
+
+    # Place elements using relative coordinates and sizes on main_canvas
+    title.place(relx=0.5, rely=0.04, anchor="n")
+    exit_button.place(relx=0.97, rely=0.04, anchor="ne")
+    help_button.place(relx=0.85, rely=0.04, anchor="ne")
+
+    # Place the main content frame (center_volume_frame)
+    # It takes up most of the central space
+    center_volume_frame.place(relx=0.5, rely=0.12, relwidth=0.9, relheight=0.8, anchor="n")
+
+    # Pack elements within center_volume_frame (old pack logic applies here)
+    playlist_button_frame.pack(side="left", expand=True, fill="both", anchor="center", padx=(20,10), pady=20) # Adjusted padx/pady
+    volume_frame.pack(side="right", anchor="n", padx=(10,20), pady=20) # Adjusted padx/pady
+
+
+# Debouncing function to prevent excessive calls during resizing
+def resize_layout(event=None):
+    global resize_job_id
+    if resize_job_id:
+        root.after_cancel(resize_job_id)
+    resize_job_id = root.after(50, _perform_resize_layout) # Schedule _perform_resize_layout after 50ms
+
+
+#-----------------------------------------------------------------------------------------------------------------------#
+
+# --- Initial setup calls ---
+# Bind the 'f' key (lowercase only) for fullscreen toggle
+root.bind("<Control-f>", toggle_fullscreen)
+
+# Bind the main layout update function to the root window's Configure event
+# This means _perform_resize_layout will run whenever the window is resized.
+root.bind("<Configure>", resize_layout)
+
+# Initial call to set up the layout after all widgets are created
+# A small delay ensures the window has initialized its dimensions
+root.after(100, _perform_resize_layout)
+
+# Start the progress bar update loop
+update_progress_bar()
+
 
 #the whole program run
 root.mainloop()
