@@ -571,14 +571,41 @@ def display_next_question(answer=None, is_reset=False): #added is_reset flag
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-#Track fullscreen state
-is_fullscreen = [True]
+# Global variables to store the window's geometry before fullscreen
+last_width = 1280
+last_height = 720 # Set a reasonable default size
+last_x = None
+last_y = None
+
+# Track fullscreen state
+is_fullscreen = [True] # Still starts in fullscreen
 
 # Toggle fullscreen using the 'f' key
 def toggle_fullscreen(event=None):
-    is_fullscreen[0] = not is_fullscreen[0]
-    root.attributes("-fullscreen", is_fullscreen[0])
+    global last_width, last_height, last_x, last_y
 
+    if is_fullscreen[0]: # Currently fullscreen, going to non-fullscreen
+        # Store current fullscreen dimensions (often maxed to screen)
+        # We'll rely on stored last_width/height for restoration
+        
+        root.attributes("-fullscreen", False)
+        # Restore to last known non-fullscreen size or a default if not set
+        if last_x is not None and last_y is not None:
+             root.geometry(f"{last_width}x{last_height}+{last_x}+{last_y}")
+        else: # Fallback to a default if no previous state was captured
+             root.geometry(f"{last_width}x{last_height}")
+        print(f"Exiting fullscreen: Restoring to {root.winfo_width()}x{root.winfo_height()}")
+
+    else: # Currently non-fullscreen, going to fullscreen
+        # Store current window geometry BEFORE going fullscreen
+        last_width = root.winfo_width()
+        last_height = root.winfo_height()
+        last_x = root.winfo_x()
+        last_y = root.winfo_y()
+        print(f"Entering fullscreen: Stored current size {last_width}x{last_height}")
+        root.attributes("-fullscreen", True)
+
+    is_fullscreen[0] = not is_fullscreen[0]
 # Bind the 'f' key (lowercase only)
 root.bind("<Control-f>", toggle_fullscreen)
 
