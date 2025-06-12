@@ -24,6 +24,11 @@ def resource_path(*relative_path_parts):
     return os.path.join(base_path, *relative_path_parts)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#for alignment
+bg_photo_tk = None # Global variable for background image (to prevent garbage collection)
+bg_photo_id = None
+resize_job_id=None
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 def get_image_path(filename):
     # This gets the path of the current Python file
     base_path = os.path.dirname(os.path.abspath(__file__))
@@ -53,21 +58,104 @@ def show_help():
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 #main window
 root = tk.Tk()  #create the main app window
-root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}")  #full-screen size
+root.attributes("-fullscreen", True)  #full-screen size
 root.title("Stress Level Survey")
 root.configure(bg="#FFF8E1")  #change the background color of entire window
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+# --- Main Canvas for Background ---
+main_canvas = tk.Canvas(root, highlightthickness=0, bg="#fdf6f0")
+main_canvas.pack(fill="both", expand=True)
 
 # Load and set background image
 base_dir = os.path.dirname(os.path.abspath(__file__)) 
 bg_image_path = os.path.join(base_dir, "stress_bg.png") 
-bg_image=Image.open(bg_image_path)
-bg_image = bg_image.resize((root.winfo_screenwidth(), root.winfo_screenheight()), Image.Resampling.LANCZOS) #full screen
-bg_photo = ImageTk.PhotoImage(bg_image)
+try:
+    bg_image_original = Image.open(bg_image_path)
+except FileNotFoundError:
+    messagebox.showerror("Error", f"Background image not found: {bg_image_path}")
+    root.destroy()
+    sys.exit()
 
-bg_label = tk.Label(root, image=bg_photo)
-bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+#-------------------------------------------------------------------------------------------------------------------#
+#for alignment
+def _perform_resize_layout(event=None):
+    global bg_photo_tk, bg_photo_id
+
+    current_width = root.winfo_width() # Use root's width
+    current_height = root.winfo_height()
+
+    print(f"--- Layout Update: Root size {current_width}x{current_height} ---") # Debugging print
+
+    # Prevent errors if window dimensions are 0 (e.g., during initialization)
+    if current_width == 1 or current_height == 1:
+        print("Root size is 1x1, skipping detailed layout updates.") # Debugging print
+        return
+
+    # Resize and update background image on main_canvas
+    resized_bg_image = bg_image_original.resize((current_width, current_height), Image.Resampling.LANCZOS)
+    bg_photo_tk = ImageTk.PhotoImage(resized_bg_image)
+
+    # Use a try-except block to gracefully handle the TclError for image update
+    try:
+        if bg_photo_id: # If image already exists on canvas, just update it
+            main_canvas.itemconfig(bg_photo_id, image=bg_photo_tk)
+        else: # Otherwise, create it for the first time
+            bg_photo_id = main_canvas.create_image(0, 0, image=bg_photo_tk, anchor="nw")
+        main_canvas.tag_lower(bg_photo_id) # Ensure background is at the lowest layer
+    except tk.TclError as e:
+        print(f"Error updating background image: {e}. Recreating image.")
+        # If error occurs, try to delete and recreate, or simply recreate
+        if bg_photo_id:
+             main_canvas.delete(bg_photo_id) # Try to delete the problematic ID
+        bg_photo_id = main_canvas.create_image(0, 0, image=bg_photo_tk, anchor="nw")
+        main_canvas.tag_lower(bg_photo_id)
+
+    # --- Responsive Positioning for Main UI Elements using .place() on main_canvas ---
+    # All main UI elements are now placed on main_canvas instead of root directly.
+
+    # Title label
+    title.place(in_=main_canvas, relx=0.5, rely=0.03, anchor="n") # Centered, slightly from top
+
+    # Instruction frame (holds instruction label and restart button)
+    instruction_frame.place(in_=main_canvas, relx=0.5, rely=0.09, relwidth=0.75, height=50, anchor="n")
+    # instruction_label and reset_btn are packed inside instruction_frame, so they'll adjust within it.
+
+    # Progress bar - REMOVED 'height=15' from place() as it's set in constructor
+    progress.place(in_=main_canvas, relx=0.5, rely=0.155, relwidth=0.7, anchor="n") # Centered, below instruction frame
+
+    # Main container frame (holds chat on left and result/tips on right)
+    main_frame.place(in_=main_canvas, relx=0.5, rely=0.22, anchor="n", relwidth=0.9, relheight=0.75) # Centered, wider and taller
+    
+    # Update wraplength for result_label based on right_frame's width
+    # This needs to happen after right_frame has its final size from .place()
+    root.update_idletasks() # Ensures frames have their sizes
+    if right_frame.winfo_width() > 0:
+        result_label.config(wraplength=right_frame.winfo_width() * 0.9) # 90% of right_frame width
+
+    # Ensure scroll region is updated after layout changes
+    root.update_idletasks() # Let tkinter update its internal geometry
+    chat_canvas.config(scrollregion=chat_canvas.bbox("all"))
+
+    # Debugging prints for frame sizes
+    print(f"   main_frame size: {main_frame.winfo_width()}x{main_frame.winfo_height()}") # Debugging print
+    print(f"   left_frame size: {left_frame.winfo_width()}x{left_frame.winfo_height()}") # Debugging print
+    print(f"   right_frame size: {right_frame.winfo_width()}x{right_frame.winfo_height()}") # Debugging print
+    print(f"   chat_canvas size: {chat_canvas.winfo_width()}x{chat_canvas.winfo_height()}") # Debugging print
+    print(f"   chat_frame size: {chat_frame.winfo_width()}x{chat_frame.winfo_height()}") # Debugging print
+    print(f"   chat_canvas scrollregion: {chat_canvas.cget('scrollregion')}") # Debugging print
+
+
+
+# This is the debouncing function that will be called by the <Configure> event
+def resize_layout(event=None):
+    global resize_job_id
+    # If there's an existing scheduled job, cancel it
+    if resize_job_id:
+        root.after_cancel(resize_job_id)
+    # Schedule the actual layout update to happen after a short delay (e.g., 50ms)
+    # This ensures the layout is only updated *after* the user has stopped resizing for a moment.
+    resize_job_id = root.after(50, _perform_resize_layout)
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
 
@@ -165,33 +253,29 @@ def save_stress_result(score, level):
     date_today = datetime.date.today().isoformat()  #2025-05-20 fromat current date
 
     cursor.execute("INSERT INTO stress_quiz (profile, date, score, stress_level) VALUES (?, ?, ?, ?)",
-              (profile, date_today, score, level))
+                   (profile, date_today, score, level))
 
     connect.commit()
-    connect.close()  
+    connect.close()    
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #title label
 title = tk.Label(root, text="Stress Level Survey📃", font=("Arial", 20, "bold"), bg="#FCF8E8", fg="#333")
-title.pack(pady=10)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # Frame to hold instruction label and restart button side by side
 instruction_frame = tk.Frame(root, bg="#FFF8E1")
-instruction_frame.pack(pady=(0, 10))
 
 #instruction label to tell user what to do
 instruction_label = tk.Label(instruction_frame, text="Hi! Please press one of the buttons below to answer each question.", font=("Segoe UI", 13, "italic"), bg="#FFF8E1", fg="#555", wraplength=500, justify="left")
-instruction_label.pack(side="left",pady=(0, 10),anchor="w")
+instruction_label.pack(side="left",pady=(0, 10),padx=(200,5),anchor="w",expand=True,fill="x")
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Progress bar
 progress = ctk.CTkProgressBar(root, orientation="horizontal", width=700, height=15, corner_radius=10, fg_color="#FFE0B2", progress_color="#FFB74D")
 progress.set(0)
-progress.pack(pady=(5, 10))
-
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Restart button
@@ -204,7 +288,7 @@ def reset_quiz():
         widget.destroy()
     result_label.config(text="[Your stress level and tips will be displayed here.]")
     chat_canvas.yview_moveto(0)  # Scroll to top when restarting
-    display_next_question()
+    display_next_question(is_reset=True)
 
 reset_btn = ctk.CTkButton(instruction_frame, text="🔁 Restart Survey", 
                            font=ctk.CTkFont("Segoe UI", 16, "bold"),
@@ -213,7 +297,7 @@ reset_btn = ctk.CTkButton(instruction_frame, text="🔁 Restart Survey",
                            command=reset_quiz, 
                            hover_color="#FFB380", # Darker yellow on hover
                            corner_radius=14) # Adding CustomTkinter styling
-reset_btn.pack(side="left",anchor="e",pady=(3,10))
+reset_btn.pack(side="right",anchor="e",pady=(3,10),padx=(10,30))
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -275,7 +359,6 @@ user_scores=[] #list to store user's selected scores
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # Container frame to hold chat on the left and result/tips on the right
 main_frame = tk.Frame(root, bg="#FFF8E1")
-main_frame.place(relx=0.5, rely=0.55, anchor="center", relwidth=0.9, relheight=0.6)
 
 # Left frame for chat box
 left_frame = tk.Frame(main_frame, bg="#FFFFFF", bd=2, relief="flat")
@@ -285,22 +368,17 @@ left_frame.place(relx=0, rely=0, relwidth=0.55, relheight=1)
 right_frame = tk.Frame(main_frame, bg="#FFFDE7")
 right_frame.place(relx=0.56, rely=0, relwidth=0.43, relheight=1)
 
-# Outer frame with border acting as the "box"
-chat_box = tk.Frame(left_frame, bg="#FFFFFF", bd=2, relief="flat")
-chat_box.place(relx=0.5, rely=0.45, anchor="center", width=600, height=400) #relx=horizontal,value between 0.0 (left) and 1.0 (right) #rely=vertical.value between 0.0 (top) and 1.0 (bottom)
-
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-# Scrollbar inside the chat box
+# Scrollbar inside the chat box (direct child of left_frame)
 scrollbar = ttk.Scrollbar(left_frame, orient="vertical")
-scrollbar.pack(side="right", fill="y")
+scrollbar.pack(side="right", fill="y", padx=1, pady=1)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-# Canvas for scrollable area
+# Canvas for scrollable area (direct child of left_frame)
 chat_canvas = tk.Canvas(left_frame, bg="#FFFFFF", yscrollcommand=scrollbar.set, highlightthickness=0) #yscrollcommand=scrollbar.set:connects the canvas's vertical scrolling to the scrollbar
-chat_canvas.pack(side="left", fill="both", expand=True)
-scrollbar.config(command=chat_canvas.yview) #when move the scrollbar, it scrolls the canvas vertically using .yview()
+chat_canvas.pack(side="left", fill="both", expand=True, padx=1, pady=1) # Ensure fill and expand are set
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -313,7 +391,7 @@ chat_canvas.create_window((0, 0), window=chat_frame, anchor="nw")
 # Update the scroll region when adding new widgets
 def update_scroll_region(event=None): #event=None:allow function to be called automatically by an event
     chat_canvas.configure(scrollregion=chat_canvas.bbox("all")) #chat_canvas.configure(scrollregion=...): Updates the scrollable area of the canvas so that it fits all its content
-                                                                #chat_canvas.bbox("all"): Gets the bounding box (min and max x/y coordinates) of everything inside the canvas.
+                                                                 #chat_canvas.bbox("all"): Gets the bounding box (min and max x/y coordinates) of everything inside the canvas.
 chat_frame.bind("<Configure>", update_scroll_region)
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -333,9 +411,9 @@ chat_canvas.bind_all("<Button-5>", lambda event: chat_canvas.yview_scroll(1, "un
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # Result label (outside and below the chat interface)
-result_label = tk.Label(right_frame, text="[Your stress level and tips will be displayed here.]", font=("Segoe UI", 14), bg="#FCF8E8", fg="#3A3D64", wraplength=480, justify="left")
-# Place result_label just below the chat_box
-result_label.place(relx=0.5,rely=0.30,anchor="center")  # Just below the title and chat box
+result_label = tk.Label(right_frame, text="[Your stress level and tips will be displayed here.]", font=("Segoe UI", 14), bg="#FCF8E8", fg="#3A3D64", justify="left")
+# Place result_label in the center of right_frame. wraplength will be set dynamically in resize_layout
+result_label.place(relx=0.5,rely=0.30,anchor="center")    # Just below the title and chat box
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -398,7 +476,7 @@ def pop_button(button, initial_pady):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #function to display next question
-def display_next_question(answer=None): #answer=None:parameter that stores the selected answer #if users selected a answer it will pass to a function
+def display_next_question(answer=None, is_reset=False): #added is_reset flag
     global current_index #used to track which question in the quiz is currently being displayed
 
     #show the user response
@@ -413,12 +491,11 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
         user_bubble_frame.pack(pady=(5, 2), padx=(100,25), anchor="e", ipadx=5, ipady=3) # Anchor right
         
         response_label = ctk.CTkLabel(user_bubble_frame, text=f"🧍 You: {answer}", 
-                                      font=ctk.CTkFont("Calibri", 17, "bold"), 
-                                      text_color="#6D4C41", 
-                                      wraplength=380, justify="left")
+                                          font=ctk.CTkFont("Calibri", 17, "bold"), 
+                                          text_color="#6D4C41", 
+                                          wraplength=380, justify="left")
         response_label.pack(padx=10, pady=5, anchor="e")
 
-        # Inside display_next_question(), after displaying the user response
         # Timestamp for user message
         timestamp = datetime.datetime.now().strftime("%I:%M %p")
         time_label = ctk.CTkLabel(chat_frame, text=timestamp, font=ctk.CTkFont("Segoe UI", 11), text_color="#888888")
@@ -426,6 +503,27 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
 
         # Call scroll_to_bottom after the user response is added
         root.after(100, scroll_to_bottom) # Use after to ensure widgets are drawn
+
+    # Display intro message only if not resetting and it's the very first question
+    # This block has been moved inside display_next_question to manage its display based on the survey flow.
+    # Check if this is the very first call (current_index is 0 and no answer provided yet)
+    if not is_reset and current_index == 0 and not answer:
+        intro_bubble_frame = ctk.CTkFrame(chat_frame, fg_color="#FFE0B2", corner_radius=15) # Light purple intro bubble
+        intro_bubble_frame.pack(pady=10, padx=(10, 100), anchor="w", ipadx=5, ipady=3)
+
+        intro_label = ctk.CTkLabel(intro_bubble_frame, text="👋 Hi! I'm here to check your stress level. Let's begin the survey!", 
+                                    font=ctk.CTkFont("Calibri", 18, "bold"), 
+                                    text_color="#795548", 
+                                    wraplength=560, justify="left") # Reduced wraplength
+        intro_label.pack(padx=10, pady=5, anchor="w")
+
+        # Timestamp for intro message
+        timestamp = datetime.datetime.now().strftime("%I:%M %p")
+        time_label = ctk.CTkLabel(chat_frame, text=timestamp, font=ctk.CTkFont("Segoe UI", 11), text_color="#757575")
+        time_label.pack(anchor="w", padx=10, pady=(0, 5))
+
+        root.after(500, scroll_to_bottom) # Short delay for intro scroll
+
 
     #move to the next question if there's a new answer
     if current_index < len(quiz_questions): #check if there are more question to display
@@ -435,9 +533,9 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
         bot_bubble_frame.pack(pady=(5, 2), padx=10, anchor="w", fill="x", ipadx=5, ipady=3) # Anchor left
 
         question_label = ctk.CTkLabel(bot_bubble_frame, text=f"🤖 Q{current_index+1}: {quiz_questions[current_index]}", 
-                                      font=ctk.CTkFont("Calibri", 17, "bold"), 
-                                      text_color="#3E2723", 
-                                      wraplength=560, justify="left")
+                                          font=ctk.CTkFont("Calibri", 17, "bold"), 
+                                          text_color="#3E2723", 
+                                          wraplength=560, justify="left")
         question_label.pack(padx=10, pady=5, anchor="w")
 
         # Timestamp for bot message
@@ -450,15 +548,15 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
         button_frame = ctk.CTkFrame(chat_frame, fg_color="transparent") # Transparent background
         button_frame.pack(pady=10, anchor="w", padx=10)
 
-        for option in options:                                                         #When clicked, it calls display_next_question(opt), passing the selected option as the answer #button_frame to remove the options after a selection
+        for option in options:                                           
             button = ctk.CTkButton(button_frame, text=option, 
-                                   fg_color="#FFAB91", # Light purple for options
-                                   text_color="#4E342E", 
-                                   command=lambda opt=option: [display_next_question(opt), button_frame.destroy()],
-                                   hover_color="#FF8A65", # Darker purple on hover
-                                   corner_radius=6,
-                                   font=ctk.CTkFont("Segoe UI", 15, "bold"),
-                                   width=120, height=35)
+                                       fg_color="#FFAB91", # Light purple for options
+                                       text_color="#4E342E", 
+                                       command=lambda opt=option: [on_option_click(opt, button_frame)],
+                                       hover_color="#FF8A65", # Darker purple on hover
+                                       corner_radius=6,
+                                       font=ctk.CTkFont("Segoe UI", 15, "bold"),
+                                       width=120, height=35)
             button.pack(side="left", padx=5)
             root.after(100 + options.index(option) * 50, lambda b=button: pop_button(b, (5,5)))
         current_index += 1 #+1 and move to next question
@@ -471,28 +569,10 @@ def display_next_question(answer=None): #answer=None:parameter that stores the s
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------#
 
-# Display an intro message before the first question
-intro_bubble_frame = ctk.CTkFrame(chat_frame, fg_color="#FFE0B2", corner_radius=15) # Light purple intro bubble
-intro_bubble_frame.pack(pady=10, padx=(10, 100), anchor="w", ipadx=5, ipady=3)
-
-intro_label = ctk.CTkLabel(intro_bubble_frame, text="👋 Hi! I'm here to check your stress level. Let's begin the survey!", 
-                           font=ctk.CTkFont("Calibri", 18, "bold"), 
-                           text_color="#795548", 
-                           wraplength=560, justify="left") # Reduced wraplength
-intro_label.pack(padx=10, pady=5, anchor="w")
-
-# Timestamp for intro message
-timestamp = datetime.datetime.now().strftime("%I:%M %p")
-time_label = ctk.CTkLabel(chat_frame, text=timestamp, font=ctk.CTkFont("Segoe UI", 11), text_color="#757575")
-time_label.pack(anchor="w", padx=10, pady=(0, 5))
-
-# Delay the first question slightly to simulate a chat feel
-root.after(1000, display_next_question)  # delay 1 second before showing the first question
-
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #Track fullscreen state
-is_fullscreen = [False]
+is_fullscreen = [True]
 
 # Toggle fullscreen using the 'f' key
 def toggle_fullscreen(event=None):
@@ -514,13 +594,21 @@ exit_button = ctk.CTkButton(
     corner_radius=25,
     command=root.destroy
 )
-exit_button.place(relx=0.97, rely=0.04, anchor="ne")
+exit_button.place(in_=main_canvas,relx=0.97, rely=0.04, anchor="ne")
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 help_button = ctk.CTkButton(root, text="❓ Help", font=("Segoe UI", 14), fg_color="#5A9BD5", hover_color="#7AB8FF", text_color="white", corner_radius=25, command=show_help)
-help_button.place(relx=0.97, rely=0.09, anchor="ne")
+help_button.place(in_=main_canvas,relx=0.97, rely=0.09, anchor="ne")
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+# --- Initial setup calls ---
+# Bind update_layout to the root window's Configure event
+root.bind("<Configure>", resize_layout)
+# Initial call to update_layout to set up the elements, ensuring window is drawn
+# Added a small initial delay to ensure the window is fully rendered before layout calculation and first question
+root.after(100, lambda: [resize_layout(), display_next_question()])
+
 
 # Run the main program
 root.mainloop()

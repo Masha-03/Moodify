@@ -244,7 +244,6 @@ root.configure(bg="#fdf6f0")
 main_canvas = tk.Canvas(root, highlightthickness=0, bg="#fdf6f0")
 main_canvas.pack(fill="both", expand=True)
 
-
 # Load and set background image
 base_dir = os.path.dirname(os.path.abspath(__file__)) 
 bg_image_path = os.path.join(base_dir, "diary_bg.png") 
