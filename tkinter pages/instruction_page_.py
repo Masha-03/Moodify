@@ -534,7 +534,22 @@ is_fullscreen = [False] # Using a list to allow modification within function sco
 
 def toggle_fullscreen(event=None):
     current_fullscreen_state = root.attributes("-fullscreen")
-    root.attributes("-fullscreen", not current_fullscreen_state)
+    if current_fullscreen_state: # Currently fullscreen, exit fullscreen
+        root.attributes("-fullscreen", False)
+        target_width = 1280
+        target_height = 720
+        
+        # Calculate center coordinates for the target size
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        
+        center_x = (screen_width - target_width) // 2
+        center_y = (screen_height - target_height) // 2
+        
+        root.geometry(f"{target_width}x{target_height}+{center_x}+{center_y}")
+    else:
+        root.attributes("-fullscreen", True)
+    
     is_fullscreen[0] = not current_fullscreen_state # Update state tracker
     # After toggling fullscreen, force a layout update to ensure elements reposition correctly
     root.update_idletasks() # Ensure window size is updated
