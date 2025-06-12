@@ -33,6 +33,14 @@ mood_quotes = {
     "Relaxed": "Peace of mind is the best kind of success."
 }
 
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+# Global variables for responsive layout and fullscreen management
+resize_job_id = None # For debouncing the resize event
+last_width = 1280 # Default non-fullscreen width
+last_height = 720 # Default non-fullscreen height
+last_x = None # Will store the x position
+last_y = None # Will store the y position
+is_fullscreen = [True] # Start in fullscreen
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
 
 def get_db_path():
@@ -170,11 +178,13 @@ def clear_entry():
     global selected_mood
     selected_mood = ""
     # Optionally reset background to default
-    root.configure(bg="#fdf6f0")
-    title.configure(bg="#fdf6f0")
-    ask_user_label.configure(bg="#fdf6f0")
-    label.configure(bg="#fdf6f0")
+    current_bg_color = "#fdf6f0"
+    main_canvas.configure(bg=current_bg_color) # Update main_canvas background
+    title.configure(bg=current_bg_color)
+    ask_user_label.configure(bg=current_bg_color)
+    label.configure(bg=current_bg_color)
     frame_button.configure(bg="#FCF8E8")
+    word_count_label.configure(bg=current_bg_color)
     for button in emoji_buttons:
         button.configure(bg="#ffe0e0")
 
@@ -226,11 +236,10 @@ def set_mood(mood):
         btn_colour="#f8c9c9"
 
     #Update background & text colors
-    root.configure(bg=bg_colour)
+    main_canvas.configure(bg=bg_colour)
     title.configure(bg=bg_colour)
     ask_user_label.configure(bg=bg_colour)
     label.configure(bg=bg_colour)
-    text_entry.configure(bg="white", fg="#000")  #keep text box simple
     frame_button.configure(bg=bg_colour)
     word_count_label.configure(bg=bg_colour)
 
@@ -259,14 +268,17 @@ def resize_image(image_path, size=(50, 50)):
 
 #main window
 root=tk.Tk()
-root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}") #full-screen size
+root.attributes("-fullscreen", True) # Start in true fullscreen
 root.title("Mood Tracker")
 root.configure(bg="#fdf6f0") 
 
+# --- Main Canvas to manage all UI elements for responsive layout ---
+# All other widgets will be placed inside this canvas.
+main_canvas = tk.Canvas(root, highlightthickness=0, bg="#fdf6f0")
+main_canvas.pack(fill="both", expand=True) # Canvas fills the entire root window
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 title=tk.Label(root,text="Mood Tracker⭐", font=("Helvetica", 18, "bold"),bg="#fdf6f0",fg="#333")
-title.pack(pady=10)
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -276,17 +288,13 @@ ask_user=["How are you feeling today?",
           "How's your mood today?",
           "What are you feeling right now?"]
 random_ask_user=random.choice(ask_user) #computer will random display the question
-print(random_ask_user) #print the sentence
 
 #label to display the ask_user sentences
-ask_user_label=tk.Label(root,text=random_ask_user, font=("Comic Sans MS",15),bg="#fdf6f0", fg="#555", wraplength=800) #wraplength=control text wrapping,will break the text into new line once it reaches specific pixel width.
-ask_user_label.pack(pady=(10,10))
-
+ask_user_label=tk.Label(main_canvas,text=random_ask_user, font=("Comic Sans MS",15),bg="#fdf6f0", fg="#555", wraplength=800) #wraplength=control text wrapping,will break the text into new line once it reaches specific pixel width.
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #create frame to hold emoji button and centre them
-frame_button=tk.Frame(root,bg="#FCF8E8")
-frame_button.pack(pady=20)
+frame_button=tk.Frame(main_canvas,bg="#FCF8E8")
 
 #list of emoji buttons
 emoji_buttons=[]
@@ -325,18 +333,15 @@ button_relaxed.pack(side="left", padx=20)
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #blank text area for user to input something
-text_entry=tk.Text(root,font=("Comic Sans MS",12), height=13, width=70, bd=2, relief="groove", highlightthickness=1, highlightbackground="#ccc")
-text_entry.pack()
+text_entry=tk.Text(main_canvas,font=("Comic Sans MS",12), height=13, width=70, bd=2, relief="groove", highlightthickness=1, highlightbackground="#ccc")
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #Add a instruction label for users
-label=tk.Label(root,text="Choose a button or describe your mood inside the blank box.",font=("Comic Sans MS",11),bg="#fdf6f0",fg="#777")
-label.pack(pady=(7,5))      
+label=tk.Label(main_canvas,text="Choose a button or describe your mood inside the blank box.",font=("Comic Sans MS",11),bg="#fdf6f0",fg="#777")    
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
-word_count_label = tk.Label(root, text="Words: 0", font=("Comic Sans MS", 10), bg="#fdf6f0", fg="#555")
-word_count_label.pack()
+word_count_label = tk.Label(main_canvas, text="Words: 0", font=("Comic Sans MS", 10), bg="#fdf6f0", fg="#555")
 
 text_entry.bind("<KeyRelease>", update_word_count)
 
@@ -344,7 +349,6 @@ text_entry.bind("<KeyRelease>", update_word_count)
 
 #save Button to save the mood
 save_button = tk.Button(root, text="Save Mood", font=("Comic Sans MS", 12), bg="white", relief="groove", command=save_mood)
-save_button.pack(pady=10)
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -352,17 +356,78 @@ save_button.pack(pady=10)
 selected_mood = ""
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
-
-#Track fullscreen state
-is_fullscreen = [False]
-
-# Toggle fullscreen using the 'f' key
+# Function to toggle fullscreen mode
 def toggle_fullscreen(event=None):
-    is_fullscreen[0] = not is_fullscreen[0]
-    root.attributes("-fullscreen", is_fullscreen[0])
+    global last_width, last_height, last_x, last_y, is_fullscreen
 
-# Bind the 'f' key (lowercase only)
-root.bind("<Control-f>", toggle_fullscreen)
+    if is_fullscreen[0]: # Currently fullscreen, going to non-fullscreen
+        root.attributes("-fullscreen", False)
+        # Restore to last known non-fullscreen size and position
+        if last_x is not None and last_y is not None:
+             root.geometry(f"{last_width}x{last_height}+{last_x}+{last_y}")
+        else: # Fallback to a default size (centered roughly)
+            screen_width = root.winfo_screenwidth()
+            screen_height = root.winfo_screenheight()
+            # Use slightly smaller defaults if 1000x800 is too large for some screens
+            default_width = min(1000, int(screen_width * 0.8))
+            default_height = min(800, int(screen_height * 0.8))
+            default_x = (screen_width - default_width) // 2
+            default_y = (screen_height - default_height) // 2
+            root.geometry(f"{default_width}x{default_height}+{default_x}+{default_y}")
+
+    else: # Currently non-fullscreen, going to fullscreen
+        # Store current window geometry BEFORE going fullscreen
+        last_width = root.winfo_width()
+        last_height = root.winfo_height()
+        last_x = root.winfo_x()
+        last_y = root.winfo_y()
+        root.attributes("-fullscreen", True)
+
+    is_fullscreen[0] = not is_fullscreen[0]
+    # Immediately re-layout after fullscreen toggle
+    _perform_resize_layout()
+
+# Function to perform the actual layout adjustments
+def _perform_resize_layout(event=None):
+    global resize_job_id
+    
+    current_canvas_width = main_canvas.winfo_width()
+    current_canvas_height = main_canvas.winfo_height()
+
+    if current_canvas_width == 1 or current_canvas_height == 1: # Avoid division by zero or tiny windows
+        return
+
+    # Place elements using relative coordinates and sizes on main_canvas
+    # These values are carefully chosen percentages to maintain visual balance.
+    title.place(relx=0.5, rely=0.04, anchor="n")
+    ask_user_label.place(relx=0.5, rely=0.10, anchor="n", relwidth=0.8)
+    
+    # Adjust wraplength for text labels dynamically based on their relative width
+    ask_user_label.config(wraplength=int(current_canvas_width * 0.75)) # 75% of its relwidth
+
+    frame_button.place(relx=0.5, rely=0.20, anchor="n", relwidth=0.9, relheight=0.1) # Relative size for the emoji frame
+    # Note: The emoji buttons inside `frame_button` use `pack`, which is fine,
+    # as `frame_button` itself is now responsively placed.
+
+    text_entry.place(relx=0.5, rely=0.35, anchor="n", relwidth=0.7, relheight=0.4)
+
+    label.place(relx=0.5, rely=0.76, anchor="n")
+    word_count_label.place(relx=0.5, rely=0.80, anchor="n")
+    save_button.place(relx=0.5, rely=0.87, anchor="n")
+
+    # Position side buttons (Exit, Clear, Timestamp, Help) relative to main_canvas
+    exit_button.place(relx=0.97, rely=0.04, anchor="ne")
+    clear_button.place(relx=0.03, rely=0.13, anchor="w")
+    timestamp_button.place(relx=0.03, rely=0.08, anchor="w")
+    help_button.place(relx=0.97, rely=0.09, anchor="ne")
+
+
+# Debouncing function to prevent excessive calls during resizing
+def resize_layout(event=None):
+    global resize_job_id
+    if resize_job_id:
+        root.after_cancel(resize_job_id)
+    resize_job_id = root.after(50, _perform_resize_layout) # Schedule _perform_resize_layout after 50ms
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 #exit button incase the ctrl+f key doesnt works
@@ -376,23 +441,32 @@ exit_button = ctk.CTkButton(
     corner_radius=25,
     command=root.destroy
 )
-exit_button.place(relx=0.97, rely=0.04, anchor="ne")
-
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 clear_button = ctk.CTkButton(root, text="Clear Entry", font=("Segoe UI", 14), hover_color="#FFA9FF", text_color="black",fg_color="#ffd3d3", corner_radius=25,command=clear_entry)
-clear_button.place(relx=0.03, rely=0.13, anchor="w")
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 timestamp_button = ctk.CTkButton(root, text="Insert Timestamp",fg_color="#ffadad", hover_color="#F7CDFF", font=("Segoe UI", 14),text_color="black", corner_radius=25,command=insert_timestamp)
-timestamp_button.place(relx=0.03, rely=0.08, anchor="w")
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 help_button = ctk.CTkButton(root, text="❓ Help", font=("Segoe UI", 14), fg_color="#5A9BD5", hover_color="#7AB8FF", text_color="white", corner_radius=25, command=show_help)
-help_button.place(relx=0.97, rely=0.09, anchor="ne")
+
 #--------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+# --- Initial setup calls ---
+# Bind the 'f' key (lowercase only) for fullscreen toggle
+root.bind("<Control-f>", toggle_fullscreen)
+
+# Bind the main layout update function to the root window's Configure event
+# This means _perform_resize_layout will run whenever the window is resized.
+root.bind("<Configure>", resize_layout)
+
+# Initial call to set up the layout after all widgets are created
+# A small delay ensures the window has initialized its dimensions
+root.after(100, _perform_resize_layout)
+
 
 #run the whole program
 root.mainloop()
