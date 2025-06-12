@@ -250,7 +250,7 @@ bg_label_on_canvas = main_canvas.create_image(0, 0, anchor="nw", image=None) # I
 #----------------------------------------------------------------------------------------------------------------------#
 
 #title
-title=tk.Label(main_canvas,text="Relax Soothing Sound Player🎶", font=("Segoe UI", 18, "bold"),bg="#d9e9df",fg="black")
+title=tk.Label(main_canvas,text="Relax Soothing Sound Player🎶", font=("Segoe UI", 21, "bold"),bg="#d9e9df",fg="black")
 
 #----------------------------------------------------------------------------------------------------------------------#
 
@@ -263,18 +263,18 @@ playlist_button_frame=tk.Frame(center_volume_frame,bg="#d9e9df")
 #----------------------------------------------------------------------------------------------------------------------#
 
 #label for now playing(since now dont have song yet,so display"no sound is playing")
-label_now_playing=tk.Label(playlist_button_frame, text="No sound is playing.", bg="#d9e9df", font=("Segoe UI", 13,"bold"))
+label_now_playing=tk.Label(playlist_button_frame, text="No sound is playing.", bg="#d9e9df", font=("Segoe UI", 18,"bold"))
 label_now_playing.pack(pady=(0,7))
 
 #----------------------------------------------------------------------------------------------------------------------#
 #PLAYLIST
 
 #title for playlist
-label_playlist=tk.Label(playlist_button_frame, text="Playlist🎧", bg="#d9e9df", font=("Comic Sans MS", 13))
+label_playlist=tk.Label(playlist_button_frame, text="Playlist🎧", bg="#d9e9df", font=("Comic Sans MS", 18))
 label_playlist.pack(pady=(0,5))
 
 #the listbox to show available sound
-playlist_box=tk.Listbox(playlist_button_frame, bg="white", fg="#1a237e",selectbackground="#a3d2ca", selectforeground="black",activestyle="none", font=("Segoe UI", 10, "italic"),bd=2, relief="groove",highlightthickness=2)
+playlist_box=tk.Listbox(playlist_button_frame, bg="white", fg="#1a237e",selectbackground="#a3d2ca", selectforeground="black",activestyle="none", font=("Segoe UI", 15, "italic"),bd=2, relief="groove",highlightthickness=2)
 playlist_box.pack(pady=(0,5),anchor="center",fill="both",expand=True)
 playlist_box.focus_set() #ensure listbox has keyboard focus
 
@@ -351,7 +351,7 @@ create_tooltip(button_previous, "Previous sound")
 
 volume_frame = tk.Frame(center_volume_frame, bg="#d9e9df")
 
-volume_label = tk.Label(volume_frame, text="Volume 🔊", bg="#d9e9df", fg="#5e7f68", font=("Segoe UI", 12))
+volume_label = tk.Label(volume_frame, text="Volume 🔊", bg="#d9e9df", fg="#5e7f68", font=("Segoe UI", 15))
 volume_label.pack()
 
 #volume control slider                                 #resolution=1:slider moves in steps of 1 unit                                   #troughcolor=the track colour
@@ -367,7 +367,6 @@ button_mute.bind("<Leave>", lambda e: button_mute.config(bg="#78a45c"))
 
 # Set pygame mixer volume to default slider value
 pygame.mixer.music.set_volume(0.5)
-#----------------------------------------------------------------------------------------------------------------------#
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # Function to toggle fullscreen mode
