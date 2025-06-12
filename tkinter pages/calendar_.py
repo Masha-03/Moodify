@@ -87,12 +87,6 @@ if os.path.exists(database_file_path):
     print(f"Database file FOUND at: {database_file_path}")
 else:
     print(f"Database file NOT FOUND at: {database_file_path}")
-    # Consider creating the folder and an empty DB here if it's truly missing on first run
-    # try:
-    #     os.makedirs(os.path.dirname(database_file_path), exist_ok=True)
-    #     print(f"Created directory: {os.path.dirname(database_file_path)}")
-    # except OSError as e:
-    #     print(f"Error creating directory: {e}")
         
 #Get profile from the database
 def get_profile():
@@ -174,8 +168,6 @@ def show_entry(selected_date):
         indented_no_entry = "\n".join("    " + line for line in formatted_no_entry.splitlines()) #Indents every line of the content with 4 spaces 
         
         content_text.insert(tk.END, indented_no_entry)
-        # content_text.tag_add("top_space", "1.0", "1.0 lineend")   #First line only
-        # content_text.tag_add("left_margin", "1.0", "end") #All lines
         content_text.configure(state="disabled") #Disable editing
         
         #Mood and mood description
@@ -189,8 +181,6 @@ def show_entry(selected_date):
         indented_no_mooddesc = "\n".join("    " + line for line in formatted_no_mooddesc.splitlines()) #Indents every line of the content with 4 spaces 
     
         mooddesc_display.insert(tk.END, indented_no_mooddesc)
-        # mooddesc_display.tag_add("top_space", "1.0", "1.0 lineend")   #First line only
-        # mooddesc_display.tag_add("left_margin", "1.0", "end") #All lines
         mooddesc_display.configure(state="disabled") #Disable editing
    
     connect.close()
@@ -199,7 +189,7 @@ def show_entry(selected_date):
 
 #give users some tips
 def show_help():
-    messagebox.showinfo("Help", "Click on a date to view your diary and mood. Press Ctrl+F to toggle fullscreen.")
+    messagebox.showinfo("Help", "Click on a date to view your diary and mood entry history. Press Ctrl+F to toggle fullscreen.")
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -268,20 +258,20 @@ app.grid_rowconfigure(1, weight=1)
 app.grid_columnconfigure(0, weight=1) 
 
 app.title("Calendar")
-app.configure(bg="#FFF8F0") #change the background color of entire window
+app.configure(bg="#FFF8F0") #Change the background color of entire window
 
 #Bind the 'f' key (lowercase only) (for fullscreen)
 app.bind("<Control-f>", toggle_fullscreen)
 #Bind 'esc' key to escape fullscreen
 app.bind("<Escape>", toggle_fullscreen) 
 
-# --- Background Image Handling ---
-# Label to display the background image (created, but image set by update_background_image)
+#Background Image Handling
+#Label to display the background image (created, but image set by update_background_image)
 bg_label = tk.Label(app)
 bg_label.place(x=0, y=0, relwidth=1, relheight=1)   # Stretch it across the window
 bg_label.lower() # Lower the label so it doesn’t cover other widgets
 
-# Bind the resize event to update the background image
+#Bind the resize event to update the background image
 app.bind("<Configure>", update_background_image)
 # Call it once initially to load and set the background image
 update_background_image()
@@ -301,37 +291,37 @@ header_frame.grid_columnconfigure(1, weight=1) # Title Label column (expands hor
 header_frame.grid_columnconfigure(2, weight=0) # Stacked Help/Exit Buttons column (fixed width)
 
 
-# Clear Display button (top-left)
+#Clear Display button 
 clear_button = ctk.CTkButton(header_frame, text="Clear Display", font=("Arial Rounded MT Bold", 14),
                               fg_color="#E6D6B8", text_color="#333", hover_color="#C0C0C0",
                               corner_radius=10, command=clear_display)
 clear_button.grid(row=0, column=0, padx=(0, 10), sticky="W") # Place in header_frame's row 0, column 0
 
 
-# Title label (now inside header_frame)
+#Title
 title_label = ctk.CTkLabel(header_frame, text="My History 🧸", font=ctk.CTkFont("Helvetica", 26, weight="bold"), text_color="#333", fg_color="#e9e2d0")
 title_label.grid(row=0, column=1, sticky="NSEW", padx=10, pady=5) # NSEW to center and expand within its cell
 
 
-# --- Button Stack Frame (for Help and Exit buttons) ---
-# This frame will hold Help and Exit buttons stacked vertically
+#Button stack frame
+#Hold Help and Exit buttons stacked vertically
 button_stack_frame = ctk.CTkFrame(header_frame, fg_color="transparent") # Use transparent to match header_frame
 button_stack_frame.grid(row=0, column=2, sticky="E") # Place in header_frame's row 0, column 2, right-aligned
 
-# Configure button_stack_frame's internal grid for vertical stacking
+#Vertical stacking
 button_stack_frame.grid_columnconfigure(0, weight=1) # Single column for buttons
 button_stack_frame.grid_rowconfigure(0, weight=1) # Help button row
 button_stack_frame.grid_rowconfigure(1, weight=1) # Exit button row
 
 
-# Help button (top-right, stacked above exit button)
+#Help button (above exit button)
 help_button = ctk.CTkButton(button_stack_frame, text="❓ Help", font=("Segoe UI", 14), fg_color="#5A9BD5", hover_color="#7AB8FF", text_color="white", corner_radius=25, command=show_help)
-help_button.grid(row=0, column=0, padx=5, pady=(0, 2), sticky="E") # Place in button_stack_frame
+help_button.grid(row=0, column=0, padx=5, pady=(0, 2), sticky="E") 
 
 
-# Exit button (top-rightmost, stacked below help button)
+#Exit button 
 exit_button = ctk.CTkButton(
-    button_stack_frame, # Parent is now button_stack_frame
+    button_stack_frame, 
     text="❌ Exit",
     font=("Segoe UI", 14),
     fg_color="#FF5151",
@@ -340,47 +330,47 @@ exit_button = ctk.CTkButton(
     corner_radius=25,
     command=app.destroy
 )
-exit_button.grid(row=1, column=0, padx=5, pady=(2, 0), sticky="E") # Place in button_stack_frame
+exit_button.grid(row=1, column=0, padx=5, pady=(2, 0), sticky="E") 
 
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
-# --- Main Content Area Frame (to hold left_frame and history_frame side-by-side) ---
+#Main Content Area Frame 
 # This frame will be placed in app's row 1
-main_content_frame = ctk.CTkFrame(app, fg_color="#FFF8F0") # Set explicit color to match app's bg
-main_content_frame.grid(row=1, column=0, sticky="NSEW", padx=20, pady=10) # Spans the single app column
+main_content_frame = ctk.CTkFrame(app, fg_color="#FFF8F0") 
+main_content_frame.grid(row=1, column=0, padx=20, pady=10, sticky="NSEW")
 
-# Configure main_content_frame's internal grid for side-by-side layout
-main_content_frame.grid_rowconfigure(0, weight=1) # Only one row for content, expands vertically
-main_content_frame.grid_columnconfigure(0, weight=1) # Column for left_frame (expands)
-main_content_frame.grid_columnconfigure(1, weight=2) # Column for history_frame (expands twice as much)
+#Side-by-side layout
+main_content_frame.grid_rowconfigure(0, weight=1) #One row for content, expands vertically
+main_content_frame.grid_columnconfigure(0, weight=1) #Column for left frame
+main_content_frame.grid_columnconfigure(1, weight=100) #Column for history frame 
 
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # frame for left side (now inside main_content_frame)
-left_frame = ctk.CTkFrame(main_content_frame, fg_color="#FFF8F0") # Set explicit color
-left_frame.grid(row=0, column=0, sticky="NSEW", padx=(0, 20), pady=0) # Place in main_content_frame, left column
+left_frame = ctk.CTkFrame(main_content_frame, fg_color="#FFF8F0") 
+left_frame.grid(row=0, column=0, sticky="NSEW", padx=0, pady=0) 
 
-# Configure left_frame's internal grid to be dynamic
+#Configure left_frame's internal grid to be dynamic
 left_frame.grid_columnconfigure(0, weight=1) # The single column containing all widgets will expand horizontally
 
-# Configure rows inside left_frame:
-left_frame.grid_rowconfigure(0, weight=0) # "Choose a date" label (fixed height)
-left_frame.grid_rowconfigure(1, weight=1) # Calendar widget (expands vertically)
-left_frame.grid_rowconfigure(2, weight=0) # Choose Date button (fixed height)
-left_frame.grid_rowconfigure(3, weight=1) # Flexible empty row to push date_label down
-left_frame.grid_rowconfigure(4, weight=0) # Date label (fixed height)
+#Configure rows inside left_frame:
+left_frame.grid_rowconfigure(0, weight=0) # Choose a date label 
+left_frame.grid_rowconfigure(1, weight=1) # Calendar widget
+left_frame.grid_rowconfigure(2, weight=0) # Choose Date button 
+left_frame.grid_rowconfigure(3, weight=1) # Empty row 
+left_frame.grid_rowconfigure(4, weight=0) # Date label 
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
-#add a label for the title
-label=ctk.CTkLabel(left_frame, text="Choose on a date to view your diary", font=("Helvetica", 15), text_color="#777")
-label.grid(row=0, column=0, padx=250, pady=(20, 20))
+#Title label
+label=ctk.CTkLabel(left_frame, text="Choose on a date to view your diary", font=("Helvetica", 17), text_color="#777")
+label.grid(row=0, column=0, padx=250, pady=(40, 20))
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
-#create a calendar widget with themed colors
+#Calendar widget with themed colors
 calendar=Calendar(left_frame, selectmode="day", date_pattern="yyyy-mm-dd", 
               font=("Helvetica",11), background="#FFDAB3", #calendar background
               foreground="#6F4E37", #month and year's text color
@@ -389,99 +379,98 @@ calendar=Calendar(left_frame, selectmode="day", date_pattern="yyyy-mm-dd",
               weekendbackground="#FFF1E0", #the color of weekend's date
               selectbackground="#FF9F45", #when you click on a random date there will present an orange color.
               disabledbackground="#ccc") #the colour of the date that are not able to be clicked
-#the frame around the calendar
-calendar.grid(row=1, column=0, padx=10, pady=10, sticky="NSEW") # Add sticky="NSEW"
+#Frame around the calendar
+calendar.grid(row=1, column=0, padx=100, pady=10, sticky="NSEW") # Add sticky="NSEW"
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
-#choose date button
+#Choose date button
 choosedate_btn = ctk.CTkButton(left_frame,
     text="Choose Date",
-    font=("Arial Rounded MT Bold", 18),
+    font=("Arial Rounded MT Bold", 20),
     fg_color="#FFD1A6",      #background color
     text_color="#444",       #text color
     hover_color="#FFB66E",   #color when hovered or clicked
     corner_radius=10,        #for rounded edges
     command=grab_date)
-choosedate_btn.grid(row=2, column=0, pady=10)
+choosedate_btn.grid(row=2, column=0, pady=20)
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
-#the display of the date (YYYY-mm-dd)
-date_label = ctk.CTkLabel(left_frame, text="", font=ctk.CTkFont("Arial Rounded MT Bold", 15), text_color="#444")
-date_label.grid(row=3, column=0, pady=(5, 10), sticky="n")
+#Display of the date (YYYY-mm-dd)
+date_label = ctk.CTkLabel(left_frame, text="", font=ctk.CTkFont("Arial Rounded MT Bold", 22), text_color="#444")
+date_label.grid(row=3, column=0, pady=(20, 10), sticky="n")
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
-# History Frame (now inside main_content_frame)
+#History Frame
 history_frame = ctk.CTkFrame(main_content_frame, corner_radius=15, fg_color="#E6D6B8")
-history_frame.grid(row=0, column=1, sticky="NSEW", padx=(20, 0), pady=0) # Place in main_content_frame, right column
+history_frame.grid(row=0, column=1, sticky="NSEW", padx=0, pady=0) 
 
-# Configure history_frame's internal grid for responsiveness
-history_frame.grid_rowconfigure(0, weight=1) # The 'container' row will expand
-history_frame.grid_columnconfigure(0, weight=1) # The 'container' column will expand
+#Internal grid
+history_frame.grid_rowconfigure(0, weight=1) 
+history_frame.grid_columnconfigure(0, weight=1) 
 
-# Container (now inside history_frame)
+#Inside history frame
 container = ctk.CTkFrame(history_frame, fg_color="#E6D6B8", corner_radius=15)
-container.grid(row=0, column=0, sticky="NSEW", padx=20, pady=10) # Place in history_frame
+container.grid(row=0, column=0, sticky="NSEW", padx=20, pady=10) 
 
-# Configure container's internal grid for content layout
-container.grid_columnconfigure(0, weight=1) # Make the single content column expand horizontally
+#Layout
+container.grid_columnconfigure(0, weight=1) #Content column expand horizontally
 
-# Configure rows for vertical expansion within the container
-container.grid_rowconfigure(0, weight=0) # Title Label "Title:" (fixed height)
-container.grid_rowconfigure(1, weight=0) # title_display (fixed height)
-container.grid_rowconfigure(2, weight=0) # Entry Label "Entry:" (fixed height)
-container.grid_rowconfigure(3, weight=3) # content_frame (will expand vertically much more)
-container.grid_rowconfigure(4, weight=0) # Mood Label "Mood:" (fixed height)
-container.grid_rowconfigure(5, weight=0) # mood_display (fixed height)
-container.grid_rowconfigure(6, weight=0) # Mood Description Label (fixed height)
-container.grid_rowconfigure(7, weight=1) # mooddesc_frame (will expand vertically)
-container.grid_rowconfigure(8, weight=0) # Any potential footer or extra space
+#Container rows
+container.grid_rowconfigure(0, weight=0) # title label 
+container.grid_rowconfigure(1, weight=0) # title display 
+container.grid_rowconfigure(2, weight=0) # entry label
+container.grid_rowconfigure(3, weight=3) # content frame (vertically)
+container.grid_rowconfigure(4, weight=0) # mood label 
+container.grid_rowconfigure(5, weight=0) # mood display 
+container.grid_rowconfigure(6, weight=0) # mood description label 
+container.grid_rowconfigure(7, weight=1) # mooddesc frame (vertically)
+container.grid_rowconfigure(8, weight=0) #Extra space
 
-# Diary Title
+#Diary Title
 ctk.CTkLabel(container, text="Title:", font=ctk.CTkFont(size=15, weight="bold")).grid(row=0, column=0, sticky="w", pady=(10, 5))
 title_display = ctk.CTkLabel(container, text="", fg_color="white", corner_radius=6, anchor="w")
-title_display.grid(row=1, column=0, sticky="EW", pady=(0, 10)) # sticky="EW" to stretch horizontally
+title_display.grid(row=1, column=0, sticky="EW", pady=(0, 10)) #Stretch horizontally
 
-# Diary Entry
+#Diary Entry
 ctk.CTkLabel(container, text="Entry:", font=ctk.CTkFont(size=15, weight="bold")).grid(row=2, column=0, sticky="w", pady=(5, 5))
 content_frame = ctk.CTkFrame(container, fg_color="white", corner_radius=6)
-content_frame.grid(row=3, column=0, sticky="NSEW", pady=(0, 10)) # sticky="NSEW" to stretch in both directions
+content_frame.grid(row=3, column=0, sticky="NSEW", pady=(0, 10)) #Stretch in both directions
 
-# Configure content_frame's internal grid (for Textbox and Scrollbar)
-content_frame.grid_rowconfigure(0, weight=1) # The row with textbox will expand vertically
-content_frame.grid_columnconfigure(0, weight=1) # The column with textbox will expand horizontally
+#Internal grid (for Textbox and Scrollbar)
+content_frame.grid_rowconfigure(0, weight=1) #Expand vertically
+content_frame.grid_columnconfigure(0, weight=1) #Expand horizontally
 
-content_text = ctk.CTkTextbox(content_frame, wrap="word", fg_color="white", corner_radius=0, # REMOVED height=100
+content_text = ctk.CTkTextbox(content_frame, wrap="word", fg_color="white", corner_radius=0, 
                               font=ctk.CTkFont(size=14))
-content_text.grid(row=0, column=0, sticky="NSEW") # Changed from pack to grid, sticky to fill
+content_text.grid(row=0, column=0, sticky="NSEW") 
 content_scroll = ctk.CTkScrollbar(content_frame, orientation="vertical", command=content_text.yview)
-content_scroll.grid(row=0, column=1, sticky="NS") # Changed from pack to grid, sticky="NS" for vertical fill
+content_scroll.grid(row=0, column=1, sticky="NS") # Vertical fill
 content_text.configure(yscrollcommand=content_scroll.set, state="disabled")
 
-# Mood
+#Mood
 ctk.CTkLabel(container, text="Mood:", font=ctk.CTkFont(size=15, weight="bold")).grid(row=4, column=0, sticky="w", pady=(10, 5))
 mood_display = ctk.CTkLabel(container, text="", fg_color="white", corner_radius=6, anchor="w")
-mood_display.grid(row=5, column=0, sticky="EW", pady=(0, 10)) # sticky="EW" to stretch horizontally
+mood_display.grid(row=5, column=0, sticky="EW", pady=(0, 10)) #Stretch horizontally
 
-# Mood Description
+#Mood Description
 ctk.CTkLabel(container, text="Mood Description:", font=ctk.CTkFont(size=15, weight="bold")).grid(row=6, column=0, sticky="w", pady=(5, 5))
 mooddesc_frame = ctk.CTkFrame(container, fg_color="white", corner_radius=6)
-mooddesc_frame.grid(row=7, column=0, sticky="NSEW", pady=(0, 10)) # sticky="NSEW" to stretch in both directions
+mooddesc_frame.grid(row=7, column=0, sticky="NSEW", pady=(0, 10)) #Stretch in both directions
 
-# Configure mooddesc_frame's internal grid (for Textbox and Scrollbar)
-mooddesc_frame.grid_rowconfigure(0, weight=1) # The row with textbox will expand vertically
-mooddesc_frame.grid_columnconfigure(0, weight=1) # The column with textbox will expand horizontally
+#Internal grid (for Textbox and Scrollbar)
+mooddesc_frame.grid_rowconfigure(0, weight=1) 
+mooddesc_frame.grid_columnconfigure(0, weight=1) #Expand horizontally
 
-mooddesc_display = ctk.CTkTextbox(mooddesc_frame, wrap="word", fg_color="white", corner_radius=0, # REMOVED height=100
-                                  font=ctk.CTkFont(size=14))
-mooddesc_display.grid(row=0, column=0, sticky="NSEW") # Changed from pack to grid, sticky to fill
+mooddesc_display = ctk.CTkTextbox(mooddesc_frame, wrap="word", fg_color="white", corner_radius=0, font=ctk.CTkFont(size=14))
+mooddesc_display.grid(row=0, column=0, sticky="NSEW")
 mooddesc_scroll = ctk.CTkScrollbar(mooddesc_frame, orientation="vertical", command=mooddesc_display.yview)
-mooddesc_scroll.grid(row=0, column=1, sticky="NS") # Changed from pack to grid, sticky="NS" for vertical fill
+mooddesc_scroll.grid(row=0, column=1, sticky="NS") #Vertical fill
 mooddesc_display.configure(yscrollcommand=mooddesc_scroll.set, state="disabled")
 
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-#run the whole program
+#Run whole program
 app.mainloop()
