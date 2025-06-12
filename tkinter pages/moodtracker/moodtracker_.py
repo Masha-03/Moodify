@@ -184,6 +184,7 @@ def clear_entry():
     ask_user_label.configure(bg=current_bg_color)
     label.configure(bg=current_bg_color)
     frame_button.configure(bg="#FCF8E8")
+    emoji_buttons_inner_frame.configure(bg="#FCF8E8")
     word_count_label.configure(bg=current_bg_color)
     for button in emoji_buttons:
         button.configure(bg="#ffe0e0")
@@ -240,7 +241,9 @@ def set_mood(mood):
     title.configure(bg=bg_colour)
     ask_user_label.configure(bg=bg_colour)
     label.configure(bg=bg_colour)
+    text_entry.configure(bg="white", fg="#000")
     frame_button.configure(bg=bg_colour)
+    emoji_buttons_inner_frame.configure(bg=bg_colour)
     word_count_label.configure(bg=bg_colour)
 
     #update all buttons to match the theme
@@ -278,7 +281,7 @@ main_canvas = tk.Canvas(root, highlightthickness=0, bg="#fdf6f0")
 main_canvas.pack(fill="both", expand=True) # Canvas fills the entire root window
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
-title=tk.Label(root,text="Mood Tracker⭐", font=("Helvetica", 18, "bold"),bg="#fdf6f0",fg="#333")
+title=tk.Label(main_canvas,text="Mood Tracker⭐", font=("Helvetica", 18, "bold"),bg="#fdf6f0",fg="#333")
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -296,6 +299,10 @@ ask_user_label=tk.Label(main_canvas,text=random_ask_user, font=("Comic Sans MS",
 #create frame to hold emoji button and centre them
 frame_button=tk.Frame(main_canvas,bg="#FCF8E8")
 
+# This inner frame will be packed with expand=True, which centers its contents.
+emoji_buttons_inner_frame = tk.Frame(frame_button, bg=frame_button.cget('bg'))
+emoji_buttons_inner_frame.pack(fill="none",expand=True,anchor="center") # This centers the inner frame horizontally within frame_button
+
 #list of emoji buttons
 emoji_buttons=[]
 
@@ -309,12 +316,12 @@ relaxed_image = resize_image(get_image_path("relaxed.png"))
 
 
 #button to choose the mood
-button_happy=tk.Button(frame_button, image=happy_image, bg="#ffe0e0", relief="flat", command=lambda:set_mood("Happy")) #command=lambda is to bind a function to button/expression 
-button_sad=tk.Button(frame_button, image=sad_image, bg="#ffe0e0", relief="flat", command=lambda:set_mood("Sad"))       #when button clicked lambda calls set_mood("") function
-button_angry=tk.Button(frame_button, image=angry_image, bg="#ffe0e0", relief="flat", command=lambda:set_mood("Angry")) #flat=has no 3D effect
-button_excited=tk.Button(frame_button, image=excited_image, bg="#ffe0e0", relief="flat", command=lambda:set_mood("Excited"))
-button_sleepy=tk.Button(frame_button, image=sleepy_image, bg="#ffe0e0", relief="flat", command=lambda:set_mood("Sleepy"))
-button_relaxed=tk.Button(frame_button, image=relaxed_image, bg="#ffe0e0", relief="flat", command=lambda:set_mood("Relaxed"))
+button_happy=tk.Button(emoji_buttons_inner_frame, image=happy_image, bg="#ffe0e0", relief="flat", command=lambda:set_mood("Happy")) #command=lambda is to bind a function to button/expression 
+button_sad=tk.Button(emoji_buttons_inner_frame, image=sad_image, bg="#ffe0e0", relief="flat", command=lambda:set_mood("Sad"))       #when button clicked lambda calls set_mood("") function
+button_angry=tk.Button(emoji_buttons_inner_frame, image=angry_image, bg="#ffe0e0", relief="flat", command=lambda:set_mood("Angry")) #flat=has no 3D effect
+button_excited=tk.Button(emoji_buttons_inner_frame, image=excited_image, bg="#ffe0e0", relief="flat", command=lambda:set_mood("Excited"))
+button_sleepy=tk.Button(emoji_buttons_inner_frame, image=sleepy_image, bg="#ffe0e0", relief="flat", command=lambda:set_mood("Sleepy"))
+button_relaxed=tk.Button(emoji_buttons_inner_frame, image=relaxed_image, bg="#ffe0e0", relief="flat", command=lambda:set_mood("Relaxed"))
 
 #add all buttons to the list
 emoji_buttons.extend([
@@ -366,14 +373,25 @@ def toggle_fullscreen(event=None):
         if last_x is not None and last_y is not None:
              root.geometry(f"{last_width}x{last_height}+{last_x}+{last_y}")
         else: # Fallback to a default size (centered roughly)
+            # If no non-fullscreen size was ever stored (e.g., app started fullscreen)
+            # Set to the desired default non-fullscreen size (1280x720)
+            target_width = 1280  # Force 1280
+            target_height = 720  # Force 720
+
             screen_width = root.winfo_screenwidth()
             screen_height = root.winfo_screenheight()
-            # Use slightly smaller defaults if 1000x800 is too large for some screens
-            default_width = min(1000, int(screen_width * 0.8))
-            default_height = min(800, int(screen_height * 0.8))
-            default_x = (screen_width - default_width) // 2
-            default_y = (screen_height - default_height) // 2
-            root.geometry(f"{default_width}x{default_height}+{default_x}+{default_y}")
+            # Center the window based on the desired target size
+            center_x = (screen_width - target_width) // 2
+            center_y = (screen_height - target_height) // 2
+            
+            root.geometry(f"{target_width}x{target_height}+{center_x}+{center_y}")
+            
+            # Store these values for subsequent toggles
+            last_width = target_width
+            last_height = target_height
+            last_x = center_x
+            last_y = center_y
+
 
     else: # Currently non-fullscreen, going to fullscreen
         # Store current window geometry BEFORE going fullscreen
@@ -443,15 +461,15 @@ exit_button = ctk.CTkButton(
 )
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-clear_button = ctk.CTkButton(root, text="Clear Entry", font=("Segoe UI", 14), hover_color="#FFA9FF", text_color="black",fg_color="#ffd3d3", corner_radius=25,command=clear_entry)
+clear_button = ctk.CTkButton(main_canvas, text="Clear Entry", font=("Segoe UI", 14), hover_color="#FFA9FF", text_color="black",fg_color="#ffd3d3", corner_radius=25,command=clear_entry)
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-timestamp_button = ctk.CTkButton(root, text="Insert Timestamp",fg_color="#ffadad", hover_color="#F7CDFF", font=("Segoe UI", 14),text_color="black", corner_radius=25,command=insert_timestamp)
+timestamp_button = ctk.CTkButton(main_canvas, text="Insert Timestamp",fg_color="#ffadad", hover_color="#F7CDFF", font=("Segoe UI", 14),text_color="black", corner_radius=25,command=insert_timestamp)
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-help_button = ctk.CTkButton(root, text="❓ Help", font=("Segoe UI", 14), fg_color="#5A9BD5", hover_color="#7AB8FF", text_color="white", corner_radius=25, command=show_help)
+help_button = ctk.CTkButton(main_canvas, text="❓ Help", font=("Segoe UI", 14), fg_color="#5A9BD5", hover_color="#7AB8FF", text_color="white", corner_radius=25, command=show_help)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------#
 
