@@ -68,13 +68,13 @@ if os.path.exists(database_file_path):
     print(f"Database file FOUND at: {database_file_path}")
 else:
     print(f"Database file NOT FOUND at: {database_file_path}")
-    print("WARNING: A new database file will likely be created here.")
-    # Create the 'database' folder if it doesn't exist
-    try:
-        os.makedirs(os.path.dirname(database_file_path), exist_ok=True)
-        print(f"Created directory: {os.path.dirname(database_file_path)}")
-    except OSError as e:
-        print(f"Error creating directory: {e}")
+    # print("WARNING: A new database file will likely be created here.")
+    # # Create the 'database' folder if it doesn't exist
+    # try:
+    #     os.makedirs(os.path.dirname(database_file_path), exist_ok=True)
+    #     print(f"Created directory: {os.path.dirname(database_file_path)}")
+    # except OSError as e:
+    #     print(f"Error creating directory: {e}")
 
 def get_profile():
     connect = sqlite3.connect(database_file_path)
@@ -673,7 +673,7 @@ def main():
     
     #Help with tips
     def show_help():
-        messagebox.showinfo("Help", "Click on different views to get statistic on your app usage. There are 3 views: weekly, monthy and annual. You can find breathing session chart, mood distribution chart, diary entry chart and stress level chart.")
+        messagebox.showinfo("Help", "Click on different views to get statistics based on your app usage. There are 3 views: 7 days, monthly and annual. You can find breathing session chart, mood distribution chart, diary entry chart and stress level chart for all three views.")
 
     #Exit button (bottom left in sidebar)
     exit_button = ctk.CTkButton(
@@ -739,14 +739,14 @@ def main():
         create_weekly_charts(profile, main_area, bg_photo)
         
         #Ceate sidebar buttons
-        for tab in ["Weekly", "Monthly", "Annual"]:
+        for tab in ["7 days", "Monthly", "Annual"]:
             btn = tk.Button(
                 sidebar, text=tab, fg="#ffffff", bg="#545454", relief="flat", font=("Segoe UI", 12), width=18, height=2, activebackground="#5C5C5C"
             )
             btn.pack(pady=10)
             btn.bind("<Enter>", on_hover)
             btn.bind("<Leave>", on_leave)
-            if tab.lower() == "weekly":
+            if tab.lower() == "7 days":
                 btn.config(command=lambda: create_weekly_charts(profile, main_area, bg_photo)) #weekly button
             elif tab.lower() == "monthly":
                 btn.config(command=lambda: create_monthly_charts(profile, main_area, bg_photo))

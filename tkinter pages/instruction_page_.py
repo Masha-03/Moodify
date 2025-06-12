@@ -97,13 +97,13 @@ if os.path.exists(database_file_path):
     print(f"Database file FOUND at: {database_file_path}")
 else:
     print(f"Database file NOT FOUND at: {database_file_path}")
-    print("WARNING: A new database file will likely be created here.")
-    # Create the 'database' folder if it doesn't exist
-    try:
-        os.makedirs(os.path.dirname(database_file_path), exist_ok=True)
-        print(f"Created directory: {os.path.dirname(database_file_path)}")
-    except OSError as e:
-        print(f"Error creating directory: {e}")
+#   print("WARNING: A new database file will likely be created here.")
+#   # Create the 'database' folder if it doesn't exist
+#   try:
+#       os.makedirs(os.path.dirname(database_file_path), exist_ok=True)
+#       print(f"Created directory: {os.path.dirname(database_file_path)}")
+#   except OSError as e:
+#       print(f"Error creating directory: {e}")
 
 #Get profile from the database
 def get_profile():
@@ -167,7 +167,7 @@ def start_game():
         #Close the current Tkinter window
         root.destroy()
 
-#-----------------------------------------------------------------------------------------------------------------------------------------------#
+#--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 
 def run_game(): # This function seems unused in your current flow
     pygame.init()
@@ -211,6 +211,7 @@ bg_photo_tk = None # Store the PhotoImage object reference
 
 # Keep references to the window IDs for dynamic positioning
 # Initialize to None, these will hold the IDs returned by main_canvas.create_window
+#for alignment
 title_window_id = None
 outer_frame_window_id = None
 button_frame_window_id = None
@@ -533,7 +534,22 @@ is_fullscreen = [False] # Using a list to allow modification within function sco
 
 def toggle_fullscreen(event=None):
     current_fullscreen_state = root.attributes("-fullscreen")
-    root.attributes("-fullscreen", not current_fullscreen_state)
+    if current_fullscreen_state: # Currently fullscreen, exit fullscreen
+        root.attributes("-fullscreen", False)
+        target_width = 1280
+        target_height = 720
+        
+        # Calculate center coordinates for the target size
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        
+        center_x = (screen_width - target_width) // 2
+        center_y = (screen_height - target_height) // 2
+        
+        root.geometry(f"{target_width}x{target_height}+{center_x}+{center_y}")
+    else:
+        root.attributes("-fullscreen", True)
+    
     is_fullscreen[0] = not current_fullscreen_state # Update state tracker
     # After toggling fullscreen, force a layout update to ensure elements reposition correctly
     root.update_idletasks() # Ensure window size is updated
