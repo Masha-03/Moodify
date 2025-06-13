@@ -14,7 +14,7 @@ mood_display = None
 mooddesc_display = None
 calendar = None
 date_label = None
-profile = None # Global for get_profile
+profile = None #Global for get_profile
 
 #Dynamic Background Image Handler
 #Use a list to store the PhotoImage reference, so it can be modified in the nested function scope

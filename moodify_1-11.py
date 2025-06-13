@@ -190,65 +190,44 @@ def enter_data():
         
         #Display received data
         print(f": {profile}, Gender: {gender}") 
-        
-        #Check for duplicate profile and gender
-        cursor.execute("SELECT * FROM user_info WHERE profile = ? AND gender = ?", (profile, gender))
-        result = cursor.fetchone() #Fetches matching profile name, gender
 
-        #Same profile name but different gender
-        if result is not None:
-            if result[0] != gender:
-                messagebox.showinfo("Profile Name Taken", f"The profile name '{profile}' is already used by someone else.\nPlease choose a different name.")
-                #Clear field after profile input
-                profile_entry.delete(0, tk.END)
-                profile_entry.focus_set()  #Puts the cursor back in the profile box
-                #Reset gender to blank
-                gender_combobox.set("")
-                connect.close()
-                return
-        
-        if result:
-            
-            #Same profile name and gender        
-            proceed = messagebox.askyesno("Profile Exists", f"The profile name '{profile}' already exists.\nAre you this user and want to continue?")
+        #Check for exact match (same profile name, same gender)
+        cursor.execute("SELECT * FROM user_info WHERE profile = ? AND gender = ?", (profile, gender))
+        exact_match_result = cursor.fetchone()
+
+        if exact_match_result:
+            proceed = messagebox.askyesno(
+                "Profile Exists",
+                f"The profile name '{profile}' already exists.\nAre you this user and want to continue?"
+            )
 
             if proceed:
-                
-                connect = sqlite3.connect(database_file_path)
-                cursor = connect.cursor()
-                #Delete the old entry (same profile name and gender)
+                #Delete the old entry (same)
                 cursor.execute("DELETE FROM user_info WHERE profile = ? AND gender = ?", (profile, gender))
                 #Save data, update
                 connect.commit()
                 #Close connection
-                connect.close()  
-                
-                connect = sqlite3.connect(database_file_path)
-                cursor = connect.cursor()
+                connect.close() 
+
                 #Re-insert the same profile (becomes the last row)
                 data_insert_query = """ INSERT INTO user_info
-                (profile, gender) VALUES
-                (?, ?)"""
+                (profile, gender) VALUES (?, ?)"""
                 data_insert_tuple = (profile, gender)
-                connect.execute(data_insert_query, data_insert_tuple)
+                cursor.execute(data_insert_query, data_insert_tuple)
                 #Save data, update
                 connect.commit()
                 #Close connection
-                connect.close()  
-                
-                #Successful pop up box
+                connect.close() 
+
                 messagebox.showinfo("Success", "Lesgooo! Profile saved successfully!")
-                
-                #Connect to next page after succesful entry
+
+                #Connect to next page after successful entry
                 instruction_script_path = resource_path("tkinter pages", "instruction_page_.py")
                 subprocess.Popen([sys.executable, instruction_script_path])
-                
-                #Wait for 3 seconds before closing the window
+
                 time.sleep(3)
-                #Close the current Tkinter window
                 root.destroy()
                 sys.exit()
-                
             else:
                 messagebox.showinfo("Profile Name Taken", "Please enter a different profile name.")
                 #Clear field after profile input
@@ -256,36 +235,55 @@ def enter_data():
                 profile_entry.focus_set()  #Puts the cursor back in the profile box
                 #Reset gender to blank
                 gender_combobox.set("")
-            
+
         else:
-            #Insert only if no duplicate profile name
-            data_insert_query = """ INSERT INTO user_info
-            (profile, gender) VALUES
-            (?, ?)"""
-            data_insert_tuple = (profile, gender)
-            connect.execute(data_insert_query, data_insert_tuple)
-            #Save data, update
-            connect.commit()
-            #Close connection
-            connect.close()  
-             
-            #Successful pop up box
-            messagebox.showinfo("Success", "Lesgooo! Profile saved successfully!")
-            
-            #Connect to next page after succesful entry
-            instruction_script_path = resource_path("tkinter pages", "instruction_page_.py")
-            subprocess.Popen([sys.executable, instruction_script_path])
-            
-            #Wait for 3 seconds before closing the window
-            time.sleep(3)
-            #Close the current Tkinter window
-            root.destroy()
-            sys.exit()
+            #Check for same profile name with any gender
+            cursor.execute("SELECT gender FROM user_info WHERE profile = ?", (profile,))
+            profile_name_exists_result = cursor.fetchone() #Fetches gender if profile name exists
+
+            if profile_name_exists_result:
+                messagebox.showinfo(
+                    "Profile Name Taken",
+                    f"The profile name '{profile}' is already used by someone else.\nPlease choose a different name."
+                )
+                #Clear field after profile input
+                profile_entry.delete(0, tk.END)
+                profile_entry.focus_set()  #Puts the cursor back in the profile box
+                #Reset gender to blank
+                gender_combobox.set("")
+            else:
+                #No duplicate profile name found at all, so insert
+                data_insert_query = """ INSERT INTO user_info
+                (profile, gender) VALUES (?, ?)"""
+                data_insert_tuple = (profile, gender)
+                cursor.execute(data_insert_query, data_insert_tuple)
+                #Save data, update
+                connect.commit()
+                #Close connection
+                connect.close() 
+
+                messagebox.showinfo("Success", "Lesgooo! Profile saved successfully!")
+
+                #Connect to next page after successful entry
+                instruction_script_path = resource_path("tkinter pages", "instruction_page_.py")
+                subprocess.Popen([sys.executable, instruction_script_path])
+
+                #Wait for 3 seconds before closing the window
+                time.sleep(3)
+                #Close the current Tkinter window
+                root.destroy()
+                sys.exit()
                 
+        #Save data, update
+        connect.commit()
+        #Close connection
+        connect.close() 
         #Clear field after profile input
         profile_entry.delete(0, tk.END)
+        profile_entry.focus_set()  #Puts the cursor back in the profile box
         #Reset gender to blank
-        gender_combobox.set("") 
+        gender_combobox.set("")
+         
     
 #Submit button   
 button = tk.Button(main_frame, text="SUBMIT",font=label_font, bg=button_color, width=20, command= enter_data)  
