@@ -9,7 +9,7 @@ import os
 import sys
 from tkinter import messagebox
 
-# --- Asset Helper Function (for PyInstaller compatibility) ---
+#Asset Helper Function
 def resource_path(*relative_path_parts):
     """
     Returns the absolute path to a resource, whether running as a script
@@ -35,17 +35,14 @@ def get_db_path():
         app_root = sys._MEIPASS
     else:
         # We are running in a normal Python environment (unfrozen)
-        # Current script location for this example: c:\Users\Coshi\Moodify\tkinter pages\breathing\your_breathing_script.py
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        # script_dir will be: c:\Users\Coshi\Moodify\tkinter pages\breathing
 
-        # To get to 'c:\Users\Coshi\Moodify', we need to go up two levels:
-        # 1. From 'breathing' to 'tkinter pages'
-        intermediate_dir = os.path.dirname(script_dir) # Result: 'c:\Users\Coshi\Moodify\tkinter pages'
-        # 2. From 'tkinter pages' to 'Moodify'
-        app_root = os.path.dirname(intermediate_dir) # Result: 'c:\Users\Coshi\Moodify'
+        # From 'breathing' to 'tkinter pages'
+        intermediate_dir = os.path.dirname(script_dir)
+        # From 'tkinter pages' to 'Moodify'
+        app_root = os.path.dirname(intermediate_dir) 
 
-    # Now, join the app_root with the database folder and the file name
+    #Join the app_root with the database folder and the file name
     db_path = os.path.join(app_root, db_folder_name, db_file_name)
 
     print(f"Running in {'frozen' if getattr(sys, 'frozen', False) else 'unfrozen'} mode.")

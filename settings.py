@@ -51,13 +51,6 @@ if os.path.exists(database_file_path):
     print(f"Database file FOUND at: {database_file_path}")
 else:
     print(f"Database file NOT FOUND at: {database_file_path}")
-#     print("WARNING: A new database file will likely be created here.")
-#     # Create the 'database' folder if it doesn't exist
-#     try:
-#         os.makedirs(os.path.dirname(database_file_path), exist_ok=True)
-#         print(f"Created directory: {os.path.dirname(database_file_path)}")
-#     except OSError as e:
-#         print(f"Error creating directory: {e}")
 
 # Constants for screen dimension and colors
 BG_COLOR = (245, 235, 220)
@@ -303,11 +296,11 @@ def handle_event(event, rects):
                             
                             #Launch the new gender window then open settings 
                             if selected_gender.lower().lower() == "male":
-                                script_path = resource_path("main game code_Male.py")
-                                subprocess.Popen([sys.executable, script_path, "--open-settings"])
+                                script_path = resource_path("main game code_Male.exe")
+                                subprocess.Popen([script_path, "--open-settings"])
                             else:
-                                script_path = resource_path("main game code.py")
-                                subprocess.Popen([sys.executable, script_path, "--open-settings"])
+                                script_path = resource_path("main game code.exe")
+                                subprocess.Popen([script_path, "--open-settings"])
 
                             #Wait for 3 seconds before closing the window
                             time.sleep(3)
