@@ -4,15 +4,19 @@ import os
 import random
 import os
 
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
+def resource_path(*relative_path_parts):
+    """
+    Returns the absolute path to a resource, whether running as a script
+    or as a PyInstaller bundled executable.
+    """
     try:
-        base_path = sys._MEIPASS  # Used by PyInstaller
-    except Exception:
-        base_path = os.path.dirname(__file__)
+        # PyInstaller creates a temp folder and sets _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # Not running as a PyInstaller executable, use current script directory
+        base_path = os.path.dirname(os.path.abspath(__file__))
 
-    return os.path.join(base_path, relative_path)
-
+    return os.path.join(base_path, *relative_path_parts)
 
 # Initialize Pygame
 pygame.init()

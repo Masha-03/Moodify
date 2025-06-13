@@ -8,14 +8,19 @@ calming_words = [
     "Fake", "Empty", "Lost", "Stuck", "Worthless"
 ]
 
-#resource path for PyInstaller compatibility
-def resource_path(relative_path):
+def resource_path(*relative_path_parts):
+    """
+    Returns the absolute path to a resource, whether running as a script
+    or as a PyInstaller bundled executable.
+    """
     try:
-        base_path = sys._MEIPASS  # used by PyInstaller to get the temporary directory
-    except Exception:
-        base_path = os.path.dirname(__file__)
+        # PyInstaller creates a temp folder and sets _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # Not running as a PyInstaller executable, use current script directory
+        base_path = os.path.dirname(os.path.abspath(__file__))
 
-    return os.path.join(base_path, relative_path)
+    return os.path.join(base_path, *relative_path_parts)
 
 # Initialize Pygame
 pygame.init()
@@ -56,7 +61,7 @@ PARTICLE_COUNT = 50
 pop_sounds = []
 for i in range(1, 5):
     try:
-        sound = pygame.mixer.Sound(resource_path(f"bubble sound/pop{i}.wav"))  # load sound files ##
+        sound = pygame.mixer.Sound(resource_path("bubble sound", f"pop{i}.wav"))
         sound.set_volume(1.0)  # setting volume to max
         pop_sounds.append(sound)  # add to the list
     except:
@@ -64,7 +69,7 @@ for i in range(1, 5):
 
 # Background music ##
 try: ##
-    pygame.mixer.music.load(resource_path("playground.wav"))  # Load background music ##
+    pygame.mixer.music.load(resource_path("playground.wav"))  # 
     pygame.mixer.music.set_volume(0.5)  # Set initial volume for background music ##
     pygame.mixer.music.play(-1)  # Play indefinitely ##
 except pygame.error as e: ##

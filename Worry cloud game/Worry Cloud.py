@@ -92,20 +92,27 @@ def get_all_worries():
 
 # #----------------------------------------------------------------------------- database code #------------------------------------------------------------------------------------------
 
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
+def resource_path(*relative_path_parts):
+    """
+    Returns the absolute path to a resource, whether running as a script
+    or as a PyInstaller bundled executable.
+    """
     try:
-        base_path = sys._MEIPASS  # used by PyInstaller
-    except Exception:
-        base_path = os.path.dirname(__file__)
+        # PyInstaller creates a temp folder and sets _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # Not running as a PyInstaller executable, use current script directory
+        base_path = os.path.dirname(os.path.abspath(__file__))
 
-    return os.path.join(base_path, relative_path)
+    return os.path.join(base_path, *relative_path_parts)
 
-MUSIC_PATH = resource_path("Worry_cloud/calm_music.wav")
-RAIN_SOUND_PATH = resource_path("Worry_cloud/rain_sound.wav")
-BACKGROUND_IMG_PATH = resource_path("Worry_cloud/star_bg2.jpg")
-CLOUD_IMG_PATH = resource_path("Worry_cloud/cloud.png") #for the worry cloud
-CLOUD2_IMG_PATH = resource_path("Worry_cloud/cloud2.png") #for background clouds
+
+MUSIC_PATH = resource_path("Worry_cloud", "calm_music.wav")
+RAIN_SOUND_PATH = resource_path("Worry_cloud", "rain_sound.wav")
+BACKGROUND_IMG_PATH = resource_path("Worry_cloud", "star_bg2.jpg")  # double-check it's .jpg, not .png
+CLOUD_IMG_PATH = resource_path("Worry_cloud", "cloud.png")
+CLOUD2_IMG_PATH = resource_path("Worry_cloud", "cloud2.png")
+
 
 #play the ambient music.
 #first, check if the music file actually exists.
