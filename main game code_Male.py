@@ -536,19 +536,19 @@ while True:
                     if not open_bubble_popper or open_bubble_popper.poll() is not None:
                         pygame.mixer.music.stop()
                         stop_rain_sound()
-                        open_bubble_popper = subprocess.Popen([sys.executable, asset("bubble popper", "buble poper.py")])
+                        open_bubble_popper = subprocess.Popen([asset("bubble popper", "buble poper.exe")])
                         music_paused_for_tkinter = True 
                 if catch_star_rect.collidepoint(event.pos):
                     if not open_bubble_popper or open_bubble_popper.poll() is not None:
                         pygame.mixer.music.stop()
                         stop_rain_sound()
-                        open_catch_star=subprocess.Popen([sys.executable,asset("catch_star","Catch The Falling Stars.py")])
+                        open_catch_star=subprocess.Popen([asset("catch_star","Catch The Falling Stars.exe")])
                         music_paused_for_tkinter = True 
                 if worrycloud_rect.collidepoint(event.pos):
                     if not open_bubble_popper or open_bubble_popper.poll() is not None:
                         pygame.mixer.music.stop()
                         stop_rain_sound()
-                        open_worrycloud=subprocess.Popen([sys.executable,asset("worry cloud game","Worry Cloud.py")])
+                        open_worrycloud=subprocess.Popen([asset("worry cloud game","Worry Cloud.exe")])
                         music_paused_for_tkinter = True #lazy to create a new variable so i use same heheh
             if show_radio:
                 if Radio_quit_button_rect.collidepoint(event.pos):
@@ -557,8 +557,10 @@ while True:
                     if not tkinterradio_process or tkinterradio_process is not None: #if its not None (not open ye/ ended)
                         pygame.mixer.music.stop()
                         stop_rain_sound()
-                        tkinterradio_process=subprocess.Popen([sys.executable,asset("tkinter pages","sound","sound_.py")])
+                        tkinterradio_process=subprocess.Popen([asset("tkinter pages","sound","sound_.exe")])
                         music_paused_for_tkinter = True
+                        
+                        
             if show_plant:
                 if plant_quit_button_rect.collidepoint(event.pos):
                     show_plant =False
@@ -579,8 +581,8 @@ while True:
             if settings.settings_open:
                 rects = settings.draw(virtual_surface, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, settings.animation_index, settings.profile)
                 settings.handle_event(event, rects)
-                
 
+                
             elif not show_tv_screen and not show_radio and not show_plant and not settings.settings_open:
                 if radio_entry.collidepoint(event.pos): #where it click on and check if its inside the box
                     show_radio =True
@@ -606,40 +608,40 @@ while True:
                     text_rect =text_surface.get_rect(center =speechbar_rect.center)
                 
                     
-                # Only close the speech bar if not clicking on any of object
+                # Only close the speech bar if not clicking on any important object
                 if not (teddy.collidepoint(event.pos) or cockroach.collidepoint(event.pos) or sofa.collidepoint(event.pos) or picture.collidepoint(event.pos)):
                     show_text = False
                 
                 if diary_rect.collidepoint(event.pos):
                     if not diary_process or diary_process.poll() is not None:
-                        diary_process=subprocess.Popen([sys.executable,asset("tkinter pages","diary_.py")]) 
+                        diary_process=subprocess.Popen([asset("tkinter pages","diary_.exe")]) 
 
                 if calendar_rect.collidepoint(event.pos):
                     if not calendar_process or calendar_process.poll() is not None:#if its not open yet or close rn poll()is not None = closed
-                        calendar_process = subprocess.Popen([sys.executable,asset("tkinter pages","calendar_.py")])
+                        calendar_process = subprocess.Popen([asset("tkinter pages","calendar_.exe")])
 
                 if moodtracker_rect.collidepoint(event.pos):
                     if not moodtracker_process or moodtracker_process.poll() is not None:
-                        calendar_process = subprocess.Popen([sys.executable,asset("tkinter pages","moodtracker","moodtracker_.py")])
+                        calendar_process = subprocess.Popen([asset("tkinter pages","moodtracker","moodtracker_.exe")])
                 
                 if hourglass_rect.collidepoint(event.pos):
                     if not breathing_process or moodtracker_process.poll() is not None:
                         pygame.mixer.music.stop() #stop the music
                         stop_rain_sound()
-                        breathing_process = subprocess.Popen([sys.executable,asset("tkinter pages","breathing","timer.py")])
+                        breathing_process = subprocess.Popen([asset("tkinter pages","breathing","timer.exe")])
                         music_paused_for_tkinter = True
     
                 if graph_rect.collidepoint(event.pos):
                     if not graph_process or graph_process.poll() is not None:
-                        graph_process = subprocess.Popen([sys.executable,asset("tkinter pages","dashboard.py")])
+                        graph_process = subprocess.Popen([asset("tkinter pages","dashboard.exe")])
 
                 if phone_rect.collidepoint(event.pos):
                     if not phone_process or phone_process.poll() is not None:
-                        phone_process = subprocess.Popen([sys.executable,asset("tkinter pages","stress_quiz_.py")])
+                        phone_process = subprocess.Popen([asset("tkinter pages","stress_quiz_.exe")])
 
                 if instruction_rect.collidepoint(event.pos):
                     if not instruction_process or instruction_process.poll() is not None:
-                        instruction_process = subprocess.Popen([sys.executable,asset("tkinter pages","intruction_page_icon.py")])
+                        instruction_process = subprocess.Popen([asset("tkinter pages","intruction_page_icon.exe")])
 
     scaled_surface = pygame.transform.scale(virtual_surface, (screen_width, screen_height))
     screen.blit(scaled_surface,(0,0))
