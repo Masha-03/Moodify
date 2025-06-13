@@ -69,18 +69,18 @@ def decrease_font_size():
 def get_db_path():
     base_dir = None
     if getattr(sys, 'frozen', False):
-        # When frozen (e.g., PyInstaller), sys._MEIPASS is the root where bundled files are.
+
         app_root = sys._MEIPASS
     else:
-        # In unfrozen mode, base_dir is 'c:\Users\Coshi\Moodify\tkinter pages'.
-        # We need to go up one level to 'c:\Users\Coshi\Moodify'.
-        script_dir = os.path.dirname(os.path.abspath(__file__)) # This is 'c:\Users\Coshi\Moodify\tkinter pages'
-        app_root = os.path.dirname(script_dir) # This steps up to 'c:\Users\Coshi\Moodify'
+        #In unfrozen mode
+        #Need to go up one level
+        script_dir = os.path.dirname(os.path.abspath(__file__)) 
+        app_root = os.path.dirname(script_dir) #Steps up
 
     db_file_name = 'moodify_database.db'
     db_folder_name = 'database'
 
-    # Now, join the app_root with the database folder and the file name
+    #Join the app_root with the database folder and the file name
     db_path = os.path.join(app_root, db_folder_name, db_file_name)
 
     print(f"Running in {'frozen' if getattr(sys, 'frozen', False) else 'unfrozen'} mode.")
@@ -92,18 +92,11 @@ def get_db_path():
 
 database_file_path = get_db_path()
 
-# Check if the database file exists at the calculated path
+#Check if the database file exists at the calculated path
 if os.path.exists(database_file_path):
     print(f"Database file FOUND at: {database_file_path}")
 else:
     print(f"Database file NOT FOUND at: {database_file_path}")
-#   print("WARNING: A new database file will likely be created here.")
-#   # Create the 'database' folder if it doesn't exist
-#   try:
-#       os.makedirs(os.path.dirname(database_file_path), exist_ok=True)
-#       print(f"Created directory: {os.path.dirname(database_file_path)}")
-#   except OSError as e:
-#       print(f"Error creating directory: {e}")
 
 #Get profile from the database
 def get_profile():
@@ -153,15 +146,15 @@ def start_game():
     gender = gender.strip().lower()
 
     if gender == "female":
-        script_path = resource_path("..", "main game code.py")
-        subprocess.Popen([sys.executable, script_path])
+        script_path = resource_path("..", "main game code.exe")
+        subprocess.Popen([script_path])
         #Wait for 1 second before closing the window
         time.sleep(1) # Reduced sleep for better user experience
         #Close the current Tkinter window
         root.destroy()
     elif gender == "male":
-        script_path = resource_path("..", "main game code_Male.py")
-        subprocess.Popen([sys.executable, script_path])
+        script_path = resource_path("..", "main game code_Male.exe")
+        subprocess.Popen([script_path])
         #Wait for 1 second before closing the window
         time.sleep(1) # Reduced sleep for better user experience
         #Close the current Tkinter window

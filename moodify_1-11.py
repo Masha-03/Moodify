@@ -218,8 +218,8 @@ def enter_data():
                 messagebox.showinfo("Success", "Lesgooo! Profile saved successfully!")
 
                 #Connect to next page after successful entry
-                instruction_script_path = resource_path("tkinter pages", "instruction_page_.py")
-                subprocess.Popen([sys.executable, instruction_script_path])
+                instruction_script_path = resource_path("tkinter pages", "instruction_page_.exe")
+                subprocess.Popen([instruction_script_path])
 
                 #Wait for 3 seconds before closing the window
                 time.sleep(3)
@@ -263,8 +263,8 @@ def enter_data():
                 messagebox.showinfo("Success", "Lesgooo! Profile saved successfully!")
 
                 #Connect to next page after successful entry
-                instruction_script_path = resource_path("tkinter pages", "instruction_page_.py")
-                subprocess.Popen([sys.executable, instruction_script_path])
+                instruction_script_path = resource_path("tkinter pages", "instruction_page_.exe")
+                subprocess.Popen([instruction_script_path])
 
                 #Wait for 3 seconds before closing the window
                 time.sleep(3)
