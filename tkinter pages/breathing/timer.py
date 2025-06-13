@@ -62,13 +62,7 @@ if os.path.exists(database_file_path):
     print(f"Database file FOUND at: {database_file_path}")
 else:
     print(f"Database file NOT FOUND at: {database_file_path}")
-#     print("WARNING: A new database file will likely be created here.")
-#     # Create the 'database' folder if it doesn't exist
-#     try:
-#         os.makedirs(os.path.dirname(database_file_path), exist_ok=True)
-#         print(f"Created directory: {os.path.dirname(database_file_path)}")
-#     except OSError as e:
-#         print(f"Error creating directory: {e}")
+
 
 #Get profile from the database
 def get_profile():
@@ -1206,18 +1200,27 @@ class Timer5_5(ctk.CTkFrame):
 
 ################################################################################################################################################################################
 
+#Global UI Widget References 
+bg_label = None 
+main_frame = None
+title_label = None # For Title
+#Global references for CTkImage objects for breathing exercise buttons
+img_calm = None
+img_balance = None
+img_release = None
+img_relax = None
+
 #Set appearance and theme
 ctk.set_appearance_mode("light")  
 ctk.set_default_color_theme("blue")  
 
 #Create app window
 app = ctk.CTk()
-app.title("Breathing Exercise")
+app.title("Breathing Exercise") # Title as specified in Part 1
 
 def on_close():
     if not app.winfo_exists():
         return
-
     #Forcefully terminate the application to prevent lingering events
     sys.exit()
 
@@ -1226,22 +1229,22 @@ app.protocol("WM_DELETE_WINDOW", on_close)
 #Fullscreen size
 app.update_idletasks()
 try:
-    app.state('zoomed')  # Works on Windows
-    app.update()
+    app.state('zoomed')   # Works on Windows
+    app.update() # Update to apply the 'zoomed' state
 except:
-    # Fallback: manually set to full screen size
+    #Fallback: manually set to full screen size
     screen_width = app.winfo_screenwidth()
     screen_height = app.winfo_screenheight()
     app.geometry(f"{screen_width}x{screen_height}")
 
-# ESC to exit fullscreen
+#ESC to exit fullscreen
 def exit_fullscreen(event=None):
     app.attributes("-fullscreen", False)
 
 app.bind("<Escape>", exit_fullscreen)
 
 #Track fullscreen state
-is_fullscreen = [False]
+is_fullscreen = [False] # Initial state is not fullscreen (from app.state('zoomed') or geometry)
 
 # Toggle fullscreen using the 'f' key
 def toggle_fullscreen(event=None):
@@ -1260,38 +1263,46 @@ title_label = ctk.CTkLabel(
 )
 title_label.pack(pady=(30, 10))
 
-#Load and set the background image
-base_dir= os.path.dirname(os.path.abspath(__file__))
+#Define the base directory
+base_dir= os.path.dirname(os.path.abspath(__file__)) 
+
+#Load and set the background image (initial load)
 bg_image_path = os.path.join(base_dir, "breathing_bg.png")
 bg_image = Image.open(bg_image_path) 
-bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
+bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))   #Resize to fullscreen
 bg_photo = ImageTk.PhotoImage(bg_image)
 
 #Label to display the background image
 bg_label = tk.Label(app, image=bg_photo)
-bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Stretch it across the window
-bg_label.image = bg_photo  # Keep a reference to avoid garbage collection
+bg_label.place(x=0, y=0, relwidth=1, relheight=1)   #Stretch it across the window
+bg_label.image = bg_photo   #Keep a reference to avoid garbage collection
 
 #Lower the label so it doesn’t cover other widgets
 bg_label.lower()
 
-#Define the base directory
-base_dir = os.path.dirname(os.path.abspath(__file__))
 
-#Load and resize an image
+#Load and resize an image (for icons)
 def load_image(filename, size=(100, 100)):
-    image_path = os.path.join(base_dir, filename)
-    img = Image.open(image_path)
-    img = img.resize(size, Image.Resampling.LANCZOS)
-    return ctk.CTkImage(light_image=img, dark_image=img, size=size)
+    #Uses base_dir
+    image_path = os.path.join(base_dir, filename) 
+    try:
+        img = Image.open(image_path)
+        img = img.resize(size, Image.Resampling.LANCZOS)
+        return ctk.CTkImage(light_image=img, dark_image=img, size=size)
+    except FileNotFoundError:
+        print(f"Warning: Image not found at {image_path}. Using a transparent placeholder.")
+        return ctk.CTkImage(Image.new('RGBA', size, (0, 0, 0, 0)), size=size) 
+    except Exception as e:
+        print(f"Error loading image {image_path}: {e}. Using a transparent placeholder.")
+        return ctk.CTkImage(Image.new('RGBA', size, (0, 0, 0, 0)), size=size)
 
-#Load all images
-img_calm = load_image("calm.png")
-img_balance = load_image("balance.png")
-img_release = load_image("release.png")
-img_relax = load_image("relax.png")
+#Load all images for the icon buttons
+img_calm = load_image("calm.png") 
+img_balance = load_image("balance.png") 
+img_release = load_image("release.png") 
+img_relax = load_image("relax.png") 
 
-# Button style
+#Button style
 button_style = {
     "width": 250,
     "height": 70,
@@ -1300,7 +1311,7 @@ button_style = {
 }
 
 #give users some tips
-def show_help():
+def show_help(): 
     messagebox.showinfo("Help", "Click on a breathing exercise based on your preference. Press Ctrl+F to toggle fullscreen.")
 
 #exit button
@@ -1329,25 +1340,46 @@ def clear_app_widgets():
     for widget in app.winfo_children():
         widget.destroy()
 
+
+#Function to create image + button 
+def create_icon_button(parent, image, text, command):
+    frame = ctk.CTkFrame(parent, fg_color="transparent")
+    frame.columnconfigure(0, weight=1)
+
+    label = ctk.CTkLabel(frame, image=image, text="", width=80, height=80)
+    label.grid(row=0, column=0, pady=(10, 5))
+
+    button = ctk.CTkButton(frame, text=text, image=None, command=command, **button_style)
+    button.grid(row=1, column=0, pady=(0, 10))
+
+    return frame
+
 def go_home():
-    try:
-        pygame.mixer.music.stop()
-    except Exception as e:
-        print("Error stopping music:", e)
+    #Stop any background music at home
+    #Initialize Pygame for music playback
+    pygame.mixer.init()
+    pygame.mixer.music.stop()
         
-    clear_app_widgets()
+    clear_app_widgets() #This will clear the screen
+
     global main_frame
     global title_label
+    global bg_label #Make bg_label global as it's being re-created
 
-    #Load and set the background image
-    bg_image = Image.open("tkinter pages/breathing/breathing_bg.png") 
-    bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
-    bg_photo = ImageTk.PhotoImage(bg_image)
+    #Load and set the background image (standardized path)
+    current_width = app.winfo_screenwidth()
+    current_height = app.winfo_screenheight()
+    
+    # Use the global base_dir and standardized path for 'breathing_bg.png'
+    bg_image_path_in_func = os.path.join(base_dir, "breathing_bg.png") 
+    bg_image_in_func = Image.open(bg_image_path_in_func) 
+    bg_image_in_func = bg_image_in_func.resize((current_width, current_height), Image.Resampling.LANCZOS) 
+    bg_photo_in_func = ImageTk.PhotoImage(bg_image_in_func)
 
     #Label to display the background image
-    bg_label = tk.Label(app, image=bg_photo)
-    bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Stretch it across the window
-    bg_label.image = bg_photo  # Keep a reference to avoid garbage collection
+    bg_label = tk.Label(app, image=bg_photo_in_func) # Assign to global bg_label
+    bg_label.place(x=0, y=0, relwidth=1, relheight=1) 
+    bg_label.image = bg_photo_in_func # Keep a reference to avoid garbage collection
 
     #Lower the label so it doesn’t cover other widgets
     bg_label.lower()
@@ -1376,125 +1408,121 @@ def go_home():
     )
     title_label.pack(pady=(30, 10))
 
+    #Center layout (from Part 5 logic now used inside go_home)
     center_frame = ctk.CTkFrame(app, fg_color="#cee6f4")
     center_frame.pack(expand=True)
 
-    main_frame = ctk.CTkFrame(center_frame, corner_radius=20, fg_color="#cee6f4")
+    main_frame = ctk.CTkFrame(center_frame, corner_radius=20, fg_color="#f3f3f3") 
     main_frame.pack(pady=20, padx=40)
 
-    # Button creator
-    def create_icon_button(parent, image, text, command):
-        frame = ctk.CTkFrame(parent, fg_color="transparent")
-        frame.columnconfigure(0, weight=1)
-
-        label = ctk.CTkLabel(frame, image=image, text="", width=80, height=80)
-        label.grid(row=0, column=0, pady=(10, 5))
-
-        button = ctk.CTkButton(frame, text=text, image=None, command=command, **button_style)
-        button.grid(row=1, column=0, pady=(0, 10))
-
-        return frame
-
-    # Place buttons again
+    #Place buttons
     create_icon_button(main_frame, img_calm, "4-7-4 Breathing Exercise", open_4_7_4).grid(row=0, column=0, padx=40, pady=30)
     create_icon_button(main_frame, img_balance, "5-5 Breathing Exercise", open_5_5).grid(row=0, column=1, padx=40, pady=30)
     create_icon_button(main_frame, img_release, "4-7-8 Breathing Exercise", open_4_7_8).grid(row=1, column=0, padx=40, pady=30)
     create_icon_button(main_frame, img_relax, "2 to 1 Breathing Exercise", open_2to1).grid(row=1, column=1, padx=40, pady=30)
 
-#Button functions
+#Button functions 
 def open_4_7_4(): 
     if not app.winfo_exists():
         print("App window was destroyed. Cannot load 4-7-4 page.")
         return
     
-    clear_app_widgets()  # removes all widgets inside app
+    clear_app_widgets()   # removes all widgets inside app
     
     global main_frame
-    main_frame = ctk.CTkFrame(app, fg_color="#f3f3f3", corner_radius=20)
-    if app.winfo_exists():
-        main_frame.pack(expand=True, fill="both", padx=40, pady=20)
+    global bg_label # Ensure bg_label is global for re-creation
     
-    
-    #Load and set the background image
-    base_dir= os.path.dirname(os.path.abspath(__file__))
-    bg_image_path = os.path.join(base_dir, "breathing_bg.png")
-    bg_image = Image.open(bg_image_path) 
-    bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
-    bg_photo = ImageTk.PhotoImage(bg_image)
+    #Load and set the background image (standardized path)
+    current_width = app.winfo_screenwidth()
+    current_height = app.winfo_screenheight()
+
+    # Use the global base_dir and standardize path for 'breathing_bg.png'
+    bg_image_path_in_func = os.path.join(base_dir, "breathing_bg.png")
+    bg_image_in_func = Image.open(bg_image_path_in_func) 
+    bg_image_in_func = bg_image_in_func.resize((current_width, current_height), Image.Resampling.LANCZOS)   # Resize to fullscreen
+    bg_photo_in_func = ImageTk.PhotoImage(bg_image_in_func)
 
     #Label to display the background image
-    bg_label = tk.Label(app, image=bg_photo)
-    bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Stretch it across the window
-    bg_label.image = bg_photo  # Keep a reference to avoid garbage collection
+    bg_label = tk.Label(app, image=bg_photo_in_func) # Assign to global bg_label
+    bg_label.place(x=0, y=0, relwidth=1, relheight=1)   # Stretch it across the window
+    bg_label.image = bg_photo_in_func   # Keep a reference to avoid garbage collection
     
     #Lower the label so it doesn’t cover other widgets
     bg_label.lower()
     
     # Then create timer inside main_frame
+    main_frame = ctk.CTkFrame(app, fg_color="#f3f3f3", corner_radius=20) # Re-create main_frame for the exercise page
+    if app.winfo_exists():
+        main_frame.pack(expand=True, fill="both", padx=40, pady=20)
+
     if app.winfo_exists():
         page = Timer474(main_frame, back_callback=go_home)
         page.pack(expand=True, fill="both")
-    
+
 def open_5_5():
     if not app.winfo_exists():
-        print("App window was destroyed. Cannot load 4-7-4 page.")
+        print("App window was destroyed. Cannot load 5-5 page.")
         return
     
-    clear_app_widgets()  # removes all widgets inside app
+    clear_app_widgets()   #removes all widgets inside app
     
     global main_frame
+    global bg_label # Make bg_label global as it's being re-created
     main_frame = ctk.CTkFrame(app, fg_color="#f3f3f3", corner_radius=20)
     if app.winfo_exists():
         main_frame.pack(expand=True, fill="both", padx=40, pady=20)
     
-    #Load and set the background image
-    base_dir= os.path.dirname(os.path.abspath(__file__))
-    bg_image_path = os.path.join(base_dir, "breathing_bg.png")
+    #Load and set the background image 
+    current_width = app.winfo_screenwidth()
+    current_height = app.winfo_screenheight()
+    bg_image_path = os.path.join(base_dir, "breathing_bg.png") 
     bg_image = Image.open(bg_image_path) 
-    bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
+    bg_image = bg_image.resize((current_width, current_height), Image.Resampling.LANCZOS)   #Resize to fullscreen
     bg_photo = ImageTk.PhotoImage(bg_image)
 
     #Label to display the background image
-    bg_label = tk.Label(app, image=bg_photo)
-    bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Stretch it across the window
-    bg_label.image = bg_photo  # Keep a reference to avoid garbage collection
+    bg_label = tk.Label(app, image=bg_photo) 
+    bg_label.place(x=0, y=0, relwidth=1, relheight=1)   #Stretch it across the window
+    bg_label.image = bg_photo   #Keep a reference to avoid garbage collection
     
     #Lower the label so it doesn’t cover other widgets
     bg_label.lower()
     
-    # Then create timer inside main_frame
+    #Then create timer inside main_frame
     if app.winfo_exists():
         page = Timer5_5(main_frame, back_callback=go_home)
         page.pack(expand=True, fill="both")
     
 def open_4_7_8(): 
     if not app.winfo_exists():
-        print("App window was destroyed. Cannot load 4-7-4 page.")
+        print("App window was destroyed. Cannot load 4-7-8 page.")
         return
     
-    clear_app_widgets()  # removes all widgets inside app
+    clear_app_widgets()   #removes all widgets inside app
     
     global main_frame
+    global bg_label #Make bg_label global as it's being re-created
     main_frame = ctk.CTkFrame(app, fg_color="#f3f3f3", corner_radius=20)
     if app.winfo_exists():
         main_frame.pack(expand=True, fill="both", padx=40, pady=20)
     
-    #Load and set the background image
-    base_dir= os.path.dirname(os.path.abspath(__file__))
-    bg_image_path = os.path.join(base_dir, "breathing_bg.png")
+    #Load and set the background image 
+    current_width = app.winfo_screenwidth()
+    current_height = app.winfo_screenheight()
+    bg_image_path = os.path.join(base_dir, "breathing_bg.png") 
     bg_image = Image.open(bg_image_path) 
-    bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
+    bg_image = bg_image.resize((current_width, current_height), Image.Resampling.LANCZOS)   #Resize to fullscreen
     bg_photo = ImageTk.PhotoImage(bg_image)
 
     #Label to display the background image
     bg_label = tk.Label(app, image=bg_photo)
-    bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Stretch it across the window
-    bg_label.image = bg_photo  # Keep a reference to avoid garbage collection
+    bg_label.place(x=0, y=0, relwidth=1, relheight=1)   #Stretch it across the window
+    bg_label.image = bg_photo   #Keep a reference to avoid garbage collection
     
     #Lower the label so it doesn’t cover other widgets
     bg_label.lower()
     
-    # Then create timer inside main_frame
+    #Then create timer inside main_frame
     if app.winfo_exists():
         page = Timer478(main_frame, back_callback=go_home)
         try:
@@ -1504,63 +1532,41 @@ def open_4_7_8():
     
 def open_2to1(): 
     if not app.winfo_exists():
-        print("App window was destroyed. Cannot load 4-7-4 page.")
+        print("App window was destroyed. Cannot load 2 to 1 page.")
         return
     
-    clear_app_widgets()  # removes all widgets inside app
+    clear_app_widgets()   #removes all widgets inside app
     
     global main_frame
+    global bg_label #Make bg_label global as it's being re-created
     main_frame = ctk.CTkFrame(app, fg_color="#f3f3f3", corner_radius=20)
     if app.winfo_exists():
         main_frame.pack(expand=True, fill="both", padx=40, pady=20)
     
-    #Load and set the background image
-    base_dir= os.path.dirname(os.path.abspath(__file__))
-    bg_image_path = os.path.join(base_dir, "breathing_bg.png")
+    #Load and set the background image 
+    current_width = app.winfo_screenwidth()
+    current_height = app.winfo_screenheight()
+    bg_image_path = os.path.join(base_dir, "breathing_bg.png") 
     bg_image = Image.open(bg_image_path) 
-    bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))  # Resize to fullscreen
+    bg_image = bg_image.resize((current_width, current_height), Image.Resampling.LANCZOS)   #Resize to fullscreen
     bg_photo = ImageTk.PhotoImage(bg_image)
 
     #Label to display the background image
     bg_label = tk.Label(app, image=bg_photo)
-    bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Stretch it across the window
-    bg_label.image = bg_photo  # Keep a reference to avoid garbage collection
+    bg_label.place(x=0, y=0, relwidth=1, relheight=1)   #Stretch it across the window
+    bg_label.image = bg_photo   #Keep a reference to avoid garbage collection
     
     #Lower the label so it doesn’t cover other widgets
     bg_label.lower()
     
-    # Then create timer inside main_frame
+    #Then create timer inside main_frame
     if app.winfo_exists():
         page = Timer2to1(main_frame, back_callback=go_home)
         page.pack(expand=True, fill="both")
 
-################################################################################################################################################################################
-
-# Center layout
-center_frame = ctk.CTkFrame(app, fg_color="#cee6f4")
-center_frame.pack(expand=True)
-
-main_frame = ctk.CTkFrame(center_frame, corner_radius=20, fg_color="#f3f3f3")
-main_frame.pack(pady=20, padx=40)
-
-# Function to create image + button vertically
-def create_icon_button(parent, image, text, command):
-    frame = ctk.CTkFrame(parent, fg_color="transparent")
-    frame.columnconfigure(0, weight=1)
-
-    label = ctk.CTkLabel(frame, image=image, text="", width=80, height=80)
-    label.grid(row=0, column=0, pady=(10, 5))
-
-    button = ctk.CTkButton(frame, text=text, image=None, command=command, **button_style)
-    button.grid(row=1, column=0, pady=(0, 10))
-
-    return frame
-
-# Place buttons
-create_icon_button(main_frame, img_calm, "4-7-4 Breathing Exercise", open_4_7_4).grid(row=0, column=0, padx=40, pady=30)
-create_icon_button(main_frame, img_balance, "5-5 Breathing Exercise", open_5_5).grid(row=0, column=1, padx=40, pady=30)
-create_icon_button(main_frame, img_release, "4-7-8 Breathing Exercise", open_4_7_8).grid(row=1, column=0, padx=40, pady=30)
-create_icon_button(main_frame, img_relax, "2 to 1 Breathing Exercise", open_2to1).grid(row=1, column=1, padx=40, pady=30)
-
-#Run the app
-app.mainloop()
+#Run app
+if __name__ == "__main__":
+    # Call go_home() to set up the initial home screen with buttons
+    go_home() 
+    # Run the app (from Part 5)
+    app.mainloop()
