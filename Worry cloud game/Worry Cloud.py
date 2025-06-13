@@ -601,7 +601,7 @@ while running:
         # handle window resize event
         elif event.type == pygame.VIDEORESIZE:
             if not is_fullscreen: # if not in fullscreen, assume manual resize
-                screen_width, screen_height = event.w, event.h
+                screen_width, screen_height = 1270, 720
                 screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE) # Update screen object
                 
                 #recalculate scaling factors
