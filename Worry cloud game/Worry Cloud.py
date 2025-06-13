@@ -581,9 +581,9 @@ while running:
                             text += event.unicode
                         cursor_timer = 0 #reset cursor blink
                         cursor_visible = True
-                
-                # Toggle fullscreen with 'f' key, but only if input box is not active
-                if event.key == pygame.K_f and not active:
+
+                # Toggle fullscreen with f and ctrl key, but only if input box is not active
+                if event.key == pygame.K_f and (event.mod & pygame.KMOD_CTRL) and not active:
                     toggle_fullscreen()
 
             elif GAME_STATE == "HISTORY_SCREEN":

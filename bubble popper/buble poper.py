@@ -288,7 +288,7 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 show_loading_screen()
                 running = False
-            elif event.key == pygame.K_f:
+            elif event.key == pygame.K_f and (event.mod & pygame.KMOD_CTRL):
                 toggle_fullscreen()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if current_page == "bubble_popper":

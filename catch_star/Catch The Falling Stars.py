@@ -163,7 +163,7 @@ def draw_intro_screen():
     "Catch 10 stars to see a motivational message",
     "Collect falling stars to build Resilience",
     "Press 'M' to change mood background",
-    "Press 'F' to toggle Fullscreen",
+    "Press 'CTRL + F' to toggle Fullscreen",
     "Press 'ESC' to exit",
     "Press SPACE to start"
   ]
@@ -251,7 +251,7 @@ def main():
         if game_state == 'intro':
           if event.key == pygame.K_SPACE:
             game_state = 'playing'
-          elif event.key == pygame.K_f:
+          elif event.key == pygame.K_f and (event.mod & pygame.KMOD_CTRL): # if the F key is pressed with Ctrl modifier
             if screen.get_flags() & pygame.FULLSCREEN:
               pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
             else:
