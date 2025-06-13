@@ -126,7 +126,7 @@ music_on = True #keep track of whether music is playing
 
 #setting up the screen.
 original_screen_width, original_screen_height = 1920, 1020 #my preferred dimensions
-screen_width, screen_height = original_screen_width, original_screen_height
+screen_width, screen_height = 1270, 720 #coshin window size
 
 screen = None
 try:
