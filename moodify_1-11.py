@@ -206,8 +206,6 @@ def enter_data():
                 cursor.execute("DELETE FROM user_info WHERE profile = ? AND gender = ?", (profile, gender))
                 #Save data, update
                 connect.commit()
-                #Close connection
-                connect.close() 
 
                 #Re-insert the same profile (becomes the last row)
                 data_insert_query = """ INSERT INTO user_info
@@ -216,8 +214,6 @@ def enter_data():
                 cursor.execute(data_insert_query, data_insert_tuple)
                 #Save data, update
                 connect.commit()
-                #Close connection
-                connect.close() 
 
                 messagebox.showinfo("Success", "Lesgooo! Profile saved successfully!")
 
@@ -225,7 +221,9 @@ def enter_data():
                 instruction_script_path = resource_path("tkinter pages", "instruction_page_.py")
                 subprocess.Popen([sys.executable, instruction_script_path])
 
+                #Wait for 3 seconds before closing the window
                 time.sleep(3)
+                #Close the current Tkinter window
                 root.destroy()
                 sys.exit()
             else:
