@@ -1263,6 +1263,43 @@ title_label = ctk.CTkLabel(
 )
 title_label.pack(pady=(30, 10))
 
+def update_background_image():
+    global bg_label, bg_photo 
+
+    if not app.winfo_exists():
+        return
+
+    current_width = app.winfo_width() # Use app.winfo_width() and height
+    current_height = app.winfo_height()
+
+    #Prevent division by zero if window size is 0 (during initialization)
+    if current_width == 0 or current_height == 0:
+        app.after(100, update_background_image) #Try again 
+        return
+
+    bg_image_path = os.path.join(base_dir, "breathing_bg.png") 
+    try:
+        bg_image_original = Image.open(bg_image_path)
+        #Resize image to fit the current window dimensions
+        bg_image_resized = bg_image_original.resize((current_width, current_height), Image.Resampling.LANCZOS)
+        bg_photo = ImageTk.PhotoImage(bg_image_resized)
+
+        if bg_label is None: #Create label if it doesn't exist
+            bg_label = tk.Label(app, image=bg_photo)
+            bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+            bg_label.lower() #Ensure it's behind other widgets
+        else: #Update image if label already exists
+            bg_label.config(image=bg_photo)
+            bg_label.image = bg_photo #Keep reference
+
+    except FileNotFoundError:
+        print(f"Error: Background image not found at {bg_image_path}")
+    except Exception as e:
+        print(f"Error updating background image: {e}")
+
+# Bind the <Configure> event to the window to update background on resize
+app.bind("<Configure>", lambda event: update_background_image() if (event.widget == app and (event.width != app.winfo_width() or event.height != app.winfo_height())) else None)
+
 #Define the base directory
 base_dir= os.path.dirname(os.path.abspath(__file__)) 
 
