@@ -548,7 +548,7 @@ while True:
                     if not open_bubble_popper or open_bubble_popper.poll() is not None:
                         pygame.mixer.music.stop()
                         stop_rain_sound()
-                        open_worrycloud=subprocess.Popen([asset("worry cloud game","Worry Cloud.exe")])
+                        open_worrycloud=subprocess.Popen([asset("Worry cloud game","Worry Cloud.exe")])
                         music_paused_for_tkinter = True #lazy to create a new variable so i use same heheh
             if show_radio:
                 if Radio_quit_button_rect.collidepoint(event.pos):

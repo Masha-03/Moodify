@@ -235,7 +235,7 @@ main_canvas.pack(fill="both", expand=True)
 
 # Load and set background image
 base_dir = os.path.dirname(os.path.abspath(__file__)) 
-bg_image_path = os.path.join(base_dir, "diary_bg.png") 
+bg_image_path = resource_path("diary_bg.png") 
 try:
     bg_image_original = Image.open(bg_image_path)
 except FileNotFoundError:
