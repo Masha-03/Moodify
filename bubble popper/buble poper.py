@@ -13,7 +13,7 @@ def resource_path(relative_path):
     try:
         base_path = sys._MEIPASS  # used by PyInstaller to get the temporary directory
     except Exception:
-        base_path = os.path.abspath(".")
+        base_path = os.path.dirname(__file__)
 
     return os.path.join(base_path, relative_path)
 
@@ -56,7 +56,7 @@ PARTICLE_COUNT = 50
 pop_sounds = []
 for i in range(1, 5):
     try:
-        sound = pygame.mixer.Sound(resource_path(f"bubble popper/bubble sound/pop{i}.wav"))  # load sound files ##
+        sound = pygame.mixer.Sound(resource_path(f"bubble sound/pop{i}.wav"))  # load sound files ##
         sound.set_volume(1.0)  # setting volume to max
         pop_sounds.append(sound)  # add to the list
     except:
@@ -64,7 +64,7 @@ for i in range(1, 5):
 
 # Background music ##
 try: ##
-    pygame.mixer.music.load(resource_path("bubble popper/playground.wav"))  # Load background music ##
+    pygame.mixer.music.load(resource_path("playground.wav"))  # Load background music ##
     pygame.mixer.music.set_volume(0.5)  # Set initial volume for background music ##
     pygame.mixer.music.play(-1)  # Play indefinitely ##
 except pygame.error as e: ##

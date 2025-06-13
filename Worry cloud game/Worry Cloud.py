@@ -97,15 +97,15 @@ def resource_path(relative_path):
     try:
         base_path = sys._MEIPASS  # used by PyInstaller
     except Exception:
-        base_path = os.path.abspath(".")
+        base_path = os.path.dirname(__file__)
 
     return os.path.join(base_path, relative_path)
 
-MUSIC_PATH = resource_path("Worry cloud game/Worry_cloud/calm_music.wav")
-RAIN_SOUND_PATH = resource_path("Worry cloud game/Worry_cloud/rain_sound.wav")
-BACKGROUND_IMG_PATH = resource_path("Worry cloud game/Worry_cloud/star_bg2.jpg")
-CLOUD_IMG_PATH = resource_path("Worry cloud game/Worry_cloud/cloud.png") #for the worry cloud
-CLOUD2_IMG_PATH = resource_path("Worry cloud game/Worry_cloud/cloud2.png") #for background clouds
+MUSIC_PATH = resource_path("Worry_cloud/calm_music.wav")
+RAIN_SOUND_PATH = resource_path("Worry_cloud/rain_sound.wav")
+BACKGROUND_IMG_PATH = resource_path("Worry_cloud/star_bg2.jpg")
+CLOUD_IMG_PATH = resource_path("Worry_cloud/cloud.png") #for the worry cloud
+CLOUD2_IMG_PATH = resource_path("Worry_cloud/cloud2.png") #for background clouds
 
 #play the ambient music.
 #first, check if the music file actually exists.
