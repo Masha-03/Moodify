@@ -1284,7 +1284,7 @@ def update_background_image():
         bg_image_resized = bg_image_original.resize((current_width, current_height), Image.Resampling.LANCZOS)
         bg_photo = ImageTk.PhotoImage(bg_image_resized)
 
-        if bg_label is None: #Create label if it doesn't exist
+        if bg_label is None or not bg_label.winfo_exists(): #Create label if it doesn't exist
             bg_label = tk.Label(app, image=bg_photo)
             bg_label.place(x=0, y=0, relwidth=1, relheight=1)
             bg_label.lower() #Ensure it's behind other widgets
@@ -1376,7 +1376,10 @@ def clear_app_widgets():
     
     for widget in app.winfo_children():
         widget.destroy()
-
+        
+    for widget in list(app.winfo_children()): 
+        if widget is not bg_label: # Do not destroy the background label if it exists
+             widget.destroy()
 
 #Function to create image + button 
 def create_icon_button(parent, image, text, command):
@@ -1398,6 +1401,7 @@ def go_home():
     pygame.mixer.music.stop()
         
     clear_app_widgets() #This will clear the screen
+    update_background_image()
 
     global main_frame
     global title_label
@@ -1465,6 +1469,7 @@ def open_4_7_4():
         return
     
     clear_app_widgets()   # removes all widgets inside app
+    update_background_image()
     
     global main_frame
     global bg_label # Ensure bg_label is global for re-creation
@@ -1502,6 +1507,7 @@ def open_5_5():
         return
     
     clear_app_widgets()   #removes all widgets inside app
+    update_background_image()
     
     global main_frame
     global bg_label # Make bg_label global as it's being re-created
@@ -1536,6 +1542,7 @@ def open_4_7_8():
         return
     
     clear_app_widgets()   #removes all widgets inside app
+    update_background_image()
     
     global main_frame
     global bg_label #Make bg_label global as it's being re-created
@@ -1573,6 +1580,7 @@ def open_2to1():
         return
     
     clear_app_widgets()   #removes all widgets inside app
+    update_background_image()
     
     global main_frame
     global bg_label #Make bg_label global as it's being re-created
@@ -1603,7 +1611,8 @@ def open_2to1():
 
 #Run app
 if __name__ == "__main__":
-    # Call go_home() to set up the initial home screen with buttons
+    app.update_idletasks() # Ensure window dimensions are available
+    update_background_image() 
     go_home() 
     # Run the app (from Part 5)
     app.mainloop()
