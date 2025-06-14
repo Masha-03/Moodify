@@ -193,12 +193,30 @@ def show_help():
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
+# Track fullscreen state
+is_fullscreen = [False] # Using a list to allow modification within function scope
 # Toggle fullscreen using the 'f' key
 def toggle_fullscreen(event=None):
-    if app.attributes('-fullscreen'):
-        app.attributes('-fullscreen', False)
+    current_fullscreen_state = app.attributes("-fullscreen")
+    if current_fullscreen_state: # Currently fullscreen, exit fullscreen
+        app.attributes("-fullscreen", False)
+        target_width = 1280
+        target_height = 720
+        
+        # Calculate center coordinates for the target size
+        screen_width = app.winfo_screenwidth()
+        screen_height = app.winfo_screenheight()
+        
+        center_x = (screen_width - target_width) // 2
+        center_y = (screen_height - target_height) // 2
+        
+        app.geometry(f"{target_width}x{target_height}+{center_x}+{center_y}")
     else:
-        app.attributes('-fullscreen', True)
+        app.attributes("-fullscreen", True)
+    
+    is_fullscreen[0] = not current_fullscreen_state # Update state tracker
+    # After toggling fullscreen, force a layout update to ensure elements reposition correctly
+    app.update_idletasks() # Ensure window size is updated
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
