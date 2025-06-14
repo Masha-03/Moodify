@@ -294,12 +294,12 @@ emoji_buttons_inner_frame.pack(fill="none",expand=True,anchor="center") # This c
 emoji_buttons=[]
 
 # Load images using relative paths
-happy_image = resize_image(get_image_path("happy.png"))
-sad_image = resize_image(get_image_path("sad.png"))
-angry_image = resize_image(get_image_path("angry.png"))
-excited_image = resize_image(get_image_path("excited.png"))
-sleepy_image = resize_image(get_image_path("sleepy.png"))
-relaxed_image = resize_image(get_image_path("relaxed.png"))
+happy_image = resize_image(resource_path("happy.png"))
+sad_image = resize_image(resource_path("sad.png"))
+angry_image = resize_image(resource_path("angry.png"))
+excited_image = resize_image(resource_path("excited.png"))
+sleepy_image = resize_image(resource_path("sleepy.png"))
+relaxed_image = resize_image(resource_path("relaxed.png"))
 
 
 #button to choose the mood

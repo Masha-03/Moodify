@@ -1,1 +1,6 @@
 __pycache__/
+*.exe
+# Ignore PyInstaller build outputs
+build/
+dist/
+*.spec

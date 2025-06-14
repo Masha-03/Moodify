@@ -4,15 +4,19 @@ import os
 import random
 import os
 
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
+def resource_path(*relative_path_parts):
+    """
+    Returns the absolute path to a resource, whether running as a script
+    or as a PyInstaller bundled executable.
+    """
     try:
-        base_path = sys._MEIPASS  # Used by PyInstaller
-    except Exception:
-        base_path = os.path.abspath(".")
+        # PyInstaller creates a temp folder and sets _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # Not running as a PyInstaller executable, use current script directory
+        base_path = os.path.dirname(os.path.abspath(__file__))
 
-    return os.path.join(base_path, relative_path)
-
+    return os.path.join(base_path, *relative_path_parts)
 
 # Initialize Pygame
 pygame.init()
@@ -37,9 +41,9 @@ scale_x, scale_y = get_scale_factors(screen.get_width(), screen.get_height())
 # -----------------------------------------------------------------------------------------------------------------------------------
 # Load Background Images for Different Moods
 MOODS = {
-  "Calm Night": pygame.image.load(resource_path("catch_star/starrynight.png")).convert(),
-  "Peaceful Moonlight": pygame.image.load(resource_path("catch_star/moonlight.png")).convert(),
-  "Serene Aurora": pygame.image.load(resource_path("catch_star/aurora.png")).convert()
+  "Calm Night": pygame.image.load(resource_path("starrynight.png")).convert(),
+  "Peaceful Moonlight": pygame.image.load(resource_path("moonlight.png")).convert(),
+  "Serene Aurora": pygame.image.load(resource_path("aurora.png")).convert()
 } #.convert() --> change the pixel format of an image with no arguments, to create a copy that will draw more quickly on the screen
 current_mood = "Calm Night" #sets the initial background mood
 BACKGROUND = pygame.transform.scale(MOODS[current_mood], (screen.get_width(), screen.get_height())) #stretches/shrinks it to match the screen size. ########################################################
@@ -49,10 +53,10 @@ game_state = 'intro'
 
 # -----------------------------------------------------------------------------------------------------------------------------------
 # load sound effect
-CATCH_SOUND = pygame.mixer.Sound(resource_path("catch_star/catch_sound.wav")) # catching sound
+CATCH_SOUND = pygame.mixer.Sound(resource_path("catch_sound.wav")) # catching sound
 
 # Load background music
-pygame.mixer.music.load(resource_path("catch_star/background_music.wav"))
+pygame.mixer.music.load(resource_path("background_music.wav"))
 pygame.mixer.music.set_volume(0.5)
 pygame.mixer.music.play(-1) # Play in a loop (-1 means infinite loop)
 # -----------------------------------------------------------------------------------------------------------------------------------
@@ -60,7 +64,7 @@ pygame.mixer.music.play(-1) # Play in a loop (-1 means infinite loop)
 # load catcher image
 PLAYER_WIDTH_RATIO = 225 / WIDTH # calculate the ratio of the basket original width to the current window width
 PLAYER_HEIGHT_RATIO = 190 / HEIGHT # calculate the ratio of the basket original height to the current window height
-PLAYER_IMAGE = pygame.image.load(resource_path("catch_star/catcher.png")).convert_alpha() #sincge the image has transparency bg, use alpha to avoid having solid color at the back
+PLAYER_IMAGE = pygame.image.load(resource_path("catcher.png")).convert_alpha() #sincge the image has transparency bg, use alpha to avoid having solid color at the back
 PLAYER_WIDTH = int(PLAYER_WIDTH_RATIO * screen.get_width()) # calculate the player width based on the screen size ###############################################################################
 PLAYER_HEIGHT = int(PLAYER_HEIGHT_RATIO * screen.get_height()) # calculate the player height based on the screen size ##############################################################################3
 SCALED_PLAYER = pygame.transform.scale(PLAYER_IMAGE, (PLAYER_WIDTH, PLAYER_HEIGHT)) # scale the player image
@@ -74,8 +78,8 @@ player_speed = 5 * scale_x # player speed based on the screen size
 
 # star properties
 STAR_IMAGES = [
-  pygame.image.load(resource_path("catch_star/star1.png")).convert_alpha(), # load the first star image
-  pygame.image.load(resource_path("catch_star/star2.png")).convert_alpha() # load the second star image
+  pygame.image.load(resource_path("star1.png")).convert_alpha(), # load the first star image
+  pygame.image.load(resource_path("star2.png")).convert_alpha() # load the second star image
 ]
 
 # scale the star images based on the current screen size
@@ -163,7 +167,7 @@ def draw_intro_screen():
     "Catch 10 stars to see a motivational message",
     "Collect falling stars to build Resilience",
     "Press 'M' to change mood background",
-    "Press 'F' to toggle Fullscreen",
+    "Press 'CTRL + F' to toggle Fullscreen",
     "Press 'ESC' to exit",
     "Press SPACE to start"
   ]
@@ -251,7 +255,7 @@ def main():
         if game_state == 'intro':
           if event.key == pygame.K_SPACE:
             game_state = 'playing'
-          elif event.key == pygame.K_f:
+          elif event.key == pygame.K_f and (event.mod & pygame.KMOD_CTRL): # if the F key is pressed with Ctrl modifier
             if screen.get_flags() & pygame.FULLSCREEN:
               pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
             else:

@@ -92,20 +92,27 @@ def get_all_worries():
 
 # #----------------------------------------------------------------------------- database code #------------------------------------------------------------------------------------------
 
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
+def resource_path(*relative_path_parts):
+    """
+    Returns the absolute path to a resource, whether running as a script
+    or as a PyInstaller bundled executable.
+    """
     try:
-        base_path = sys._MEIPASS  # used by PyInstaller
-    except Exception:
-        base_path = os.path.abspath(".")
+        # PyInstaller creates a temp folder and sets _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # Not running as a PyInstaller executable, use current script directory
+        base_path = os.path.dirname(os.path.abspath(__file__))
 
-    return os.path.join(base_path, relative_path)
+    return os.path.join(base_path, *relative_path_parts)
 
-MUSIC_PATH = resource_path("Worry cloud game/Worry_cloud/calm_music.wav")
-RAIN_SOUND_PATH = resource_path("Worry cloud game/Worry_cloud/rain_sound.wav")
-BACKGROUND_IMG_PATH = resource_path("Worry cloud game/Worry_cloud/star_bg2.jpg")
-CLOUD_IMG_PATH = resource_path("Worry cloud game/Worry_cloud/cloud.png") #for the worry cloud
-CLOUD2_IMG_PATH = resource_path("Worry cloud game/Worry_cloud/cloud2.png") #for background clouds
+
+MUSIC_PATH = resource_path("Worry_cloud", "calm_music.wav")
+RAIN_SOUND_PATH = resource_path("Worry_cloud", "rain_sound.wav")
+BACKGROUND_IMG_PATH = resource_path("Worry_cloud", "star_bg2.jpg")  # double-check it's .jpg, not .png
+CLOUD_IMG_PATH = resource_path("Worry_cloud", "cloud.png")
+CLOUD2_IMG_PATH = resource_path("Worry_cloud", "cloud2.png")
+
 
 #play the ambient music.
 #first, check if the music file actually exists.
@@ -126,7 +133,7 @@ music_on = True #keep track of whether music is playing
 
 #setting up the screen.
 original_screen_width, original_screen_height = 1920, 1020 #my preferred dimensions
-screen_width, screen_height = original_screen_width, original_screen_height
+screen_width, screen_height = 1270, 720 #coshin window size
 
 screen = None
 try:
@@ -581,9 +588,9 @@ while running:
                             text += event.unicode
                         cursor_timer = 0 #reset cursor blink
                         cursor_visible = True
-                
-                # Toggle fullscreen with 'f' key, but only if input box is not active
-                if event.key == pygame.K_f and not active:
+
+                # Toggle fullscreen with f and ctrl key, but only if input box is not active
+                if event.key == pygame.K_f and (event.mod & pygame.KMOD_CTRL) and not active:
                     toggle_fullscreen()
 
             elif GAME_STATE == "HISTORY_SCREEN":
@@ -601,7 +608,7 @@ while running:
         # handle window resize event
         elif event.type == pygame.VIDEORESIZE:
             if not is_fullscreen: # if not in fullscreen, assume manual resize
-                screen_width, screen_height = event.w, event.h
+                screen_width, screen_height = 1270, 720
                 screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE) # Update screen object
                 
                 #recalculate scaling factors

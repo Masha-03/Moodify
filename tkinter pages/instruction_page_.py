@@ -15,12 +15,14 @@ def resource_path(*relative_path_parts):
     or as a PyInstaller bundled executable.
     """
     try:
-        # PyInstaller creates a temp folder and sets _MEIPASS
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = sys._MEIPASS
     except AttributeError:
-        # Not running as a PyInstaller executable, use current script directory
-        base_path = os.path.dirname(os.path.abspath(__file__))
-
+        # Not frozen (running in development)
+        # This will get the directory of the current script file
+        base_path = os.path.abspath(os.path.dirname(sys.argv[0]))
+    
+    # Join all path components
     return os.path.join(base_path, *relative_path_parts)
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -146,15 +148,15 @@ def start_game():
     gender = gender.strip().lower()
 
     if gender == "female":
-        script_path = resource_path("..", "main game code.py")
-        subprocess.Popen([sys.executable, script_path])
+        script_path = resource_path("main game code.py")
+        subprocess.Popen([script_path])
         #Wait for 3 seconds before closing the window
         time.sleep(3)
         #Close the current Tkinter window
         root.destroy()
     elif gender == "male":
-        script_path = resource_path("..", "main game code_Male.py")
-        subprocess.Popen([sys.executable, script_path])
+        script_path = resource_path("main game code_Male.py")
+        subprocess.Popen([script_path])
         #Wait for 3 seconds before closing the window
         time.sleep(3)
         #Close the current Tkinter window
