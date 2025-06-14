@@ -146,17 +146,17 @@ def start_game():
     gender = gender.strip().lower()
 
     if gender == "female":
-        script_path = resource_path("..", "main game code.exe")
-        subprocess.Popen([script_path])
-        #Wait for 1 second before closing the window
-        time.sleep(1) # Reduced sleep for better user experience
+        script_path = resource_path("..", "main game code.py")
+        subprocess.Popen([sys.executable, script_path])
+        #Wait for 3 seconds before closing the window
+        time.sleep(3)
         #Close the current Tkinter window
         root.destroy()
     elif gender == "male":
-        script_path = resource_path("..", "main game code_Male.exe")
-        subprocess.Popen([script_path])
-        #Wait for 1 second before closing the window
-        time.sleep(1) # Reduced sleep for better user experience
+        script_path = resource_path("..", "main game code_Male.py")
+        subprocess.Popen([sys.executable, script_path])
+        #Wait for 3 seconds before closing the window
+        time.sleep(3)
         #Close the current Tkinter window
         root.destroy()
 
