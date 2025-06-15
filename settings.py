@@ -141,24 +141,24 @@ def update_profile(new_name):
         return False if not result else None  #Cancel -> return False, Retry -> return None
     else:
         try:
-            #Start a transaction
-            cursor.execute("BEGIN")
-
+            connect = connect_db()
+            cursor = connect.cursor()
             #Update profile in all tables
             tables_to_update = ["user_info", "mood_entries", "breathing_exercise", "diary_entries", "stress_quiz", "worries"]
             for table in tables_to_update:
                 cursor.execute(f"UPDATE {table} SET profile = ? WHERE profile = ?", (new_name, profile))
 
             connect.commit()
+            connect.close()
             profile = new_name  # Update global variable
             messagebox.showinfo("Success", f"Profile name changed to '{new_name}'")
             return True
         except Exception as e:
-            connect.rollback()
+            connect.rollback() #Undo all uncommitted changes
+            connect.close()
             messagebox.showerror("Error", f"An error occurred while updating profile name:\n{e}")
             return False
-        finally:
-            connect.close()
+            
 
 #Fetch initial data
 get_profile()  #Fetch the latest profile first

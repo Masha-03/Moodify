@@ -130,16 +130,16 @@ def save_mood():
         current_time = now.strftime("%H:%M:%S") #Get time
 
         # Insert into database
-        conn = sqlite3.connect(database_file_path)
-        cursor = conn.cursor()
+        connect = sqlite3.connect(database_file_path)
+        cursor = connect.cursor()
 
         cursor.execute('''
             INSERT INTO mood_entries (profile, date, time, mood, mood_description)
             VALUES (?, ?, ?, ?, ?)
         ''', (profile, current_date, current_time, selected_mood, mood_desc))
 
-        conn.commit()
-        conn.close()
+        connect.commit()
+        connect.close()
 
         #Show popup after submit
         quote = mood_quotes.get(selected_mood, "No quote available.")
