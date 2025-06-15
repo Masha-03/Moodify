@@ -35,26 +35,23 @@ def resource_path(*relative_path_parts):
 charts = [] 
 
 def get_db_path():
-    base_dir = None
-    if getattr(sys, 'frozen', False):
-        #Database folder is at the same level as the executable.
-        app_root = sys._MEIPASS
-    else:
-        #In unfrozen mode
-        script_dir = os.path.dirname(os.path.abspath(__file__)) 
-        app_root = os.path.dirname(script_dir) 
-
     db_file_name = 'moodify_database.db'
     db_folder_name = 'database'
 
-    #Join the app_root with the database folder and the file name
+    if getattr(sys, 'frozen', False):
+        # Running from EXE inside "Moodify/tkinter pages/"
+        exe_dir = os.path.dirname(sys.executable)
+        app_root = os.path.abspath(os.path.join(exe_dir, ".."))  # Up to Moodify/
+    else:
+        # Running from .py inside "Moodify/tkinter pages/"
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        app_root = os.path.abspath(os.path.join(script_dir, ".."))  # Up to Moodify/
+
     db_path = os.path.join(app_root, db_folder_name, db_file_name)
 
     print(f"Running in {'frozen' if getattr(sys, 'frozen', False) else 'unfrozen'} mode.")
-    print(f"Detected script directory: {os.path.dirname(os.path.abspath(__file__))}")
-    print(f"Calculated application root: {app_root}")
+    print(f"Detected script directory: {script_dir if not getattr(sys, 'frozen', False) else exe_dir}")
     print(f"Calculated database path: {db_path}")
-
     return db_path
 
 database_file_path = get_db_path()
@@ -628,7 +625,7 @@ def main():
     
     #Background picture
     base_dir = os.path.dirname(os.path.abspath(__file__)) 
-    bg_image_path = os.path.join(base_dir, "dashboard_bg.png") 
+    bg_image_path = resource_path("dashboard_bg.png") 
     bg_image = Image.open(bg_image_path)  #Open the image first
     bg_photo = ImageTk.PhotoImage(bg_image)  #Convert to PhotoImage
 

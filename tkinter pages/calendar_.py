@@ -29,8 +29,8 @@ def update_background_image(event=None):
     if current_width == 0 or current_height == 0:
         return
 
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    bg_image_path = os.path.join(base_dir, "calendar_bg.png")
+    base_dir = resource_path(os.path.abspath(__file__))
+    bg_image_path = resource_path("calendar_bg.png")
 
     try:
         original_bg_image = Image.open(bg_image_path)
@@ -62,20 +62,22 @@ def resource_path(*relative_path_parts):
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 def get_db_path():
-    if getattr(sys, 'frozen', False):
-        app_root = sys._MEIPASS
-    else:
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        app_root = os.path.dirname(script_dir)
-
     db_file_name = 'moodify_database.db'
     db_folder_name = 'database'
+
+    if getattr(sys, 'frozen', False):
+        # Running from EXE inside "Moodify/tkinter pages/"
+        exe_dir = os.path.dirname(sys.executable)
+        app_root = os.path.abspath(os.path.join(exe_dir, ".."))  # Step up to "Moodify/"
+    else:
+        # Running from .py inside "Moodify/tkinter pages/"
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        app_root = os.path.abspath(os.path.join(script_dir, ".."))  # Step up to "Moodify/"
 
     db_path = os.path.join(app_root, db_folder_name, db_file_name)
 
     print(f"Running in {'frozen' if getattr(sys, 'frozen', False) else 'unfrozen'} mode.")
-    print(f"Detected script directory: {os.path.dirname(os.path.abspath(__file__))}")
-    print(f"Calculated application root: {app_root}")
+    print(f"Detected script directory: {script_dir if not getattr(sys, 'frozen', False) else exe_dir}")
     print(f"Calculated database path: {db_path}")
 
     return db_path

@@ -8,16 +8,37 @@ pygame.init()
 
 # #------------------------------------------------------------------------------------------ database code #------------------------------------------------------------------------------
 
-#Find the folder where the current Python file is
-#Always save database in same folder
-db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'database', 'moodify_database.db')
-DB_NAME = db_path
+def get_correct_db_path():
+    db_name = 'moodify_database.db'
+    db_folder = 'database'
+
+    if getattr(sys, 'frozen', False):
+        # Running from EXE → go up 1 level to Moodify/
+        exe_dir = os.path.dirname(sys.executable)
+        app_root = os.path.abspath(os.path.join(exe_dir, ".."))
+    else:
+        # Running from script → go up 2 levels to Moodify/
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        app_root = os.path.abspath(os.path.join(script_dir, "..", ".."))
+
+    db_path = os.path.join(app_root,"Moodify", db_folder, db_name)
+
+    print("Attempting to connect to database at:", db_path)
+    print("Exists:", os.path.exists(db_path))
+    return db_path
+
+
+db_path = get_correct_db_path()
+DB_NAME = db_path 
 RECENT_WORRIES_DISPLAY_COUNT = 3
+
 
 #Get profile from the database
 def get_profile():
     global profile
-    connect = sqlite3.connect(db_path)
+    print(f"Attempting to connect to database at: {DB_NAME}") ######
+
+    connect = sqlite3.connect(DB_NAME)
     cursor = connect.cursor()
     
     #Fetch the profile
@@ -33,7 +54,7 @@ def get_profile():
 def setup_database():
     """Connects to the SQLite database and creates the worries table if it doesn't exist."""
     try:
-        conn = sqlite3.connect(db_path)
+        conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         cursor.execute('''
            CREATE TABLE IF NOT EXISTS worries (
@@ -55,7 +76,7 @@ def save_worry_to_db(worry_text):
         return
 
     try:
-        conn = sqlite3.connect(db_path)
+        conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         cursor.execute("INSERT INTO worries (worry_text, profile) VALUES (?, ?)",
             (worry_text, profile))
@@ -68,7 +89,7 @@ def get_latest_worries(count=RECENT_WORRIES_DISPLAY_COUNT):
     """Retrieves the latest 'count' worries from the database."""
     worries_list = []
     try:
-        conn = sqlite3.connect(db_path)
+        conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         cursor.execute("SELECT worry_text, timestamp FROM worries WHERE profile = ? ORDER BY timestamp DESC LIMIT ?", (profile, count))
         worries_list = cursor.fetchall()
@@ -81,7 +102,7 @@ def get_all_worries():
     """Retrieves all worries from the database."""
     worries_list = []
     try:
-        conn = sqlite3.connect(db_path)
+        conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         cursor.execute("SELECT worry_text, timestamp FROM worries WHERE profile = ? ORDER BY timestamp DESC", (profile,))
         worries_list = cursor.fetchall()

@@ -24,31 +24,20 @@ def resource_path(*relative_path_parts):
     return os.path.join(base_path, *relative_path_parts)
 
 def get_db_path():
-    base_dir = None
-    db_file_name = 'moodify_database.db'
-    
-    if getattr(sys, 'frozen', False):
-        # We are running in a bundle (e.g., PyInstaller)
-        # In PyInstaller, sys._MEIPASS is the path to the temporary folder where your bundled data files are extracted.
-        # You need to configure PyInstaller to include the 'database' folder.
-        base_dir = sys._MEIPASS
-        print(f"Running in frozen mode. Base directory: {base_dir}")
-        
-        # When using PyInstaller, you'd typically put your database file directly into the sys._MEIPASS directory (or a subfolder you specify in the .spec).
-        # For simplicity, if you bundle the whole 'database' folder relative to your script, it will often end up directly in sys._MEIPASS or a subfolder there.
-        db_path = os.path.join(base_dir, 'database', db_file_name) 
-        
-    else:
-        # We are running in a normal Python environment (during development)
-        # The script is in 'YourMainAppFolder/your_main_app.py'
-        # The database is in 'YourMainAppFolder/database/moodify_database.db'
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        print(f"Running in unfrozen mode. Base directory: {base_dir}")
-        
-        # Construct the path relative to the script's directory
-        db_path = os.path.join(base_dir, 'database', db_file_name)
+    db_file_name = "moodify_database.db"
 
-    print(f"Calculated database path: {db_path}")
+    if getattr(sys, 'frozen', False):
+        # Running from PyInstaller EXE
+        base_dir = os.path.dirname(sys.executable)
+        db_path = os.path.abspath(os.path.join(base_dir, "..", "database", db_file_name))
+        print("Running in frozen mode.")
+    else:
+        # Running from source (.py)
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        db_path = os.path.abspath(os.path.join(base_dir, "database", db_file_name))
+        print("Running in unfrozen mode.")
+
+    print(f"Database path: {db_path}")
     return db_path
 
 database_file_path = get_db_path()
@@ -116,7 +105,7 @@ screen_height = root.winfo_screenheight()
 
 #Load and set the background image
 base_dir = os.path.dirname(os.path.abspath(__file__)) 
-bg_image_path = os.path.join(base_dir,"graphics", "intro_bg.png") 
+bg_image_path = resource_path("graphics", "intro_bg.png") 
 bg_image=Image.open(bg_image_path)
 bg_image = bg_image.resize((root.winfo_screenwidth(), root.winfo_screenheight()))  # Resize to fullscreen
 bg_photo = ImageTk.PhotoImage(bg_image)
@@ -218,8 +207,31 @@ def enter_data():
                 messagebox.showinfo("Success", "Lesgooo! Profile saved successfully!")
 
                 #Connect to next page after successful entry
-                instruction_script_path = resource_path("tkinter pages", "instruction_page_.exe")
-                subprocess.Popen([instruction_script_path])
+                if getattr(sys, 'frozen', False):
+    # Running from a packaged EXE
+                    base_dir = os.path.dirname(sys.executable)
+                    instruction_script_path = os.path.abspath(os.path.join(base_dir, "..", "tkinter pages", "instruction_page_.exe"))
+
+                    if not os.path.exists(instruction_script_path):
+                        messagebox.showerror("Error", f"Instruction page not found:\n{instruction_script_path}")
+                        return
+                    subprocess.Popen([instruction_script_path])
+                    time.sleep(3)
+                    root.destroy()
+                    sys.exit()
+                else:
+    # Running from a Python script (VS Code or development mode)
+                    base_dir = os.path.dirname(os.path.abspath(__file__))
+                    instruction_script_path = os.path.join(base_dir, "tkinter pages", "instruction_page_.py")
+
+                    if not os.path.exists(instruction_script_path):
+                        messagebox.showerror("Error", f"Instruction .py not found:\n{instruction_script_path}")
+                        return
+                    subprocess.Popen([sys.executable, instruction_script_path])
+
+                    time.sleep(3)
+                    root.destroy()
+                    sys.exit()
 
                 #Wait for 3 seconds before closing the window
                 time.sleep(3)
@@ -262,15 +274,33 @@ def enter_data():
 
                 messagebox.showinfo("Success", "Lesgooo! Profile saved successfully!")
 
-                #Connect to next page after successful entry
-                instruction_script_path = resource_path("tkinter pages", "instruction_page_.exe")
-                subprocess.Popen([instruction_script_path])
+                if getattr(sys, 'frozen', False):
+    # Running from a packaged EXE
+                    base_dir = os.path.dirname(sys.executable)
+                    instruction_script_path = os.path.abspath(os.path.join(base_dir, "..", "tkinter pages", "instruction_page_.exe"))
 
-                #Wait for 3 seconds before closing the window
-                time.sleep(3)
-                #Close the current Tkinter window
-                root.destroy()
-                sys.exit()
+                    if not os.path.exists(instruction_script_path):
+                        messagebox.showerror("Error", f"Instruction page not found:\n{instruction_script_path}")
+                        return
+                    subprocess.Popen([instruction_script_path])
+                    time.sleep(3)
+                    root.destroy()
+                    sys.exit()
+                else:
+    # Running from a Python script (VS Code or development mode)
+                    base_dir = os.path.dirname(os.path.abspath(__file__))
+                    instruction_script_path = os.path.join(base_dir, "tkinter pages", "instruction_page_.py")
+
+                    if not os.path.exists(instruction_script_path):
+                        messagebox.showerror("Error", f"Instruction .py not found:\n{instruction_script_path}")
+                        return
+                    subprocess.Popen([sys.executable, instruction_script_path])
+
+                    time.sleep(3)
+                    root.destroy()
+                    sys.exit()
+                
+
                 
         #Save data, update
         connect.commit()

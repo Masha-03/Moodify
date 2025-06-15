@@ -8,6 +8,9 @@ import os
 from PIL import Image, ImageTk
 import time
 
+
+
+
 # --- Asset Helper Function (for PyInstaller compatibility) ---
 def resource_path(*relative_path_parts):
     """
@@ -66,31 +69,32 @@ def decrease_font_size():
 
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 
+import os, sys
+
 def get_db_path():
-    base_dir = None
+    db_file_name = "moodify_database.db"
+
     if getattr(sys, 'frozen', False):
-
-        app_root = sys._MEIPASS
+        # Running from EXE inside "Moodify/tkinter pages"
+        exe_dir = os.path.dirname(sys.executable)
+        app_root = os.path.abspath(os.path.join(exe_dir, ".."))  # Goes up to "Moodify/"
     else:
-        #In unfrozen mode
-        #Need to go up one level
-        script_dir = os.path.dirname(os.path.abspath(__file__)) 
-        app_root = os.path.dirname(script_dir) #Steps up
+        # Running from .py inside "Moodify/tkinter pages"
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        app_root = os.path.abspath(os.path.join(script_dir, ".."))  # Goes up to "Moodify/"
 
-    db_file_name = 'moodify_database.db'
-    db_folder_name = 'database'
-
-    #Join the app_root with the database folder and the file name
-    db_path = os.path.join(app_root, db_folder_name, db_file_name)
-
-    print(f"Running in {'frozen' if getattr(sys, 'frozen', False) else 'unfrozen'} mode.")
-    print(f"Detected script directory: {os.path.dirname(os.path.abspath(__file__))}")
-    print(f"Calculated application root: {app_root}")
-    print(f"Calculated database path: {db_path}")
-
+    db_path = os.path.join(app_root, "database", db_file_name)
+    print(f"INSTRUCTION PAGE: Using DB path → {db_path}")
+    print("DB exists:", os.path.exists(db_path))
     return db_path
 
+
 database_file_path = get_db_path()
+
+
+print("INSTRUCTION PAGE: Using DB path →", get_db_path())
+print("DB exists:", os.path.exists(get_db_path()))
+
 
 #Check if the database file exists at the calculated path
 if os.path.exists(database_file_path):
@@ -145,21 +149,24 @@ def start_game():
 
     gender = gender.strip().lower()
 
-    if gender == "female":
-        script_path = resource_path("..", "main game code.exe")
-        subprocess.Popen([script_path])
-        #Wait for 1 second before closing the window
-        time.sleep(1) # Reduced sleep for better user experience
-        #Close the current Tkinter window
-        root.destroy()
-    elif gender == "male":
-        script_path = resource_path("..", "main game code_Male.exe")
-        subprocess.Popen([script_path])
-        #Wait for 1 second before closing the window
-        time.sleep(1) # Reduced sleep for better user experience
-        #Close the current Tkinter window
-        root.destroy()
+    # Path to ../dist/
+    base_dir = os.path.dirname(sys.executable)
+    exe_dir = os.path.abspath(os.path.join(base_dir, "..", "dist"))
 
+    if gender == "female":
+        script_path = os.path.join(exe_dir, "main game code.exe")
+    elif gender == "male":
+        script_path = os.path.join(exe_dir, "main game code_Male.exe")
+    else:
+        tk.messagebox.showerror("Error", "Invalid gender.")
+        return
+
+    if not os.path.exists(script_path):
+        tk.messagebox.showerror("Error", f"Game not found:\n{script_path}")
+        return
+
+    subprocess.Popen([script_path], close_fds=True)
+    root.destroy()
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 
 def run_game(): # This function seems unused in your current flow
@@ -198,7 +205,7 @@ current_font_size = tk.IntVar(value=13)  # starting font size
 
 # Load background image once
 base_dir = os.path.dirname(os.path.abspath(__file__))
-bg_image_original = Image.open(os.path.join(base_dir, "instruction_page_bg.png"))
+bg_image_original = Image.open(resource_path("instruction_page_bg.png"))
 bg_photo_id = None # Store the canvas item ID for the background image
 bg_photo_tk = None # Store the PhotoImage object reference
 
