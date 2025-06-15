@@ -1332,6 +1332,7 @@ def show_help():
 
 #exit button
 exit_button = ctk.CTkButton(
+    
     app,
     text="❌ Exit",
     font=("Segoe UI", 14),

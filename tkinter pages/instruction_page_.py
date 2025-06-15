@@ -8,9 +8,6 @@ import os
 from PIL import Image, ImageTk
 import time
 
-
-
-
 # --- Asset Helper Function (for PyInstaller compatibility) ---
 def resource_path(*relative_path_parts):
     """
