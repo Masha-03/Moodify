@@ -548,9 +548,7 @@ while True:
                     if not open_worrycloud or open_worrycloud.poll() is not None:
                         pygame.mixer.music.stop()
                         stop_rain_sound()
-                        exe_path = asset("worry cloud game","Worry Cloud.exe")
-                        exe_dir = os.path.dirname(exe_path)
-                        open_worrycloud=subprocess.Popen([exe_path], cwd=exe_dir)
+                        open_worrycloud=subprocess.Popen([asset("worry cloud game","Worry Cloud.exe")])
                         music_paused_for_tkinter = True #lazy to create a new variable so i use same heheh
             if show_radio:
                 if Radio_quit_button_rect.collidepoint(event.pos):
@@ -616,49 +614,35 @@ while True:
                 
                 if diary_rect.collidepoint(event.pos):
                     if not diary_process or diary_process.poll() is not None:
-                        exe_path = asset("tkinter pages", "diary_.exe")
-                        exe_dir = os.path.dirname(exe_path)
-
-                        diary_process = subprocess.Popen([exe_path], cwd=exe_dir)
+                        diary_process = subprocess.Popen([asset("tkinter pages", "diary_.exe")])
 
                 if calendar_rect.collidepoint(event.pos):
                     if not calendar_process or calendar_process.poll() is not None:#if its not open yet or close rn poll()is not None = closed
-                        exe_path = asset("tkinter pages","calendar_.exe")
-                        exe_dir = os.path.dirname(exe_path)
-                        calendar_process = subprocess.Popen([exe_path], cwd=exe_dir)
+                        calendar_process = subprocess.Popen([asset("tkinter pages","calendar_.exe")])
 
                 if moodtracker_rect.collidepoint(event.pos):
                     if not moodtracker_process or moodtracker_process.poll() is not None:
-                        exe_path = asset("tkinter pages","moodtracker","moodtracker_.exe")
-                        exe_dir = os.path.dirname(exe_path)
-                        moodtracker_process = subprocess.Popen([exe_path], cwd=exe_dir)
+                        moodtracker_process = subprocess.Popen([asset("tkinter pages","moodtracker","moodtracker_.exe")])
                 
                 if hourglass_rect.collidepoint(event.pos):
                     if not breathing_process or breathing_process.poll() is not None:
                         pygame.mixer.music.stop() #stop the music
                         stop_rain_sound()
-                        exe_path = asset("tkinter pages","breathing","timer.exe")
-                        exe_dir = os.path.dirname(exe_path)
-                        breathing_process = subprocess.Popen([exe_path], cwd=exe_dir)
+                        breathing_process = subprocess.Popen([asset("tkinter pages","breathing","timer.exe")])
                         music_paused_for_tkinter = True
     
                 if graph_rect.collidepoint(event.pos):
                     if not graph_process or graph_process.poll() is not None:
-                        exe_path = asset("tkinter pages","dashboard.exe")
-                        exe_dir = os.path.dirname(exe_path)
-                        graph_process = subprocess.Popen([exe_path], cwd=exe_dir)
+                        graph_process = subprocess.Popen([asset("tkinter pages","dashboard.exe")])
 
                 if phone_rect.collidepoint(event.pos):
                     if not phone_process or phone_process.poll() is not None:
-                        exe_path = asset("tkinter pages","stress_quiz_.exe")
-                        exe_dir = os.path.dirname(exe_path)
-                        phone_process = subprocess.Popen([exe_path], cwd=exe_dir)
+                        
+                        phone_process = subprocess.Popen([asset("tkinter pages","stress_quiz_.exe")])
 
                 if instruction_rect.collidepoint(event.pos):
                     if not instruction_process or instruction_process.poll() is not None:
-                        exe_path = asset("tkinter pages","intruction_page_icon.exe")
-                        exe_dir = os.path.dirname(exe_path)
-                        instruction_process = subprocess.Popen([exe_path], cwd=exe_dir)
+                        instruction_process = subprocess.Popen([asset("tkinter pages","intruction_page_icon.exe")])
 
     scaled_surface = pygame.transform.scale(virtual_surface, (screen_width, screen_height))
     screen.blit(scaled_surface,(0,0))

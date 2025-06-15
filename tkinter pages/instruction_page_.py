@@ -149,9 +149,14 @@ def start_game():
 
     gender = gender.strip().lower()
 
-    # Path to ../dist/
-    base_dir = os.path.dirname(sys.executable)
-    exe_dir = os.path.abspath(os.path.join(base_dir, "..", "dist"))
+    if getattr(sys, 'frozen', False):
+        # Running from PyInstaller EXE
+        base_dir = os.path.dirname(sys.executable)
+        exe_dir = os.path.abspath(os.path.join(base_dir, "..", "dist"))
+    else:
+        # Running from VS Code or Python
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        exe_dir = os.path.abspath(os.path.join(script_dir, "..", "dist"))
 
     if gender == "female":
         script_path = os.path.join(exe_dir, "main game code.exe")
@@ -167,6 +172,7 @@ def start_game():
 
     subprocess.Popen([script_path], close_fds=True)
     root.destroy()
+
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------#
 
 def run_game(): # This function seems unused in your current flow
