@@ -104,26 +104,22 @@ def insert_timestamp():
 #--------------------------------------------------------------masha---------------------------------------------------------------------------------# 
 
 def get_db_path():
-    base_dir = None
-    if getattr(sys, 'frozen', False):
-        #Database folder is at the same level as the executable.
-        app_root = sys._MEIPASS
-    else:
-        #In unfrozen mode
-        script_dir = os.path.dirname(os.path.abspath(__file__)) 
-        app_root = os.path.dirname(script_dir) 
-
     db_file_name = 'moodify_database.db'
     db_folder_name = 'database'
 
-    #Join the app_root with the database folder and the file name
+    if getattr(sys, 'frozen', False):
+        # Running from EXE inside "Moodify/tkinter pages/"
+        exe_dir = os.path.dirname(sys.executable)
+        app_root = os.path.abspath(os.path.join(exe_dir, ".."))  # → Moodify/
+    else:
+        # Running from .py inside "Moodify/tkinter pages/"
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        app_root = os.path.abspath(os.path.join(script_dir, ".."))  # → Moodify/
+
     db_path = os.path.join(app_root, db_folder_name, db_file_name)
 
     print(f"Running in {'frozen' if getattr(sys, 'frozen', False) else 'unfrozen'} mode.")
-    print(f"Detected script directory: {os.path.dirname(os.path.abspath(__file__))}")
-    print(f"Calculated application root: {app_root}")
     print(f"Calculated database path: {db_path}")
-
     return db_path
 
 database_file_path = get_db_path()
@@ -222,6 +218,10 @@ def save_entry():
     connect.close()
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
+
+print("Working directory:", os.getcwd())
+print("Resolved DB path:", get_db_path())
+print("DB exists:", os.path.exists(get_db_path()))
 
 #main window
 root=tk.Tk()

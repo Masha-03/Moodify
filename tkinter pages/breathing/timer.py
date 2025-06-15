@@ -10,46 +10,28 @@ import sys
 from tkinter import messagebox
 
 #Asset Helper Function
-def resource_path(*relative_path_parts):
-    """
-    Returns the absolute path to a resource, whether running as a script
-    or as a PyInstaller bundled executable.
-    """
-    try:
-        # PyInstaller creates a temp folder and sets _MEIPASS
-        base_path = sys._MEIPASS
-    except AttributeError:
-        # Not running as a PyInstaller executable, use current script directory
-        base_path = os.path.dirname(os.path.abspath(__file__))
-
-    return os.path.join(base_path, *relative_path_parts)
-
+def resource_path(*parts):
+    if getattr(sys, 'frozen', False):
+        return os.path.join(sys._MEIPASS, *parts)
+    else:
+        return os.path.join(os.path.dirname(os.path.abspath(__file__)), *parts)
 def get_db_path():
     db_file_name = 'moodify_database.db'
     db_folder_name = 'database'
 
     if getattr(sys, 'frozen', False):
-        # We are running in a bundle (e.g., PyInstaller)
-        # sys._MEIPASS is the root of the extracted bundle.
-        # Ensure your PyInstaller --add-data includes the 'database' folder at this root level.
-        app_root = sys._MEIPASS
+        # Running from EXE inside "Moodify/tkinter pages/breathing/"
+        exe_dir = os.path.dirname(sys.executable)
+        app_root = os.path.abspath(os.path.join(exe_dir, "..", ".."))  # Step up to "Moodify/"
     else:
-        # We are running in a normal Python environment (unfrozen)
+        # Running as .py from "Moodify/tkinter pages/breathing/"
         script_dir = os.path.dirname(os.path.abspath(__file__))
+        app_root = os.path.abspath(os.path.join(script_dir, "..", ".."))  # Step up to "Moodify/"
 
-        # From 'breathing' to 'tkinter pages'
-        intermediate_dir = os.path.dirname(script_dir)
-        # From 'tkinter pages' to 'Moodify'
-        app_root = os.path.dirname(intermediate_dir) 
-
-    #Join the app_root with the database folder and the file name
     db_path = os.path.join(app_root, db_folder_name, db_file_name)
 
     print(f"Running in {'frozen' if getattr(sys, 'frozen', False) else 'unfrozen'} mode.")
-    print(f"Detected script directory: {os.path.dirname(os.path.abspath(__file__))}")
-    print(f"Calculated application root: {app_root}")
     print(f"Calculated database path: {db_path}")
-
     return db_path
 
 database_file_path = get_db_path()
@@ -98,7 +80,7 @@ class Timer474(ctk.CTkFrame):
         pygame.mixer.init()
         #Gets the directory of the current script
         base_dir = os.path.dirname(os.path.abspath(__file__))  
-        audio_path = os.path.join(base_dir, "breathing.mp3")
+        audio_path = resource_path("breathing.mp3")
         pygame.mixer.music.load(audio_path)
         pygame.mixer.music.play(loops=-1)  # -1 for infinite loop
 
@@ -1274,7 +1256,7 @@ def update_background_image():
         app.after(100, update_background_image) #Try again 
         return
 
-    bg_image_path = os.path.join(base_dir, "breathing_bg.png") 
+    bg_image_path = resource_path("breathing_bg.png") 
     try:
         bg_image_original = Image.open(bg_image_path)
         #Resize image to fit the current window dimensions
@@ -1301,7 +1283,7 @@ app.bind("<Configure>", lambda event: update_background_image() if (event.widget
 base_dir= os.path.dirname(os.path.abspath(__file__)) 
 
 #Load and set the background image (initial load)
-bg_image_path = os.path.join(base_dir, "breathing_bg.png")
+bg_image_path = resource_path("breathing_bg.png")
 bg_image = Image.open(bg_image_path) 
 bg_image = bg_image.resize((app.winfo_screenwidth(), app.winfo_screenheight()))   #Resize to fullscreen
 bg_photo = ImageTk.PhotoImage(bg_image)
@@ -1318,7 +1300,7 @@ bg_label.lower()
 #Load and resize an image (for icons)
 def load_image(filename, size=(100, 100)):
     #Uses base_dir
-    image_path = os.path.join(base_dir, filename) 
+    image_path = resource_path(filename) 
     try:
         img = Image.open(image_path)
         img = img.resize(size, Image.Resampling.LANCZOS)

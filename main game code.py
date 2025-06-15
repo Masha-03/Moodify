@@ -539,16 +539,16 @@ while True:
                         open_bubble_popper = subprocess.Popen([asset("bubble popper", "buble poper.exe")])
                         music_paused_for_tkinter = True 
                 if catch_star_rect.collidepoint(event.pos):
-                    if not open_bubble_popper or open_bubble_popper.poll() is not None:
+                    if not open_catch_star or open_catch_star.poll() is not None:
                         pygame.mixer.music.stop()
                         stop_rain_sound()
                         open_catch_star=subprocess.Popen([asset("catch_star","Catch The Falling Stars.exe")])
                         music_paused_for_tkinter = True 
                 if worrycloud_rect.collidepoint(event.pos):
-                    if not open_bubble_popper or open_bubble_popper.poll() is not None:
+                    if not open_worrycloud or open_worrycloud.poll() is not None:
                         pygame.mixer.music.stop()
                         stop_rain_sound()
-                        open_worrycloud=subprocess.Popen([asset("Worry cloud game","Worry Cloud.exe")])
+                        open_worrycloud=subprocess.Popen([asset("worry cloud game","Worry Cloud.exe")])
                         music_paused_for_tkinter = True #lazy to create a new variable so i use same heheh
             if show_radio:
                 if Radio_quit_button_rect.collidepoint(event.pos):
@@ -614,7 +614,7 @@ while True:
                 
                 if diary_rect.collidepoint(event.pos):
                     if not diary_process or diary_process.poll() is not None:
-                        diary_process=subprocess.Popen([asset("tkinter pages","diary_.exe")]) 
+                        diary_process = subprocess.Popen([asset("tkinter pages", "diary_.exe")])
 
                 if calendar_rect.collidepoint(event.pos):
                     if not calendar_process or calendar_process.poll() is not None:#if its not open yet or close rn poll()is not None = closed
@@ -622,10 +622,10 @@ while True:
 
                 if moodtracker_rect.collidepoint(event.pos):
                     if not moodtracker_process or moodtracker_process.poll() is not None:
-                        calendar_process = subprocess.Popen([asset("tkinter pages","moodtracker","moodtracker_.exe")])
+                        moodtracker_process = subprocess.Popen([asset("tkinter pages","moodtracker","moodtracker_.exe")])
                 
                 if hourglass_rect.collidepoint(event.pos):
-                    if not breathing_process or moodtracker_process.poll() is not None:
+                    if not breathing_process or breathing_process.poll() is not None:
                         pygame.mixer.music.stop() #stop the music
                         stop_rain_sound()
                         breathing_process = subprocess.Popen([asset("tkinter pages","breathing","timer.exe")])
@@ -637,6 +637,7 @@ while True:
 
                 if phone_rect.collidepoint(event.pos):
                     if not phone_process or phone_process.poll() is not None:
+                        
                         phone_process = subprocess.Popen([asset("tkinter pages","stress_quiz_.exe")])
 
                 if instruction_rect.collidepoint(event.pos):

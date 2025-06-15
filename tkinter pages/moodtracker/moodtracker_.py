@@ -48,26 +48,18 @@ def get_db_path():
     db_folder_name = 'database'
 
     if getattr(sys, 'frozen', False):
-        app_root = sys._MEIPASS
+        # Running from EXE inside "Moodify/tkinter pages/moodtracker/"
+        exe_dir = os.path.dirname(sys.executable)
+        app_root = os.path.abspath(os.path.join(exe_dir, "..", ".."))  # Step up twice to "Moodify/"
     else:
-        #Running in a normal Python environment (unfrozen)
+        # Running as .py from "Moodify/tkinter pages/moodtracker/"
         script_dir = os.path.dirname(os.path.abspath(__file__))
+        app_root = os.path.abspath(os.path.join(script_dir, "..", ".."))  # Step up to "Moodify/"
 
-
-        #Need to go up two levels
-        #From 'mood tracker' to 'tkinter pages'
-        #From 'tkinter pages' to 'Moodify'
-        intermediate_dir = os.path.dirname(script_dir) 
-        app_root = os.path.dirname(intermediate_dir) 
-
-    #Join the app_root with the database folder and the file name
     db_path = os.path.join(app_root, db_folder_name, db_file_name)
 
     print(f"Running in {'frozen' if getattr(sys, 'frozen', False) else 'unfrozen'} mode.")
-    print(f"Detected script directory: {os.path.dirname(os.path.abspath(__file__))}")
-    print(f"Calculated application root: {app_root}")
     print(f"Calculated database path: {db_path}")
-
     return db_path
 
 database_file_path = get_db_path()

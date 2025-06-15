@@ -17,32 +17,15 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 def get_db_path():
-    base_dir = None
-    db_file_name = 'moodify_database.db'
-    
-    if getattr(sys, 'frozen', False):
-        # We are running in a bundle (e.g., PyInstaller)
-        # In PyInstaller, sys._MEIPASS is the path to the temporary folder where your bundled data files are extracted.
-        # You need to configure PyInstaller to include the 'database' folder.
-        base_dir = sys._MEIPASS
-        print(f"Running in frozen mode. Base directory: {base_dir}")
-        
-        # When using PyInstaller, you'd typically put your database file directly into the sys._MEIPASS directory (or a subfolder you specify in the .spec).
-        # For simplicity, if you bundle the whole 'database' folder relative to your script, it will often end up directly in sys._MEIPASS or a subfolder there.
-        db_path = os.path.join(base_dir, 'database', db_file_name) 
-        
-    else:
-        # We are running in a normal Python environment (during development)
-        # The script is in 'YourMainAppFolder/your_main_app.py'
-        # The database is in 'YourMainAppFolder/database/moodify_database.db'
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        print(f"Running in unfrozen mode. Base directory: {base_dir}")
-        
-        # Construct the path relative to the script's directory
-        db_path = os.path.join(base_dir, 'database', db_file_name)
+    db_filename = "moodify_database.db"
 
-    print(f"Calculated database path: {db_path}")
-    return db_path
+    if getattr(sys, 'frozen', False):
+        # Running from an EXE
+        base_dir = os.path.dirname(sys.executable)
+        return os.path.abspath(os.path.join(base_dir, "..", "database", db_filename))
+    else:
+        # Running from .py (development)
+        return os.path.abspath(os.path.join(os.path.dirname(__file__), "database", db_filename))
 
 database_file_path = get_db_path()
 
@@ -273,23 +256,33 @@ def draw(screen, screen_width, screen_height, animation_index, profile):
         "profile_name_input_rect": profile_name_input_rect
         }
 
+def get_exe_path(exe_name):
+    current_dir = os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else __file__)
+    return os.path.abspath(os.path.join(current_dir, "dist", exe_name))
+
 def handle_event(event, rects):
     global music_muted, input_active, profile_name, profile_name_confirmed, selected_gender_index, gender_dropdown_active, current_volume
 
     if event.type == pygame.MOUSEBUTTONDOWN:
         mouse_pos = pygame.mouse.get_pos()
-        if settings_open: #all i change to string if not will be undefine the word "rects" is from my main game code
+        
+        if settings_open:
+            # Music toggle
             if rects.get("music_toggle_rect") and rects["music_toggle_rect"].collidepoint(mouse_pos):
                 music_muted = not music_muted
                 pygame.mixer.music.pause() if music_muted else pygame.mixer.music.unpause()
-                        #it will check from rects(dictionary) see it exits or not, then check the collidepoint
+
+            # Volume slider
             if rects.get("volume_slider_rect") and rects["volume_slider_rect"].collidepoint(mouse_pos):
                 rel_x = mouse_pos[0] - rects["volume_slider_rect"].x
                 current_volume = max(0, min(1, rel_x / rects["volume_slider_rect"].width))
                 pygame.mixer.music.set_volume(current_volume)
 
+            # Gender dropdown toggle
             if rects.get("gender_dropdown_rect") and rects["gender_dropdown_rect"].collidepoint(mouse_pos):
                 gender_dropdown_active = not gender_dropdown_active
+
+            # Gender selection
             elif gender_dropdown_active:
                 for i in range(len(genders)):
                     option_rect = pygame.Rect(
@@ -298,30 +291,34 @@ def handle_event(event, rects):
                         rects["gender_dropdown_rect"].width,
                         rects["gender_dropdown_rect"].height,
                     )
+
                     if option_rect.collidepoint(mouse_pos):
-                        selected_gender = genders[i] 
+                        selected_gender = genders[i]
                         gender_dropdown_active = False
 
                         if selected_gender.lower() != gender.lower():
-                            #Update in database
+                            print("Gender changed from", gender, "to", selected_gender)
                             update_gender(selected_gender)
-                            
-                            #Launch the new gender window then open settings 
-                            if selected_gender.lower().lower() == "male":
-                                script_path = resource_path("main game code_Male.exe")
-                                subprocess.Popen([script_path, "--open-settings"])
-                            else:
-                                script_path = resource_path("main game code.exe")
-                                subprocess.Popen([script_path, "--open-settings"])
 
-                            #Wait for 3 seconds before closing the window
-                            time.sleep(3)
-                            #Close current Pygame window
+                            exe_name = "main game code_Male.exe" if selected_gender.lower() == "male" else "main game code.exe"
+                            script_path = get_exe_path(exe_name)
+
+                            print("Launching new EXE:", script_path)
+
+                            if not os.path.exists(script_path):
+                                print("ERROR: Executable not found at", script_path)
+                                break  # Or safely return / continue
+
+                            try:
+                                subprocess.Popen([script_path, "--open-settings"], cwd=os.path.dirname(script_path))
+                                time.sleep(2)
+                            except Exception as e:
+                                print("Failed to launch:", e)
+
                             pygame.quit()
+                            sys.exit()
 
-                            # Exit the current script
-                            sys.exit() 
-                            break
+                        break
 
             if rects.get("profile_name_input_rect") and rects["profile_name_input_rect"].collidepoint(mouse_pos):
                 input_active = True
